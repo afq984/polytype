@@ -17,11 +17,14 @@ npm run build:wasm
 npm start
 ```
 
-Open http://127.0.0.1:4173. Choose Colemak (default) or QWERTY for English/Japanese,
+Open http://127.0.0.1:4173. Choose QWERTY (default) or Colemak for English/Japanese,
 and enable the languages you want using the checkboxes. Zhuyin always uses its
 standard physical positions. The inspection field shows QWERTY physical positions;
 pasted text must use that encoding. Settings reinterpret the current keys without
-clearing them and reset on reload. Copy debug report captures settings and candidates.
+clearing them. Layout and language choices persist in this browser, including an
+all-languages-disabled selection. If storage is unavailable, changes still work
+for the session; invalid saved settings fall back to QWERTY with all languages on.
+No typed input is stored with these preferences. Copy debug report captures settings and candidates.
 
 For a useful regression, click **Save test case…**, review/edit the expected
 output, then **Save locally**. **Export cases (JSONL)** downloads the saved set for

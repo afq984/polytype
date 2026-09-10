@@ -1,7 +1,20 @@
-import{decode,commitCandidate,sample,examplesForLayout,physicalKey,setCustomEntries,dictionarySize}from'./engine.mjs';
+import{decode,commitCandidate,examplesForLayout,physicalKey,setCustomEntries,dictionarySize}from'./engine.mjs';
 const $=id=>document.getElementById(id);let candidates=[],selected=0,committed='',timer=null;
-let examples=examplesForLayout();
 const options=()=>({layout:$('keyboard-layout').value,english:$('enable-english').checked,japanese:$('enable-japanese').checked,zhuyin:$('enable-zhuyin').checked});
+const optionsKey='polytype-input-options-v1';
+const defaultOptions={layout:'qwerty',english:true,japanese:true,zhuyin:true};
+let initialOptions=defaultOptions;
+try{
+ const saved=localStorage.getItem(optionsKey);
+ if(saved!==null){
+  const value=JSON.parse(saved);
+  if(!value||Array.isArray(value)||!['colemak','qwerty'].includes(value.layout)||!['english','japanese','zhuyin'].every(key=>typeof value[key]==='boolean'))throw new Error('Invalid input settings');
+  initialOptions=value;
+ }
+}catch{$('settings-status').textContent='Saved settings could not be loaded; using QWERTY with all languages enabled.'}
+$('keyboard-layout').value=initialOptions.layout;
+for(const language of ['english','japanese','zhuyin'])$('enable-'+language).checked=initialOptions[language];
+let examples=examplesForLayout(options().layout);
 function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
 function stop(){clearInterval(timer);timer=null;$('replay').textContent='↻ Replay example'}
 function render(reset=true){if(reset)selected=0;candidates=decode($('raw').value,options());selected=Math.min(selected,Math.max(0,candidates.length-1));const best=candidates[selected];$('count').textContent=$('raw').value.length+' / 400 keys';$('preedit').replaceChildren();$('segments').replaceChildren();$('candidates').replaceChildren();$('commit').disabled=!$('raw').value||!best;$('capture-case').disabled=!$('raw').value;
@@ -17,6 +30,8 @@ function commit(){if(!$('raw').value||!candidates[selected])return;stop();commit
 function drawExamples(){ $('examples').replaceChildren();for(const example of examples){const b=el('button','',example.name);b.onclick=()=>{setRaw(example.raw);$('raw').focus()};$('examples').append(b)}}
 drawExamples();
 $('input-options').addEventListener('change',()=>{
+ try{localStorage.setItem(optionsKey,JSON.stringify(options()));$('settings-status').textContent='Layout and languages saved in this browser.'}
+ catch{$('settings-status').textContent='Browser storage unavailable; settings apply for this session only.'}
  stop();examples=examplesForLayout(options().layout);drawExamples();updateLayoutLabels();render();
 });
 function updateLayoutLabels(){const name=options().layout==='qwerty'?'QWERTY':'Colemak';$('jp-layout').textContent='Romaji · '+name;$('en-layout').textContent=name;$('input-help').textContent=name+' ready · Enter commits. Esc clears.'}
@@ -107,5 +122,5 @@ document.getElementById('raw').disabled=false;
 document.getElementById('copy-debug').disabled=false;
 document.getElementById('input-options').disabled=false;
 updateLayoutLabels();
-setRaw(sample);
+setRaw(examples[0].raw);
 if(document.modelContext?.registerTool){try{Promise.resolve(document.modelContext.registerTool({name:'stage_keystrokes',description:'Replace the demo preedit with QWERTY-encoded keystrokes and return candidate interpretations. Does not commit text.',inputSchema:{type:'object',properties:{keystrokes:{type:'string',maxLength:400}},required:['keystrokes'],additionalProperties:false},annotations:{readOnlyHint:false},execute(input){if(!input||typeof input.keystrokes!=='string'||input.keystrokes.length>400)throw new Error('Provide at most 400 keystrokes');setRaw(input.keystrokes);return{candidates:candidates.map(x=>x.text)}}})).catch(()=>{})}catch{}}

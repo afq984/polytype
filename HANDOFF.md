@@ -2,6 +2,13 @@
 
 ## Current state
 
+The demo defaults to QWERTY and restores layout plus all three language toggles
+from polytype-input-options-v1 before generating examples or decoding. It saves
+only these four preferences, on explicit settings changes. All-off is valid;
+invalid/missing storage falls back to QWERTY/all-on, with a visible warning for
+unreadable data. Write failure keeps session settings usable. Core/API defaults
+remain Colemak for compatibility. Browser tests cover both demo formats.
+
 Pages preparation: npm run build:pages builds an allowlisted dist/ artifact;
 npm run preview:pages serves it at http://127.0.0.1:4174/polytype/. Rust build
 paths are remapped, and npm run audit:public checks dist and recursively decoded
@@ -14,7 +21,9 @@ Never push it, merge it into main, or use an all-bookmarks push. Push only main.
 See docs/PUBLISHING.md for build prerequisites, checks, limits and setup.
 Validated locally: 4 native tests, 31 passing Node tests with the same 2 ranking
 TODOs, privacy guards, and browser smoke at the Pages subpath and standalone file.
-GitHub-side permissions/deployment remain untested until a repository is configured.
+The initial GitHub Actions source build passed, including tests, both demo builds,
+privacy checks, browser smoke and artifact upload. Pages deployment was skipped
+and remains untested. Continue auditing each new public commit before pushing.
 
 The first ranking sprint is implemented. Default engines import 101,191 lowercase
 ASCII spellings from pinned SCOWL 2020.12.07 English/American word and contraction
@@ -73,8 +82,9 @@ Colemak input adapter with round-trip validation because legacy encode ignores
 uppercase; these six cases avoid the existing uppercase-O raw-format limitation.
 
 The demo offers a Colemak/QWERTY selector for English and Japanese, plus independent
-English/Japanese/Zhuyin checkboxes. Defaults remain Colemak with all three enabled;
-settings are session-only. Changes reinterpret existing raw keys without clearing
+English/Japanese/Zhuyin checkboxes. The initial version defaulted to Colemak with
+session-only settings; the current demo uses the persisted QWERTY defaults above.
+Changes reinterpret existing raw keys without clearing
 them, stop replay, and regenerate examples for the layout. Zhuyin positions never
 change. Disabling every language yields no candidates and disables commit.
 Debug reports include all settings. Decode options are implemented in the shared
@@ -164,7 +174,7 @@ repository. The local web server defaults to http://127.0.0.1:4173.
 - OS keyboard is already Colemak. KeyboardEvent.code supplies QWERTY physical
   positions; normalize once. Do not double-convert typed characters.
 - Chinese uses Taiwan standard Zhuyin positions; Japanese and English use the
-  selected Colemak (default) or QWERTY layout.
+selected QWERTY (demo default) or Colemak layout; core API defaults remain Colemak.
 - Pasted raw input is QWERTY-encoded. Dictionary editor inputs are actual Zhuyin.
 - Literal spaces permit language changes. Space can also finish a first-tone
   Zhuyin syllable and must not be discarded or blindly treated as a separator.

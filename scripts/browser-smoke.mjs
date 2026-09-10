@@ -56,6 +56,17 @@ try {
   };
   await send('Runtime.enable');
   await send('Page.enable');
+  const readOptions=()=>evaluate("({layout:document.getElementById('keyboard-layout').value,english:document.getElementById('enable-english').checked,japanese:document.getElementById('enable-japanese').checked,zhuyin:document.getElementById('enable-zhuyin').checked})");
+  const reloadReady=async()=>{
+    // Prevent a still-live old document from satisfying readiness after reload.
+    await evaluate("document.getElementById('raw').disabled=true");
+    await send('Page.reload');
+    for(let attempt=0;attempt<100;attempt++){
+      if(await evaluate("!!document.getElementById('raw') && !document.getElementById('raw').disabled"))return;
+      await new Promise(resolve=>setTimeout(resolve,50));
+    }
+    assert.fail('Reload did not initialize the demo');
+  };
   const key = async (key, code, keyCode, modifiers = 0) => {
     await send('Input.dispatchKeyEvent', {type: 'keyDown', key, code, modifiers,
       ...(keyCode ? {windowsVirtualKeyCode: keyCode} : {text: key})});
@@ -79,6 +90,16 @@ try {
       await new Promise(resolve => setTimeout(resolve, 50));
     }
     assert.equal(await evaluate("document.getElementById('preedit').textContent"), '小さい 的英文是 small');
+    assert.deepEqual(await readOptions(),{layout:'qwerty',english:true,japanese:true,zhuyin:true});
+    assert.ok(await evaluate("document.getElementById('raw').value.startsWith('tiisai ')"));
+    // Persist layout and disabled languages before any other typing tests.
+    await evaluate("document.getElementById('keyboard-layout').value='colemak'; document.getElementById('enable-english').checked=false; document.getElementById('enable-zhuyin').checked=false; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
+    await reloadReady();
+    assert.deepEqual(await readOptions(),{layout:'colemak',english:false,japanese:true,zhuyin:false});
+    assert.equal(await evaluate("document.getElementById('en-layout').textContent"),'Colemak');
+    assert.ok(await evaluate("document.getElementById('raw').value.startsWith('flldal ')"));
+    assert.deepEqual(await evaluate("JSON.parse(localStorage.getItem('polytype-input-options-v1'))"),await readOptions());
+    await evaluate("document.getElementById('enable-english').click(); document.getElementById('enable-zhuyin').click()");
     await evaluate("document.getElementById('clear').click()");
     await typeRoman('gakkou');
     assert.equal(await evaluate("document.getElementById('preedit').textContent"), 'がっこう');
@@ -164,6 +185,10 @@ try {
     await evaluate("document.getElementById('enable-english').click()");
     assert.equal(await evaluate("document.getElementById('preedit').textContent"),'Enable at least one language.');
     assert.equal(await evaluate("document.getElementById('commit').disabled"),true);
+    await reloadReady();
+    assert.deepEqual(await readOptions(),{layout:'qwerty',english:false,japanese:false,zhuyin:false});
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'Enable at least one language.');
+    assert.equal(await evaluate("document.getElementById('commit').disabled"),true);
     await evaluate("document.getElementById('enable-japanese').click(); document.getElementById('enable-zhuyin').click(); document.getElementById('enable-english').click(); [...document.querySelectorAll('#examples button')].find(b=>b.textContent==='Kana + Chinese + English').click()");
     assert.equal(await evaluate("document.getElementById('raw').value"),'gakkou us3lc3 hello');
     assert.equal(await evaluate("document.getElementById('preedit').textContent"),'がっこう 你好 hello');
@@ -221,6 +246,41 @@ try {
       finally{Storage.prototype.setItem=original}
     })()`);
     assert.match(denied,/session only/);
+    // Invalid stored preferences are ignored, without overwriting them on load.
+    const defaults={layout:'qwerty',english:true,japanese:true,zhuyin:true};
+    for(const invalid of ['{','null','[]',JSON.stringify({...defaults,layout:'dvorak'}),JSON.stringify({...defaults,english:'false'}),JSON.stringify({layout:'qwerty'})]) {
+      await evaluate(`localStorage.setItem('polytype-input-options-v1',${JSON.stringify(invalid)})`);
+      await reloadReady();
+      assert.deepEqual(await readOptions(),defaults);
+      assert.match(await evaluate("document.getElementById('settings-status').textContent"),/could not be loaded/);
+      assert.equal(await evaluate("localStorage.getItem('polytype-input-options-v1')"),invalid);
+      assert.equal(await evaluate("document.getElementById('preedit').textContent"),'小さい 的英文是 small');
+    }
+    await evaluate("document.getElementById('enable-japanese').click()");
+    const persisted=await evaluate("localStorage.getItem('polytype-input-options-v1')");
+    const sessionOptions=await evaluate(`(()=>{
+      const original=Storage.prototype.setItem;
+      Storage.prototype.setItem=()=>{throw new Error('denied')};
+      const raw=document.getElementById('raw').value;
+      try{document.getElementById('enable-japanese').click();return {raw,sameRaw:document.getElementById('raw').value===raw,status:document.getElementById('settings-status').textContent}}
+      finally{Storage.prototype.setItem=original}
+    })()`);
+    assert.equal(sessionOptions.sameRaw,true);
+    assert.match(sessionOptions.status,/session only/);
+    assert.deepEqual(await readOptions(),defaults);
+    assert.equal(await evaluate("localStorage.getItem('polytype-input-options-v1')"),persisted);
+    await reloadReady();
+    assert.equal((await readOptions()).japanese,false);
+    // Access to the localStorage property itself can throw in restricted browsers.
+    const blockedStorage=await send('Page.addScriptToEvaluateOnNewDocument',{source:"Object.defineProperty(window,'localStorage',{get(){throw new Error('denied')}})"});
+    await reloadReady();
+    await send('Page.removeScriptToEvaluateOnNewDocument',{identifier:blockedStorage.identifier});
+    assert.deepEqual(await readOptions(),defaults);
+    assert.match(await evaluate("document.getElementById('settings-status').textContent"),/could not be loaded/);
+    await evaluate("document.getElementById('enable-japanese').click(); document.getElementById('enable-zhuyin').click(); document.getElementById('clear').click()");
+    for(const char of 'hello')await key(char,'Key'+char.toUpperCase());
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'hello');
+    assert.match(await evaluate("document.getElementById('settings-status').textContent"),/session only/);
     assert.deepEqual(browserErrors, []);
     console.log('Browser passed:', url);
   }

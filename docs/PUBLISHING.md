@@ -95,8 +95,10 @@ environment's protection rules as desired. No custom domain is assumed.
 
 Deployment receives only the audited dist artifact, with Pages/OIDC write
 permissions confined to the deploy job. Build jobs have read-only contents access
-and checkout does not persist credentials. The workflow has not been run on GitHub
-yet; local build/browser checks do not validate repository settings or permissions.
+and checkout does not persist credentials. The initial source build passed on
+GitHub, including tests, browser checks, privacy checks and artifact upload:
+[initial Actions run](https://github.com/afq984/polytype/actions/runs/34476864318).
+Pages deployment was skipped and its settings/permissions remain untested.
 
 References: [GitHub custom Pages workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages),
 [Rust path remapping](https://doc.rust-lang.org/rustc/command-line-arguments.html#--remap-path-prefix-remap-source-names-in-output).
