@@ -22,9 +22,10 @@ Never push it, merge it into main, or use an all-bookmarks push. Push only main.
 See docs/PUBLISHING.md for build prerequisites, checks, limits and setup.
 Validated locally: 4 native tests, 31 passing Node tests with the same 2 ranking
 TODOs, privacy guards, and browser smoke at the Pages subpath and standalone file.
-The initial GitHub Actions source build passed, including tests, both demo builds,
-privacy checks, browser smoke and artifact upload. Pages deployment was skipped
-and remains untested. Continue auditing each new public commit before pushing.
+GitHub Actions build and Pages deployment passed, and browser smoke passed against
+the live site at https://afq984.github.io/polytype/. Public publishing notes describe
+artifact hygiene on GitHub-hosted runners; local-history precautions remain here
+and in AGENTS.md. Continue auditing each new public commit before pushing.
 
 The first ranking sprint is implemented. Default engines import 101,191 lowercase
 ASCII spellings from pinned SCOWL 2020.12.07 English/American word and contraction

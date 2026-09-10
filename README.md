@@ -59,11 +59,10 @@ core, data or web edits.
 
 For a deployable static build, run `npm run build:pages`; preview it with
 `npm run preview:pages` at http://127.0.0.1:4174/polytype/. See
-[Pages preparation and privacy checks](docs/PUBLISHING.md) before publishing.
+[Pages build and deployment](docs/PUBLISHING.md) for setup and artifact hygiene.
 Successful push builds on `main` deploy to GitHub Pages once Pages is enabled
-with GitHub Actions as its source. Pull requests only build/test. Public `main` starts with a
-clean root snapshot; older private history must never be merged into or pushed
-with it. Manual runs deploy only when the deploy checkbox is checked on `main`.
+with GitHub Actions as its source. Pull requests only build/test. Manual runs
+deploy only when the deploy checkbox is checked on `main`.
 
 ## Try it
 

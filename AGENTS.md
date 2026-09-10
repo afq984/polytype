@@ -26,6 +26,10 @@ Read HANDOFF.md before making changes. This is a prototype, not a finished nativ
   Do not use git commands or jj describe plus jj new to create commits.
 - Local development is the default. Do not publish or connect external services
   unless requested. Keep typed content local.
+- The private-prepublication bookmark retains unsafe local history. Never push
+  it, merge it into main, or use an all-bookmarks/tags push. Push only the explicit
+  main bookmark. Audit new public commits for secrets and personal exports before
+  pushing; artifact checks on GitHub do not sanitize source history or Actions logs.
 - Add dependencies only for concrete purposes; keep Cargo.lock current and the
   wasm-bindgen CLI/library versions aligned.
 - Distinguish measured behavior, proposed architecture and known limitations.
