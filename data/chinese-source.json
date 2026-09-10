@@ -1,0 +1,39 @@
+{
+  "name": "McBopomofo",
+  "revision": "f5ba010ce8795d283ee336ca7d16380f200bd2ec",
+  "license": "MIT; upstream describes BPMFMappings ancestry as libtabe BSD",
+  "selection": "All positive-frequency Big5 single-character readings; top 20,000 positive-frequency phrase/readings. Han output only. No evaluation-corpus input.",
+  "sources": [
+    {
+      "path": "Source/Data/BPMFBase.txt",
+      "url": "https://raw.githubusercontent.com/openvanilla/McBopomofo/f5ba010ce8795d283ee336ca7d16380f200bd2ec/Source/Data/BPMFBase.txt",
+      "sha256": "46e64a53dc9c6baa2cbe6e0b1af572f8ef6aafb50597178b5fd53df804316ce7"
+    },
+    {
+      "path": "Source/Data/BPMFMappings.txt",
+      "url": "https://raw.githubusercontent.com/openvanilla/McBopomofo/f5ba010ce8795d283ee336ca7d16380f200bd2ec/Source/Data/BPMFMappings.txt",
+      "sha256": "baa9452ef927b3268f600ca69fe27eb0838b8be31c8ae0dd8540561db68c7ffd"
+    },
+    {
+      "path": "Source/Data/phrase.occ",
+      "url": "https://raw.githubusercontent.com/openvanilla/McBopomofo/f5ba010ce8795d283ee336ca7d16380f200bd2ec/Source/Data/phrase.occ",
+      "sha256": "2dbe37c1c61266f65d158a3e0020a0c1f2a75039ebd7f1580ef8e537a7bc8779"
+    },
+    {
+      "path": "LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/openvanilla/McBopomofo/f5ba010ce8795d283ee336ca7d16380f200bd2ec/LICENSE.txt",
+      "sha256": "72ed32193b0c629def66df63791b2fb125946b593a3251380e6b949488f47b72"
+    }
+  ],
+  "entries": 28184,
+  "uniqueOutputs": 26236,
+  "singles": 8184,
+  "phrases": 20000,
+  "skipped": {
+    "invalid": 42,
+    "zeroFrequency": 47369,
+    "nonBig5Single": 12170,
+    "duplicate": 0
+  },
+  "sha256": "31ec4f8c89501eb4f215ccfaff1f27ca9be9f066fc1217d89ac35cacc8424b3c"
+}

@@ -1,0 +1,87 @@
+{
+  "source": "SCOWL 2020.12.07 — Kevin Atkinson and contributors",
+  "url": "https://deb.debian.org/debian/pool/main/s/scowl/scowl_2020.12.07.orig.tar.gz",
+  "archiveSha256": "5587667caa20c4891390c2d42dbb4d5c4c3f41bee77af1457ece3ba23fb859cc",
+  "selection": "Lowercase ASCII words/contractions, English and American lists, levels 10–60; minimum tier per spelling. Tiers are coverage categories, not calibrated frequencies. No evaluation input.",
+  "entries": 101191,
+  "sha256": "09e77d6d84a6476e63d596c85514a4a948171015a4733fff149b61a6950a2440",
+  "licenseSha256": "283326a422e29c510e2ba6805518c418ce3c35ed1fadc3eec83d2da4f6c5a055",
+  "sources": [
+    {
+      "path": "scowl-2020.12.07/final/american-words.10",
+      "sha256": "6ed66394d8b46ed12feac7aad989dfc4620c4f2051316ab774560aae71140994"
+    },
+    {
+      "path": "scowl-2020.12.07/final/american-words.20",
+      "sha256": "a7ae730cd5f2ee11b584c163bf0750cc7659e336c3a04da1a8a2e9c44b604b9e"
+    },
+    {
+      "path": "scowl-2020.12.07/final/american-words.35",
+      "sha256": "c999d002cfe31a2c3d9726eee1b87697402bb71cc831a2c63d064403c6a3a7fb"
+    },
+    {
+      "path": "scowl-2020.12.07/final/american-words.40",
+      "sha256": "5a9c03d207087acabc969b32c6ef93ed376208287b2c8343f7952d0d06085577"
+    },
+    {
+      "path": "scowl-2020.12.07/final/american-words.50",
+      "sha256": "1846537a15d7cf9f0b5fde8d2f69a9d3606856695c68de1701fc85d698646994"
+    },
+    {
+      "path": "scowl-2020.12.07/final/american-words.55",
+      "sha256": "d5b6d504b907ef159b164286519fc96168737d60a62310ff5d74d2076ed97027"
+    },
+    {
+      "path": "scowl-2020.12.07/final/american-words.60",
+      "sha256": "3296121b977bcc2fc3fab374b69d2a0891c825bb473ef8078161245b2a990f2f"
+    },
+    {
+      "path": "scowl-2020.12.07/final/english-contractions.10",
+      "sha256": "3d6036120922bc64e51c0ba3f4c52e24da5d86695ae93168b3f336c6eabfdd25"
+    },
+    {
+      "path": "scowl-2020.12.07/final/english-contractions.35",
+      "sha256": "413da1bae492c46f7fe1d04fc8065d1065d81cf9c65c80de9cedef6cff74abeb"
+    },
+    {
+      "path": "scowl-2020.12.07/final/english-contractions.40",
+      "sha256": "8ef274d42f258664fc86b797b1b65fecfef99beeb402405084e7e85cd2eeaed9"
+    },
+    {
+      "path": "scowl-2020.12.07/final/english-contractions.50",
+      "sha256": "c707dfceb56f848f6464e0db85b849b726088debc2ac7dfef6c0c196e2b64513"
+    },
+    {
+      "path": "scowl-2020.12.07/final/english-contractions.60",
+      "sha256": "5e37357043cdb8d57647e84d54aa795618c40aa489cd44dda3ff93f57e0590fd"
+    },
+    {
+      "path": "scowl-2020.12.07/final/english-words.10",
+      "sha256": "f19988ecdb0280ab63340e5c5e155a814ab3d0f225ae60f5cb9e000252283b0b"
+    },
+    {
+      "path": "scowl-2020.12.07/final/english-words.20",
+      "sha256": "618998fff18fb9e143a5bab49e669ec48c023758f0db476d6b64ec06994ba71e"
+    },
+    {
+      "path": "scowl-2020.12.07/final/english-words.35",
+      "sha256": "f36ace33ff09bd5eda5f3ccbcc9971c1b6a8887fa62f5ad7f93e3c220d871388"
+    },
+    {
+      "path": "scowl-2020.12.07/final/english-words.40",
+      "sha256": "fc5c2058cd24af4ca6a9bca97ce7d300c8899753715d029fc8bb3cbe602eef7f"
+    },
+    {
+      "path": "scowl-2020.12.07/final/english-words.50",
+      "sha256": "ff5b1f1752df695e0512c1e9e096f22af2dc127119918b1e43a35582ef90da90"
+    },
+    {
+      "path": "scowl-2020.12.07/final/english-words.55",
+      "sha256": "be646fbdc9c4b4fef5b23e9c5678f7479534c428a7581745178642dfd9c744d6"
+    },
+    {
+      "path": "scowl-2020.12.07/final/english-words.60",
+      "sha256": "8922ac79ea926ae876d68f178fcb1107bbdf1b90996086f63ffc3e97da55427f"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "notes": "User-supplied input, one sentence per case. Targets are provisional developer annotations, not user-confirmed gold. Convert Japanese romaji to hiragana, preserve spaces/punctuation and Latin technical terms/names (including Tanaka / tanaka). No kanji conversion or grammatical respelling is required.",
+  "cases": [
+    {"id":"mixed-01","input":"GPU tarinaikara batch size 16 nomama train mawasu.","text":"GPU たりないから batch size 16 のまま train まわす."},
+    {"id":"mixed-02","input":"ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu.","text":"あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです."},
+    {"id":"mixed-03","input":"kono PR no rebase shitekara npm test tooru ka mite.","text":"この PR の rebase してから npm test とおる か みて."},
+    {"id":"mixed-04","input":"atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru.","text":"あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる."},
+    {"id":"mixed-05","input":"Send the mitsumorisho as PDF, filename quote_2026-09.pdf","text":"Send the みつもりしょ as PDF, filename quote_2026-09.pdf"},
+    {"id":"mixed-06","input":"yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.","text":"よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた."}
+  ]
+}

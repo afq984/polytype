@@ -1,0 +1,64 @@
+name: Demo build and optional Pages deployment
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Publish the tested demo to GitHub Pages
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Rust and WASM tooling
+        run: |
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          rustup override set 1.95.0
+          cargo install wasm-bindgen-cli --version 0.2.128 --locked
+      - run: npm test
+      - run: npm run build:pages
+      - run: npm run build:standalone
+      - run: npm run audit:public
+      - name: Browser smoke test at project subpath
+        run: |
+          npm run preview:pages > "$RUNNER_TEMP/polytype-preview.log" 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid"' EXIT
+          node --input-type=module -e 'for (let i=0;;i++) { try { if ((await fetch("http://127.0.0.1:4174/polytype/")).ok) break; } catch {} if (i===29) throw new Error("Preview startup failed"); await new Promise(r=>setTimeout(r,1000)); }'
+          DEMO_URL=http://127.0.0.1:4174/polytype/ npm run test:browser
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

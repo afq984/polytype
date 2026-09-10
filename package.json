@@ -1,0 +1,24 @@
+{
+  "name": "polytype-ime-prototype",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "cargo test --workspace --locked && cargo build --locked -p polytype-core --bin polytype-json && npm run build:wasm && node --test tests/*.test.mjs",
+    "build:wasm": "node scripts/build-wasm.mjs",
+    "build:pages": "npm run build:wasm && node scripts/build-pages.mjs",
+    "preview:pages": "node scripts/serve.mjs --pages",
+    "audit:public": "node scripts/audit-public.mjs",
+    "build:standalone": "npm run build:wasm && node scripts/build-standalone.mjs",
+    "test:browser": "node scripts/browser-smoke.mjs",
+    "dictionary:import": "node scripts/import-chinese.mjs",
+    "dictionary:import-english": "node scripts/import-english.mjs",
+    "evaluate": "npm run build:wasm && node scripts/evaluate.mjs",
+    "corpus:verify": "node scripts/verify-corpus.mjs"
+  }
+}

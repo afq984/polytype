@@ -1,0 +1,9 @@
+node_modules/
+/target/
+/web/pkg/
+/dist/
+.DS_Store
+.env
+.env.*
+!.env.example
+polytype-local-cases*.jsonl

@@ -1,0 +1,2912 @@
+{
+  "method": "20 manually selected contiguous excerpts from the first 35 test sentences, selected before evaluating the expanded dictionary. Digits, unsupported punctuation and foreign proper names are excluded. This is a small development diagnostic, not a representative held-out benchmark.",
+  "mixedTextNotes": "User-supplied input, one sentence per case. Targets are provisional developer annotations, not user-confirmed gold. Convert Japanese romaji to hiragana, preserve spaces/punctuation and Latin technical terms/names (including Tanaka / tanaka). No kanji conversion or grammatical respelling is required.",
+  "notes": "Exact output matching, including variants and spaces. Readings are supplied, not inferred by the tested dictionary. Corpus overlap with upstream frequency training is unknown. CER includes insertions and can exceed 100%. Timing uses an already-loaded WASM module; prefix latency excludes engine construction and UI rendering.",
+  "corpusSha256": "58ab4f7a183df76100fbf0f43a09091392d1afce0868a5b0963c89f74e8d5fea",
+  "profiles": {
+    "prototype": {
+      "dictionary": {
+        "builtIn": 181,
+        "custom": 0,
+        "imported": 0
+      },
+      "instanceCreationMs": 0.22733800000000315,
+      "groups": {
+        "real-text": {
+          "cases": 20,
+          "top1": 0,
+          "top5": 0,
+          "characterErrorRate": 2.1759656652360513,
+          "reachable": 0
+        },
+        "guards": {
+          "cases": 22,
+          "top1": 20,
+          "top5": 21,
+          "characterErrorRate": 0.09523809523809523,
+          "reachable": null
+        },
+        "user-feedback": {
+          "cases": 5,
+          "top1": 0,
+          "top5": 3,
+          "characterErrorRate": 0.656934306569343,
+          "reachable": null
+        },
+        "mixed-colemak-all": {
+          "cases": 6,
+          "top1": 0,
+          "top5": 0,
+          "characterErrorRate": 0.5350553505535055,
+          "reachable": null
+        },
+        "mixed-colemak-en-jp": {
+          "cases": 6,
+          "top1": 0,
+          "top5": 0,
+          "characterErrorRate": 0.3800738007380074,
+          "reachable": null
+        },
+        "mixed-qwerty-all": {
+          "cases": 6,
+          "top1": 0,
+          "top5": 0,
+          "characterErrorRate": 0.5350553505535055,
+          "reachable": null
+        },
+        "mixed-qwerty-en-jp": {
+          "cases": 6,
+          "top1": 0,
+          "top5": 0,
+          "characterErrorRate": 0.3800738007380074,
+          "reachable": null
+        }
+      },
+      "prefixLatency": {
+        "count": 2515,
+        "p50Ms": 0.1630080000001044,
+        "p95Ms": 0.9477660000000014,
+        "maxMs": 1.9414179999999988
+      },
+      "rows": [
+        {
+          "id": "gsd-01",
+          "group": "real-text",
+          "raw": "5k4u;42k7tj3xu3u,3u03g/ xk7u vu, jp4wu6",
+          "expected": "這樣的處理也衍生了一些問題",
+          "actual": "這樣的ㄔㄨˇㄌㄧˇ也ㄧㄢˇ生了ㄧˉㄒㄧㄝˉㄨㄣˋㄊㄧˊ",
+          "rank": 0,
+          "edits": 21,
+          "characters": 13,
+          "reachable": false,
+          "candidates": [
+            "這樣的ㄔㄨˇㄌㄧˇ也ㄧㄢˇ生了ㄧˉㄒㄧㄝˉㄨㄣˋㄊㄧˊ",
+            "這樣的ㄔㄨˇㄌㄧˇ也ㄧㄢˇ聲了ㄧˉㄒㄧㄝˉㄨㄣˋㄊㄧˊ",
+            "這樣得ㄔㄨˇㄌㄧˇ也ㄧㄢˇ生了ㄧˉㄒㄧㄝˉㄨㄣˋㄊㄧˊ",
+            "這樣得ㄔㄨˇㄌㄧˇ也ㄧㄢˇ聲了ㄧˉㄒㄧㄝˉㄨㄣˋㄊㄧˊ",
+            "5e4lo42e7gn3xl3l,3l03d/ 了ㄧˉㄒㄧㄝˉㄨㄣˋㄊㄧˊ"
+          ]
+        },
+        {
+          "id": "gsd-02",
+          "group": "real-text",
+          "raw": "fu4u,4ru,4xj4vm4u.3bp6wu6ej/ rm0 dj03",
+          "expected": "企業界陸續有人提供捐款",
+          "actual": "ㄑㄧˋㄧㄝˋ介ㄌㄨˋㄒㄩˋ有人ㄊㄧˊ功ㄐㄩㄢˉㄎㄨㄢˇ",
+          "rank": 0,
+          "edits": 25,
+          "characters": 11,
+          "reachable": false,
+          "candidates": [
+            "ㄑㄧˋㄧㄝˋ介ㄌㄨˋㄒㄩˋ有人ㄊㄧˊ功ㄐㄩㄢˉㄎㄨㄢˇ",
+            "ㄑㄧˋㄧㄝˋ介ㄌㄨˋㄒㄩˋ有人ㄊㄧˊ工ㄐㄩㄢˉㄎㄨㄢˇ",
+            "tl4l,4pl,4xn4vm4l.3b;6wl6fn/ ㄐㄩㄢˉㄎㄨㄢˇ",
+            "tl4l,4pl,4xn4vm4l.3b;6wl6fn/ pm0 ㄎㄨㄢˇ",
+            "tl4l,4pl,4xn4vm4l.3b;6wl6fn/ pm0 sn03"
+          ]
+        },
+        {
+          "id": "gsd-03",
+          "group": "real-text",
+          "raw": "2j4rm0 cj8 jo6jp 29456j4",
+          "expected": "杜鵑花為溫帶植物",
+          "actual": "ㄉㄨˋㄐㄩㄢˉㄏㄨㄚˉ為ㄨㄣˉㄉㄞˋㄓˊㄨˋ",
+          "rank": 0,
+          "edits": 21,
+          "characters": 8,
+          "reachable": false,
+          "candidates": [
+            "ㄉㄨˋㄐㄩㄢˉㄏㄨㄚˉ為ㄨㄣˉㄉㄞˋㄓˊㄨˋ",
+            "2n4pm0 ㄏㄨㄚˉ為ㄨㄣˉㄉㄞˋㄓˊㄨˋ",
+            "2n4pm0 cn8 為ㄨㄣˉㄉㄞˋㄓˊㄨˋ",
+            "2n4pm0 cn8 ny6n; ㄉㄞˋㄓˊㄨˋ",
+            "2n4pm0 cn8 ny6n; 29456n4"
+          ]
+        },
+        {
+          "id": "gsd-04",
+          "group": "real-text",
+          "raw": "w961o3njo b06y94u84bk4294",
+          "expected": "台北雖然在亞熱帶",
+          "actual": "台ㄅㄟˇㄙㄨㄟˉㄖㄢˊ在ㄧㄚˋㄖㄜˋㄉㄞˋ",
+          "rank": 0,
+          "edits": 19,
+          "characters": 8,
+          "reachable": false,
+          "candidates": [
+            "台ㄅㄟˇㄙㄨㄟˉㄖㄢˊ在ㄧㄚˋㄖㄜˋㄉㄞˋ",
+            "台ㄅㄟˇㄙㄨㄟˉㄖㄢˊ再ㄧㄚˋㄖㄜˋㄉㄞˋ",
+            "w961y3kny ㄖㄢˊ在ㄧㄚˋㄖㄜˋㄉㄞˋ",
+            "w961y3kny ㄖㄢˊ再ㄧㄚˋㄖㄜˋㄉㄞˋ",
+            "w961y3kny b06j94l84be4294"
+          ]
+        },
+        {
+          "id": "gsd-05",
+          "group": "real-text",
+          "raw": "u 2j/4xu;3h/6x.62k7ru045j6",
+          "expected": "一棟兩層樓的建築",
+          "actual": "ㄧˉㄉㄨㄥˋㄌㄧㄤˇㄘㄥˊㄌㄡˊ的鍵ㄓㄨˊ",
+          "rank": 0,
+          "edits": 20,
+          "characters": 8,
+          "reachable": false,
+          "candidates": [
+            "ㄧˉㄉㄨㄥˋㄌㄧㄤˇㄘㄥˊㄌㄡˊ的鍵ㄓㄨˊ",
+            "l ㄉㄨㄥˋㄌㄧㄤˇㄘㄥˊㄌㄡˊ的鍵ㄓㄨˊ",
+            "ㄧˉㄉㄨㄥˋㄌㄧㄤˇㄘㄥˊㄌㄡˊ得鍵ㄓㄨˊ",
+            "l ㄉㄨㄥˋㄌㄧㄤˇㄘㄥˊㄌㄡˊ得鍵ㄓㄨˊ",
+            "l 2n/4xlo3h/6x.62e7pl045n6"
+          ]
+        },
+        {
+          "id": "gsd-06",
+          "group": "real-text",
+          "raw": "x.62u/3u.3wu0 jp6w96",
+          "expected": "樓頂有天文台",
+          "actual": "ㄌㄡˊㄉㄧㄥˇ有天文台",
+          "rank": 0,
+          "edits": 7,
+          "characters": 6,
+          "reachable": false,
+          "candidates": [
+            "ㄌㄡˊㄉㄧㄥˇ有天文台",
+            "x.62l/3l.3wl0 文台",
+            "x.62l/3l.3wl0 n;6w96"
+          ]
+        },
+        {
+          "id": "gsd-07",
+          "group": "real-text",
+          "raw": "vu04jo6wu0 jp6gk4g3m/4",
+          "expected": "現為天文社使用",
+          "actual": "現為天文ㄕㄜˋㄕˇ用",
+          "rank": 0,
+          "edits": 5,
+          "characters": 7,
+          "reachable": false,
+          "candidates": [
+            "現為天文ㄕㄜˋㄕˇ用",
+            "vl04ny6wl0 文ㄕㄜˋㄕˇ用",
+            "vl04ny6wl0 n;6de4d3m/4"
+          ]
+        },
+        {
+          "id": "gsd-08",
+          "group": "real-text",
+          "raw": "5j3ul4cji3104g4b41p3c04ao3eji6",
+          "expected": "主要夥伴是日本和美國",
+          "actual": "ㄓㄨˇ要ㄏㄨㄛˇㄅㄢˋ是日ㄅㄣˇ漢ㄇㄟˇㄍㄨㄛˊ",
+          "rank": 0,
+          "edits": 21,
+          "characters": 10,
+          "reachable": false,
+          "candidates": [
+            "ㄓㄨˇ要ㄏㄨㄛˇㄅㄢˋ是日ㄅㄣˇ漢ㄇㄟˇㄍㄨㄛˊ",
+            "ㄓㄨˇ要ㄏㄨㄛˇㄅㄢˋ事日ㄅㄣˇ漢ㄇㄟˇㄍㄨㄛˊ",
+            "ㄓㄨˇ要ㄏㄨㄛˇㄅㄢˋ式日ㄅㄣˇ漢ㄇㄟˇㄍㄨㄛˊ",
+            "5n3li4cnu3104d4b41;3c04ay3fnu6"
+          ]
+        },
+        {
+          "id": "gsd-09",
+          "group": "real-text",
+          "raw": "5k4vu, 2u04cj84ru/ rul cj04ru tj3xu3",
+          "expected": "這些電話經交換機處理",
+          "actual": "這ㄒㄧㄝˉ電ㄏㄨㄚˋㄐㄧㄥˉㄐㄧㄠˉㄏㄨㄢˋㄐㄧˉㄔㄨˇㄌㄧˇ",
+          "rank": 0,
+          "edits": 29,
+          "characters": 10,
+          "reachable": false,
+          "candidates": [
+            "這ㄒㄧㄝˉ電ㄏㄨㄚˋㄐㄧㄥˉㄐㄧㄠˉㄏㄨㄢˋㄐㄧˉㄔㄨˇㄌㄧˇ",
+            "5e4vl, 電ㄏㄨㄚˋㄐㄧㄥˉㄐㄧㄠˉㄏㄨㄢˋㄐㄧˉㄔㄨˇㄌㄧˇ",
+            "5e4vl, 2l04cn84pl/ ㄐㄧㄠˉㄏㄨㄢˋㄐㄧˉㄔㄨˇㄌㄧˇ",
+            "5e4vl, 2l04cn84pl/ pli ㄏㄨㄢˋㄐㄧˉㄔㄨˇㄌㄧˇ",
+            "5e4vl, 2l04cn84pl/ pli cn04pl ㄔㄨˇㄌㄧˇ"
+          ]
+        },
+        {
+          "id": "gsd-10",
+          "group": "real-text",
+          "raw": "g3m/42k7ao6ru,41l dji4c932u32u04x03",
+          "expected": "使用的媒介包括海底電纜",
+          "actual": "ㄕˇ用的沒介ㄅㄠˉㄎㄨㄛˋㄏㄞˇㄉㄧˇ電ㄌㄢˇ",
+          "rank": 0,
+          "edits": 19,
+          "characters": 11,
+          "reachable": false,
+          "candidates": [
+            "ㄕˇ用的沒介ㄅㄠˉㄎㄨㄛˋㄏㄞˇㄉㄧˇ電ㄌㄢˇ",
+            "ㄕˇ用得沒介ㄅㄠˉㄎㄨㄛˋㄏㄞˇㄉㄧˇ電ㄌㄢˇ",
+            "d3m/42e7ay6pl,41i ㄎㄨㄛˋㄏㄞˇㄉㄧˇ電ㄌㄢˇ",
+            "d3m/42e7ay6pl,41i snu4c932l32l04x03"
+          ]
+        },
+        {
+          "id": "gsd-11",
+          "group": "real-text",
+          "raw": "wj06e.4j;35042k7t03qup3m06ru84c04e.4a93gj4xu;4",
+          "expected": "團購網站的產品原價和購買數量",
+          "actual": "ㄊㄨㄢˊㄍㄡˋㄨㄤˇㄓㄢˋ的ㄔㄢˇㄆㄧㄣˇㄩㄢˊㄐㄧㄚˋ漢ㄍㄡˋㄇㄞˇㄕㄨˋㄌㄧㄤˋ",
+          "rank": 0,
+          "edits": 41,
+          "characters": 14,
+          "reachable": false,
+          "candidates": [
+            "ㄊㄨㄢˊㄍㄡˋㄨㄤˇㄓㄢˋ的ㄔㄢˇㄆㄧㄣˇㄩㄢˊㄐㄧㄚˋ漢ㄍㄡˋㄇㄞˇㄕㄨˋㄌㄧㄤˋ",
+            "ㄊㄨㄢˊㄍㄡˋㄨㄤˇㄓㄢˋ得ㄔㄢˇㄆㄧㄣˇㄩㄢˊㄐㄧㄚˋ漢ㄍㄡˋㄇㄞˇㄕㄨˋㄌㄧㄤˋ",
+            "wn06f.4no35042e7g03ql;3m06pl84c04f.4a93dn4xlo4"
+          ]
+        },
+        {
+          "id": "gsd-12",
+          "group": "real-text",
+          "raw": "wj06e.4j;35042k75j3ul4t03qup3zp jo6ru8 rm xo4",
+          "expected": "團購網站的主要產品分為家居類",
+          "actual": "ㄊㄨㄢˊㄍㄡˋㄨㄤˇㄓㄢˋ的ㄓㄨˇ要ㄔㄢˇㄆㄧㄣˇㄈㄣˉ為加ㄐㄩˉㄌㄟˋ",
+          "rank": 0,
+          "edits": 33,
+          "characters": 14,
+          "reachable": false,
+          "candidates": [
+            "ㄊㄨㄢˊㄍㄡˋㄨㄤˇㄓㄢˋ的ㄓㄨˇ要ㄔㄢˇㄆㄧㄣˇㄈㄣˉ為加ㄐㄩˉㄌㄟˋ",
+            "ㄊㄨㄢˊㄍㄡˋㄨㄤˇㄓㄢˋ得ㄓㄨˇ要ㄔㄢˇㄆㄧㄣˇㄈㄣˉ為加ㄐㄩˉㄌㄟˋ",
+            "ㄊㄨㄢˊㄍㄡˋㄨㄤˇㄓㄢˋ的ㄓㄨˇ要ㄔㄢˇㄆㄧㄣˇㄈㄣˉ為家ㄐㄩˉㄌㄟˋ",
+            "ㄊㄨㄢˊㄍㄡˋㄨㄤˇㄓㄢˋ得ㄓㄨˇ要ㄔㄢˇㄆㄧㄣˇㄈㄣˉ為家ㄐㄩˉㄌㄟˋ",
+            "wn06f.4no35042e75n3li4g03ql;3z; 為加ㄐㄩˉㄌㄟˋ"
+          ]
+        },
+        {
+          "id": "gsd-13",
+          "group": "real-text",
+          "raw": "up h3w.4eji4fu, ek rmp4b.41u04s/6zp 1u04-45k3",
+          "expected": "因此透過切割菌肉便能分辨二者",
+          "actual": "因ㄘˇㄊㄡˋㄍㄨㄛˋㄑㄧㄝˉㄍㄜˉㄐㄩㄣˋㄖㄡˋㄅㄧㄢˋ能ㄈㄣˉㄅㄧㄢˋㄦˋㄓㄜˇ",
+          "rank": 0,
+          "edits": 39,
+          "characters": 14,
+          "reachable": false,
+          "candidates": [
+            "因ㄘˇㄊㄡˋㄍㄨㄛˋㄑㄧㄝˉㄍㄜˉㄐㄩㄣˋㄖㄡˋㄅㄧㄢˋ能ㄈㄣˉㄅㄧㄢˋㄦˋㄓㄜˇ",
+            "音ㄘˇㄊㄡˋㄍㄨㄛˋㄑㄧㄝˉㄍㄜˉㄐㄩㄣˋㄖㄡˋㄅㄧㄢˋ能ㄈㄣˉㄅㄧㄢˋㄦˋㄓㄜˇ",
+            "l; ㄘˇㄊㄡˋㄍㄨㄛˋㄑㄧㄝˉㄍㄜˉㄐㄩㄣˋㄖㄡˋㄅㄧㄢˋ能ㄈㄣˉㄅㄧㄢˋㄦˋㄓㄜˇ",
+            "l; h3w.4fnu4tl, ふぇ ㄐㄩㄣˋㄖㄡˋㄅㄧㄢˋ能ㄈㄣˉㄅㄧㄢˋㄦˋㄓㄜˇ",
+            "l; h3w.4fnu4tl, フェ ㄐㄩㄣˋㄖㄡˋㄅㄧㄢˋ能ㄈㄣˉㄅㄧㄢˋㄦˋㄓㄜˇ"
+          ]
+        },
+        {
+          "id": "gsd-14",
+          "group": "real-text",
+          "raw": "y4b06ru,42k7wj3g4u.6u06g6ru/ z/ cj84",
+          "expected": "自然界的土是由岩石經風化",
+          "actual": "字ㄖㄢˊ介的ㄊㄨˇ是ㄧㄡˊㄧㄢˊ時ㄐㄧㄥˉㄈㄥˉㄏㄨㄚˋ",
+          "rank": 0,
+          "edits": 26,
+          "characters": 12,
+          "reachable": false,
+          "candidates": [
+            "字ㄖㄢˊ介的ㄊㄨˇ是ㄧㄡˊㄧㄢˊ時ㄐㄧㄥˉㄈㄥˉㄏㄨㄚˋ",
+            "字ㄖㄢˊ介的ㄊㄨˇ事ㄧㄡˊㄧㄢˊ時ㄐㄧㄥˉㄈㄥˉㄏㄨㄚˋ",
+            "字ㄖㄢˊ介得ㄊㄨˇ是ㄧㄡˊㄧㄢˊ時ㄐㄧㄥˉㄈㄥˉㄏㄨㄚˋ",
+            "字ㄖㄢˊ介的ㄊㄨˇ式ㄧㄡˊㄧㄢˊ時ㄐㄧㄥˉㄈㄥˉㄏㄨㄚˋ",
+            "字ㄖㄢˊ介得ㄊㄨˇ事ㄧㄡˊㄧㄢˊ時ㄐㄧㄥˉㄈㄥˉㄏㄨㄚˋ"
+          ]
+        },
+        {
+          "id": "gsd-15",
+          "group": "real-text",
+          "raw": "gp g.4e/ yji4g zo62/3bp6jo6up nj42k7u/3vu;3-6ru61j4jp32u/4",
+          "expected": "深受耕作施肥等人為因素的影響而極不穩定",
+          "actual": "ㄕㄣˉㄕㄡˋㄍㄥˉ做ㄕˉㄈㄟˊㄉㄥˇ人為因ㄙㄨˋ的ㄧㄥˇ想ㄦˊㄐㄧˊ不ㄨㄣˇㄉㄧㄥˋ",
+          "rank": 0,
+          "edits": 37,
+          "characters": 19,
+          "reachable": false,
+          "candidates": [
+            "ㄕㄣˉㄕㄡˋㄍㄥˉ做ㄕˉㄈㄟˊㄉㄥˇ人為因ㄙㄨˋ的ㄧㄥˇ想ㄦˊㄐㄧˊ不ㄨㄣˇㄉㄧㄥˋ",
+            "ㄕㄣˉㄕㄡˋㄍㄥˉ做ㄕˉㄈㄟˊㄉㄥˇ人為因ㄙㄨˋ得ㄧㄥˇ想ㄦˊㄐㄧˊ不ㄨㄣˇㄉㄧㄥˋ",
+            "ㄕㄣˉㄕㄡˋㄍㄥˉ做ㄕˉㄈㄟˊㄉㄥˇ人為音ㄙㄨˋ的ㄧㄥˇ想ㄦˊㄐㄧˊ不ㄨㄣˇㄉㄧㄥˋ",
+            "ㄕㄣˉㄕㄡˋㄍㄥˉ做ㄕˉㄈㄟˊㄉㄥˇ人為音ㄙㄨˋ得ㄧㄥˇ想ㄦˊㄐㄧˊ不ㄨㄣˇㄉㄧㄥˋ",
+            "d; ㄕㄡˋㄍㄥˉ做ㄕˉㄈㄟˊㄉㄥˇ人為因ㄙㄨˋ的ㄧㄥˇ想ㄦˊㄐㄧˊ不ㄨㄣˇㄉㄧㄥˋ"
+          ]
+        },
+        {
+          "id": "gsd-16",
+          "group": "real-text",
+          "raw": "wj3b;3g45j/4ul42k7y4b06y m06c04g/ t03y xul4",
+          "expected": "土壤是重要的自然資源和生產資料",
+          "actual": "ㄊㄨˇㄖㄤˇ是ㄓㄨㄥˋ要的字ㄖㄢˊㄗˉㄩㄢˊ漢生ㄔㄢˇㄗˉㄌㄧㄠˋ",
+          "rank": 0,
+          "edits": 29,
+          "characters": 15,
+          "reachable": false,
+          "candidates": [
+            "ㄊㄨˇㄖㄤˇ是ㄓㄨㄥˋ要的字ㄖㄢˊㄗˉㄩㄢˊ漢生ㄔㄢˇㄗˉㄌㄧㄠˋ",
+            "ㄊㄨˇㄖㄤˇ是ㄓㄨㄥˋ要的字ㄖㄢˊㄗˉㄩㄢˊ漢聲ㄔㄢˇㄗˉㄌㄧㄠˋ",
+            "ㄊㄨˇㄖㄤˇ是ㄓㄨㄥˋ要得字ㄖㄢˊㄗˉㄩㄢˊ漢生ㄔㄢˇㄗˉㄌㄧㄠˋ",
+            "ㄊㄨˇㄖㄤˇ事ㄓㄨㄥˋ要的字ㄖㄢˊㄗˉㄩㄢˊ漢生ㄔㄢˇㄗˉㄌㄧㄠˋ",
+            "ㄊㄨˇㄖㄤˇ是ㄓㄨㄥˋ要得字ㄖㄢˊㄗˉㄩㄢˊ漢聲ㄔㄢˇㄗˉㄌㄧㄠˋ"
+          ]
+        },
+        {
+          "id": "gsd-17",
+          "group": "real-text",
+          "raw": "wj3b;32k756j4g/ t03s/6xu4g4c/6xu;6wj3b;3y m0656xu;42k71ul 54",
+          "expected": "土壤的植物生產能力是衡量土壤資源質量的標誌",
+          "actual": "ㄊㄨˇㄖㄤˇ的ㄓˊㄨˋ生ㄔㄢˇ能ㄌㄧˋ是ㄏㄥˊㄌㄧㄤˊㄊㄨˇㄖㄤˇㄗˉㄩㄢˊㄓˊㄌㄧㄤˋ的ㄅㄧㄠˉㄓˋ",
+          "rank": 0,
+          "edits": 46,
+          "characters": 21,
+          "reachable": false,
+          "candidates": [
+            "ㄊㄨˇㄖㄤˇ的ㄓˊㄨˋ生ㄔㄢˇ能ㄌㄧˋ是ㄏㄥˊㄌㄧㄤˊㄊㄨˇㄖㄤˇㄗˉㄩㄢˊㄓˊㄌㄧㄤˋ的ㄅㄧㄠˉㄓˋ",
+            "ㄊㄨˇㄖㄤˇ的ㄓˊㄨˋ生ㄔㄢˇ能ㄌㄧˋ是ㄏㄥˊㄌㄧㄤˊㄊㄨˇㄖㄤˇㄗˉㄩㄢˊㄓˊㄌㄧㄤˋ得ㄅㄧㄠˉㄓˋ",
+            "ㄊㄨˇㄖㄤˇ的ㄓˊㄨˋ聲ㄔㄢˇ能ㄌㄧˋ是ㄏㄥˊㄌㄧㄤˊㄊㄨˇㄖㄤˇㄗˉㄩㄢˊㄓˊㄌㄧㄤˋ的ㄅㄧㄠˉㄓˋ",
+            "ㄊㄨˇㄖㄤˇ得ㄓˊㄨˋ生ㄔㄢˇ能ㄌㄧˋ是ㄏㄥˊㄌㄧㄤˊㄊㄨˇㄖㄤˇㄗˉㄩㄢˊㄓˊㄌㄧㄤˋ的ㄅㄧㄠˉㄓˋ",
+            "ㄊㄨˇㄖㄤˇ的ㄓˊㄨˋ生ㄔㄢˇ能ㄌㄧˋ事ㄏㄥˊㄌㄧㄤˊㄊㄨˇㄖㄤˇㄗˉㄩㄢˊㄓˊㄌㄧㄤˋ的ㄅㄧㄠˉㄓˋ"
+          ]
+        },
+        {
+          "id": "gsd-18",
+          "group": "real-text",
+          "raw": "5k4ek7ru4nj04ru dj/454xk7cji3ru04",
+          "expected": "這個計算機控制了火箭",
+          "actual": "這個ㄐㄧˋㄙㄨㄢˋㄐㄧˉㄎㄨㄥˋㄓˋ了ㄏㄨㄛˇ鍵",
+          "rank": 0,
+          "edits": 21,
+          "characters": 10,
+          "reachable": false,
+          "candidates": [
+            "這個ㄐㄧˋㄙㄨㄢˋㄐㄧˉㄎㄨㄥˋㄓˋ了ㄏㄨㄛˇ鍵",
+            "5e4fe7pl4kn04pl ㄎㄨㄥˋㄓˋ了ㄏㄨㄛˇ鍵",
+            "5e4fe7pl4kn04pl sn/454xe7cnu3pl04"
+          ]
+        },
+        {
+          "id": "gsd-19",
+          "group": "real-text",
+          "raw": "rul4w;6j06t/6xk75j3wu3284vu. ej/ t/6",
+          "expected": "教堂完成了主體大修工程",
+          "actual": "ㄐㄧㄠˋㄊㄤˊㄨㄢˊ程了ㄓㄨˇㄊㄧˇ大ㄒㄧㄡˉ功程",
+          "rank": 0,
+          "edits": 22,
+          "characters": 11,
+          "reachable": false,
+          "candidates": [
+            "ㄐㄧㄠˋㄊㄤˊㄨㄢˊ程了ㄓㄨˇㄊㄧˇ大ㄒㄧㄡˉ功程",
+            "ㄐㄧㄠˋㄊㄤˊㄨㄢˊ程了ㄓㄨˇㄊㄧˇ大ㄒㄧㄡˉ功成",
+            "ㄐㄧㄠˋㄊㄤˊㄨㄢˊ成了ㄓㄨˇㄊㄧˇ大ㄒㄧㄡˉ功程",
+            "ㄐㄧㄠˋㄊㄤˊㄨㄢˊ程了ㄓㄨˇㄊㄧˇ大ㄒㄧㄡˉ工程",
+            "ㄐㄧㄠˋㄊㄤˊㄨㄢˊ成了ㄓㄨˇㄊㄧˇ大ㄒㄧㄡˉ功成"
+          ]
+        },
+        {
+          "id": "gsd-20",
+          "group": "real-text",
+          "raw": "ej/ t/61l dji4so41j4ru,6e.42k7wul65/3",
+          "expected": "工程包括內部結構的調整",
+          "actual": "功程ㄅㄠˉㄎㄨㄛˋㄋㄟˋ不ㄐㄧㄝˊㄍㄡˋ的ㄊㄧㄠˊㄓㄥˇ",
+          "rank": 0,
+          "edits": 26,
+          "characters": 11,
+          "reachable": false,
+          "candidates": [
+            "功程ㄅㄠˉㄎㄨㄛˋㄋㄟˋ不ㄐㄧㄝˊㄍㄡˋ的ㄊㄧㄠˊㄓㄥˇ",
+            "功程ㄅㄠˉㄎㄨㄛˋㄋㄟˋ不ㄐㄧㄝˊㄍㄡˋ得ㄊㄧㄠˊㄓㄥˇ",
+            "功成ㄅㄠˉㄎㄨㄛˋㄋㄟˋ不ㄐㄧㄝˊㄍㄡˋ的ㄊㄧㄠˊㄓㄥˇ",
+            "工程ㄅㄠˉㄎㄨㄛˋㄋㄟˋ不ㄐㄧㄝˊㄍㄡˋ的ㄊㄧㄠˊㄓㄥˇ",
+            "工成ㄅㄠˉㄎㄨㄛˋㄋㄟˋ不ㄐㄧㄝˊㄍㄡˋ的ㄊㄧㄠˊㄓㄥˇ"
+          ]
+        },
+        {
+          "id": "acceptance-1",
+          "group": "guards",
+          "raw": "flldal 2k7u/ jp6g4 dmauu",
+          "expected": "小さい 的英文是 small",
+          "actual": "小さい 的英文是 small",
+          "rank": 1,
+          "edits": 0,
+          "characters": 14,
+          "reachable": null,
+          "candidates": [
+            "小さい 的英文是 small",
+            "ちいさい 的英文是 small",
+            "小さい 的英文事 small",
+            "小さい 得英文是 small",
+            "ちいさい 的英文事 small"
+          ]
+        },
+        {
+          "id": "acceptance-2",
+          "group": "guards",
+          "raw": "aj4fu06m/4fu3x96c961j6hji4 dk3u3y/ ru8 h6dj4a87?",
+          "expected": "目前用起來還不錯 可以增加詞庫嗎?",
+          "actual": "目前用起來還不錯 可以增加詞庫嗎?",
+          "rank": 1,
+          "edits": 0,
+          "characters": 17,
+          "reachable": null,
+          "candidates": [
+            "目前用起來還不錯 可以增加詞庫嗎?",
+            "目前用起來還不錯 可以增家詞庫嗎?",
+            "目前用起來還不錯 se3l3j/ 加詞庫嗎?",
+            "目前用起來還不錯 se3l3j/ 家詞庫嗎?",
+            "目前用起來還不錯 se3l3j/ pl8 詞庫嗎?"
+          ]
+        },
+        {
+          "id": "acceptance-3",
+          "group": "guards",
+          "raw": "us3lc3",
+          "expected": "你好",
+          "actual": "你好",
+          "rank": 1,
+          "edits": 0,
+          "characters": 2,
+          "reachable": null,
+          "candidates": [
+            "你好",
+            "妳好",
+            "lr3ic3"
+          ]
+        },
+        {
+          "id": "acceptance-4",
+          "group": "guards",
+          "raw": "/j5 ",
+          "expected": "中",
+          "actual": "中",
+          "rank": 1,
+          "edits": 0,
+          "characters": 1,
+          "reachable": null,
+          "candidates": [
+            "中",
+            "/n5 "
+          ]
+        },
+        {
+          "id": "acceptance-5",
+          "group": "guards",
+          "raw": "sujo/5 ",
+          "expected": "中",
+          "actual": "中",
+          "rank": 1,
+          "edits": 0,
+          "characters": 1,
+          "reachable": null,
+          "candidates": [
+            "中",
+            "rlny/5 "
+          ]
+        },
+        {
+          "id": "acceptance-6",
+          "group": "guards",
+          "raw": "m/4",
+          "expected": "用",
+          "actual": "用",
+          "rank": 1,
+          "edits": 0,
+          "characters": 1,
+          "reachable": null,
+          "candidates": [
+            "用",
+            "m/4"
+          ]
+        },
+        {
+          "id": "acceptance-7",
+          "group": "guards",
+          "raw": "danisa",
+          "expected": "さくら",
+          "actual": "さくら",
+          "rank": 1,
+          "edits": 0,
+          "characters": 3,
+          "reachable": null,
+          "candidates": [
+            "さくら",
+            "サクラ",
+            "ㄇㄛ",
+            "sakura"
+          ]
+        },
+        {
+          "id": "acceptance-8",
+          "group": "guards",
+          "raw": "tann;i",
+          "expected": "がっこう",
+          "actual": "がっこう",
+          "rank": 1,
+          "edits": 0,
+          "characters": 4,
+          "reachable": null,
+          "candidates": [
+            "がっこう",
+            "ガッコウ",
+            "ㄙㄛ",
+            "gakkou"
+          ]
+        },
+        {
+          "id": "acceptance-9",
+          "group": "guards",
+          "raw": "so;n;i",
+          "expected": "りょこう",
+          "actual": "りょこう",
+          "rank": 1,
+          "edits": 0,
+          "characters": 4,
+          "reachable": null,
+          "candidates": [
+            "りょこう",
+            "リョコウ",
+            "ㄙㄛ",
+            "ryokou"
+          ]
+        },
+        {
+          "id": "acceptance-10",
+          "group": "guards",
+          "raw": "dhlj'o;i",
+          "expected": "しんよう",
+          "actual": "しんよう",
+          "rank": 1,
+          "edits": 0,
+          "characters": 4,
+          "reachable": null,
+          "candidates": [
+            "しんよう",
+            "シンヨウ",
+            "shin'you"
+          ]
+        },
+        {
+          "id": "acceptance-11",
+          "group": "guards",
+          "raw": "dhljo;i",
+          "expected": "しにょう",
+          "actual": "しにょう",
+          "rank": 1,
+          "edits": 0,
+          "characters": 4,
+          "reachable": null,
+          "candidates": [
+            "しにょう",
+            "シニョウ",
+            "ㄘㄨㄛ",
+            "shinyou"
+          ]
+        },
+        {
+          "id": "acceptance-12",
+          "group": "guards",
+          "raw": "n;-hl-",
+          "expected": "こーひー",
+          "actual": "こーひー",
+          "rank": 1,
+          "edits": 0,
+          "characters": 4,
+          "reachable": null,
+          "candidates": [
+            "こーひー",
+            "コーヒー",
+            "ㄘㄦ",
+            "ko-hi-"
+          ]
+        },
+        {
+          "id": "acceptance-13",
+          "group": "guards",
+          "raw": "naj  hkuu;!",
+          "expected": "かん  hello!",
+          "actual": "かん  hello!",
+          "rank": 1,
+          "edits": 0,
+          "characters": 10,
+          "reachable": null,
+          "candidates": [
+            "かん  hello!",
+            "カン  hello!",
+            "ㄇㄨˉ hello!",
+            "kan  hello!"
+          ]
+        },
+        {
+          "id": "acceptance-14",
+          "group": "guards",
+          "raw": "hkuu;",
+          "expected": "hello",
+          "actual": "hello",
+          "rank": 1,
+          "edits": 0,
+          "characters": 5,
+          "reachable": null,
+          "candidates": [
+            "hello",
+            "ㄘㄧㄤ"
+          ]
+        },
+        {
+          "id": "synthetic-1",
+          "group": "guards",
+          "raw": "hkuu; w;sug",
+          "expected": "hello world",
+          "actual": "hello world",
+          "rank": 1,
+          "edits": 0,
+          "characters": 11,
+          "reachable": null,
+          "candidates": [
+            "hello world",
+            "hello ㄕㄧㄤ",
+            "ㄘㄧㄤˉㄕㄧㄤ"
+          ]
+        },
+        {
+          "id": "synthetic-2",
+          "group": "guards",
+          "raw": "t;;g m;sjljt",
+          "expected": "good morning",
+          "actual": "good morning",
+          "rank": 1,
+          "edits": 0,
+          "characters": 12,
+          "reachable": null,
+          "candidates": [
+            "good morning",
+            "ごおd morning",
+            "ゴオd morning",
+            "good ㄔㄨㄠ",
+            "ごおd ㄔㄨㄠ"
+          ]
+        },
+        {
+          "id": "synthetic-3",
+          "group": "guards",
+          "raw": "fhld ld a fkdf",
+          "expected": "this is a test",
+          "actual": "this is a test",
+          "rank": 1,
+          "edits": 0,
+          "characters": 14,
+          "reachable": null,
+          "candidates": [
+            "this is a test",
+            "this is あ test",
+            "this is ア test",
+            "this いs a test",
+            "this イs a test"
+          ]
+        },
+        {
+          "id": "synthetic-4",
+          "group": "guards",
+          "raw": "rukadk ;rkj fhk bs;wdks",
+          "expected": "please open the browser",
+          "actual": "please おぺん the ㄋㄜ",
+          "rank": 0,
+          "edits": 11,
+          "characters": 23,
+          "reachable": null,
+          "candidates": [
+            "please おぺん the ㄋㄜ",
+            "please オペン the ㄋㄜ",
+            "please おぺん the browser",
+            "please オペン the browser",
+            "please おぺん ㄘㄜˉㄋㄜ"
+          ]
+        },
+        {
+          "id": "synthetic-5",
+          "group": "guards",
+          "raw": "fhk nkob;asg ld w;snljt",
+          "expected": "the keyboard is working",
+          "actual": "the keyboard is ㄔㄨㄠ",
+          "rank": 3,
+          "edits": 7,
+          "characters": 23,
+          "reachable": null,
+          "candidates": [
+            "the keyboard is ㄔㄨㄠ",
+            "the ㄕㄤˉㄎㄠˉㄔㄨㄠ",
+            "the keyboard is working",
+            "the keyboard いs ㄔㄨㄠ",
+            "the keyboard イs ㄔㄨㄠ"
+          ]
+        },
+        {
+          "id": "synthetic-6",
+          "group": "guards",
+          "raw": "danisa hkuu;",
+          "expected": "さくら hello",
+          "actual": "さくら hello",
+          "rank": 1,
+          "edits": 0,
+          "characters": 9,
+          "reachable": null,
+          "candidates": [
+            "さくら hello",
+            "サクラ hello",
+            "sakura hello",
+            "さくら ㄘㄧㄤ",
+            "サクラ ㄘㄧㄤ"
+          ]
+        },
+        {
+          "id": "synthetic-7",
+          "group": "guards",
+          "raw": "tann;i dmauu",
+          "expected": "がっこう small",
+          "actual": "がっこう small",
+          "rank": 1,
+          "edits": 0,
+          "characters": 10,
+          "reachable": null,
+          "candidates": [
+            "がっこう small",
+            "ガッコウ small",
+            "gakkou small",
+            "がっこう ㄇㄧ",
+            "ガッコウ ㄇㄧ"
+          ]
+        },
+        {
+          "id": "trilingual",
+          "group": "guards",
+          "raw": "tann;i us3lc3 hkuu;",
+          "expected": "がっこう 你好 hello",
+          "actual": "がっこう 你好 hello",
+          "rank": 1,
+          "edits": 0,
+          "characters": 13,
+          "reachable": null,
+          "candidates": [
+            "がっこう 你好 hello",
+            "ガッコウ 你好 hello",
+            "がっこう 妳好 hello",
+            "ガッコウ 妳好 hello",
+            "ㄙㄛˉ你好 hello"
+          ]
+        },
+        {
+          "id": "feedback-code-loop",
+          "group": "user-feedback",
+          "raw": "e;s (ljf l = 0p l < 100p l++)",
+          "expected": "for (int i = 0; i < 100; i++)",
+          "actual": "ふぉr (int i = 0; i < 100; i++)",
+          "rank": 0,
+          "edits": 2,
+          "characters": 29,
+          "reachable": null,
+          "candidates": [
+            "ふぉr (int i = 0; i < 100; i++)",
+            "フォr (int i = 0; i < 100; i++)",
+            "ふぉr (int い = 0; i < 100; i++)",
+            "ふぉr (int i = 0; い < 100; i++)",
+            "ふぉr (int i = 0; イ < 100; i++)"
+          ]
+        },
+        {
+          "id": "feedback-bug-raw",
+          "group": "user-feedback",
+          "raw": "Fhld ld a bit.",
+          "expected": "This is a bug.",
+          "actual": "This is a ㄔㄡ",
+          "rank": 5,
+          "edits": 4,
+          "characters": 14,
+          "reachable": null,
+          "candidates": [
+            "This is a ㄔㄡ",
+            "This is あ ㄔㄡ",
+            "This is ア ㄔㄡ",
+            "This is ㄇˉㄔㄡ",
+            "This is a bug."
+          ]
+        },
+        {
+          "id": "feedback-short-word-period",
+          "group": "user-feedback",
+          "raw": "Fhld ld a blf.",
+          "expected": "This is a bit.",
+          "actual": "This is a ㄑㄡ",
+          "rank": 5,
+          "edits": 4,
+          "characters": 14,
+          "reachable": null,
+          "candidates": [
+            "This is a ㄑㄡ",
+            "This is あ ㄑㄡ",
+            "This is ア ㄑㄡ",
+            "This is ㄇˉㄑㄡ",
+            "This is a bit."
+          ]
+        },
+        {
+          "id": "feedback-conclusion",
+          "group": "user-feedback",
+          "raw": "c;jcuidl;j",
+          "expected": "conclusion",
+          "actual": "ㄎㄨㄤ",
+          "rank": 2,
+          "edits": 10,
+          "characters": 10,
+          "reachable": null,
+          "candidates": [
+            "ㄎㄨㄤ",
+            "conclusion"
+          ]
+        },
+        {
+          "id": "feedback-zhuyin-priority",
+          "group": "user-feedback",
+          "raw": "L fhljn 5j4up 'd rsl;slfo ld f;; hlth  (fhld ld aud; a t;;g fkdf dkjfkjck)",
+          "expected": "I think 注音's priority is too high  (this is also a good test sentence)",
+          "actual": "",
+          "rank": 0,
+          "edits": 70,
+          "characters": 70,
+          "reachable": null,
+          "candidates": []
+        },
+        {
+          "id": "mixed-01-colemak-all",
+          "group": "mixed-colemak-all",
+          "raw": "TRI fasljalnasa bafch dlzk 16 j;mama fsalj mawadi.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "GPU たりないから batch size 16 のまま train まわす.",
+          "actual": "GPU たりないから ばっch しぜ ㄅˊ のまま ㄇㄨㄠˉㄎㄩㄡ",
+          "rank": 0,
+          "edits": 19,
+          "characters": 39,
+          "reachable": null,
+          "candidates": [
+            "GPU たりないから ばっch しぜ ㄅˊ のまま ㄇㄨㄠˉㄎㄩㄡ",
+            "GPU たりないから ばっch しぜ ㄅˊ ノママ ㄇㄨㄠˉㄎㄩㄡ",
+            "GPU タリナイカラ ばっch しぜ ㄅˊ のまま ㄇㄨㄠˉㄎㄩㄡ",
+            "GPU たりないから ばっch シゼ ㄅˊ のまま ㄇㄨㄠˉㄎㄩㄡ",
+            "GPU たりないから バッch しぜ ㄅˊ のまま ㄇㄨㄠˉㄎㄩㄡ"
+          ]
+        },
+        {
+          "id": "mixed-01-colemak-en-jp",
+          "group": "mixed-colemak-en-jp",
+          "raw": "TRI fasljalnasa bafch dlzk 16 j;mama fsalj mawadi.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "GPU たりないから batch size 16 のまま train まわす.",
+          "actual": "GPU たりないから ばっch しぜ 16 のまま train mawasu.",
+          "rank": 0,
+          "edits": 13,
+          "characters": 39,
+          "reachable": null,
+          "candidates": [
+            "GPU たりないから ばっch しぜ 16 のまま train mawasu.",
+            "GPU たりないから ばっch しぜ 16 ノママ train mawasu.",
+            "GPU タリナイカラ ばっch しぜ 16 のまま train mawasu.",
+            "GPU たりないから ばっch シゼ 16 のまま train mawasu.",
+            "GPU たりないから バッch しぜ 16 のまま train mawasu."
+          ]
+        },
+        {
+          "id": "mixed-01-qwerty-all",
+          "group": "mixed-qwerty-all",
+          "raw": "GPU tarinaikara batch size 16 nomama train mawasu.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "GPU たりないから batch size 16 のまま train まわす.",
+          "actual": "GPU たりないから ばっch しぜ ㄅˊ のまま ㄙㄛˉㄋㄧㄡ",
+          "rank": 0,
+          "edits": 19,
+          "characters": 39,
+          "reachable": null,
+          "candidates": [
+            "GPU たりないから ばっch しぜ ㄅˊ のまま ㄙㄛˉㄋㄧㄡ",
+            "GPU たりないから ばっch しぜ ㄅˊ ノママ ㄙㄛˉㄋㄧㄡ",
+            "GPU タリナイカラ ばっch しぜ ㄅˊ のまま ㄙㄛˉㄋㄧㄡ",
+            "GPU たりないから ばっch シゼ ㄅˊ のまま ㄙㄛˉㄋㄧㄡ",
+            "GPU たりないから バッch しぜ ㄅˊ のまま ㄙㄛˉㄋㄧㄡ"
+          ]
+        },
+        {
+          "id": "mixed-01-qwerty-en-jp",
+          "group": "mixed-qwerty-en-jp",
+          "raw": "GPU tarinaikara batch size 16 nomama train mawasu.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "GPU たりないから batch size 16 のまま train まわす.",
+          "actual": "GPU たりないから ばっch しぜ 16 のまま train mawasu.",
+          "rank": 0,
+          "edits": 13,
+          "characters": 39,
+          "reachable": null,
+          "candidates": [
+            "GPU たりないから ばっch しぜ 16 のまま train mawasu.",
+            "GPU たりないから ばっch しぜ 16 ノママ train mawasu.",
+            "GPU タリナイカラ ばっch しぜ 16 のまま train mawasu.",
+            "GPU たりないから ばっch シゼ 16 のまま train mawasu.",
+            "GPU たりないから バッch しぜ 16 のまま train mawasu."
+          ]
+        },
+        {
+          "id": "mixed-02-colemak-all",
+          "group": "mixed-colemak-all",
+          "raw": "adhlfaj; dfajgir ha 10:00 nasa Z;;m gk, atkjga ha no;ioiizimlgkdi.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+          "actual": "あしたの standup は 10:00 から ぞおm ㄕㄝˉㄇㄨㄜˉㄇˉㄎㄩㄡ",
+          "rank": 0,
+          "edits": 25,
+          "characters": 51,
+          "reachable": null,
+          "candidates": [
+            "あしたの standup は 10:00 から ぞおm ㄕㄝˉㄇㄨㄜˉㄇˉㄎㄩㄡ",
+            "あしたの standup は 10:00 から ゾオm ㄕㄝˉㄇㄨㄜˉㄇˉㄎㄩㄡ",
+            "アシタノ standup は 10:00 から ぞおm ㄕㄝˉㄇㄨㄜˉㄇˉㄎㄩㄡ",
+            "あしたの standup は 10:00 カラ ぞおm ㄕㄝˉㄇㄨㄜˉㄇˉㄎㄩㄡ",
+            "あしたの standup ハ 10:00 から ぞおm ㄕㄝˉㄇㄨㄜˉㄇˉㄎㄩㄡ"
+          ]
+        },
+        {
+          "id": "mixed-02-colemak-en-jp",
+          "group": "mixed-colemak-en-jp",
+          "raw": "adhlfaj; dfajgir ha 10:00 nasa Z;;m gk, atkjga ha no;ioiizimlgkdi.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+          "actual": "あしたの standup は 10:00 から ぞおm de, あげんだ は kyouyuuzumidesu.",
+          "rank": 0,
+          "edits": 26,
+          "characters": 51,
+          "reachable": null,
+          "candidates": [
+            "あしたの standup は 10:00 から ぞおm de, あげんだ は kyouyuuzumidesu.",
+            "あしたの standup は 10:00 から ぞおm de, あげんだ ハ kyouyuuzumidesu.",
+            "あしたの standup は 10:00 から ぞおm de, アゲンダ は kyouyuuzumidesu.",
+            "あしたの standup は 10:00 から ゾオm de, あげんだ は kyouyuuzumidesu.",
+            "アシタノ standup は 10:00 から ぞおm de, あげんだ は kyouyuuzumidesu."
+          ]
+        },
+        {
+          "id": "mixed-02-qwerty-all",
+          "group": "mixed-qwerty-all",
+          "raw": "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+          "actual": "あしたの standup は 10:00 から ぞおm ㄍㄝˉㄇˉㄇˉㄋㄧㄡ",
+          "rank": 0,
+          "edits": 25,
+          "characters": 51,
+          "reachable": null,
+          "candidates": [
+            "あしたの standup は 10:00 から ぞおm ㄍㄝˉㄇˉㄇˉㄋㄧㄡ",
+            "あしたの standup は 10:00 から ゾオm ㄍㄝˉㄇˉㄇˉㄋㄧㄡ",
+            "アシタノ standup は 10:00 から ぞおm ㄍㄝˉㄇˉㄇˉㄋㄧㄡ",
+            "あしたの standup は 10:00 カラ ぞおm ㄍㄝˉㄇˉㄇˉㄋㄧㄡ",
+            "あしたの standup ハ 10:00 から ぞおm ㄍㄝˉㄇˉㄇˉㄋㄧㄡ"
+          ]
+        },
+        {
+          "id": "mixed-02-qwerty-en-jp",
+          "group": "mixed-qwerty-en-jp",
+          "raw": "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+          "actual": "あしたの standup は 10:00 から ぞおm de, あげんだ は kyouyuuzumidesu.",
+          "rank": 0,
+          "edits": 26,
+          "characters": 51,
+          "reachable": null,
+          "candidates": [
+            "あしたの standup は 10:00 から ぞおm de, あげんだ は kyouyuuzumidesu.",
+            "あしたの standup は 10:00 から ぞおm de, あげんだ ハ kyouyuuzumidesu.",
+            "あしたの standup は 10:00 から ぞおm de, アゲンダ は kyouyuuzumidesu.",
+            "あしたの standup は 10:00 から ゾオm de, あげんだ は kyouyuuzumidesu.",
+            "アシタノ standup は 10:00 から ぞおm de, あげんだ は kyouyuuzumidesu."
+          ]
+        },
+        {
+          "id": "mixed-03-colemak-all",
+          "group": "mixed-colemak-all",
+          "raw": "n;j; RS j; skbadk dhlfknasa jrm fkdf f;;si na mlfk.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "この PR の rebase してから npm test とおる か みて.",
+          "actual": "この PR の ればせ してから ㄐㄩˉㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ",
+          "rank": 0,
+          "edits": 24,
+          "characters": 38,
+          "reachable": null,
+          "candidates": [
+            "この PR の ればせ してから ㄐㄩˉㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ",
+            "この PR の ればせ シテカラ ㄐㄩˉㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ",
+            "この PR の レバセ してから ㄐㄩˉㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ",
+            "この PR ノ ればせ してから ㄐㄩˉㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ",
+            "コノ PR の ればせ してから ㄐㄩˉㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ"
+          ]
+        },
+        {
+          "id": "mixed-03-colemak-en-jp",
+          "group": "mixed-colemak-en-jp",
+          "raw": "n;j; RS j; skbadk dhlfknasa jrm fkdf f;;si na mlfk.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "この PR の rebase してから npm test とおる か みて.",
+          "actual": "この PR の ればせ してから npm test とおる か mite.",
+          "rank": 0,
+          "edits": 10,
+          "characters": 38,
+          "reachable": null,
+          "candidates": [
+            "この PR の ればせ してから npm test とおる か mite.",
+            "この PR の ればせ してから npm test とおる カ mite.",
+            "この PR の ればせ してから npm test トオル か mite.",
+            "この PR の ればせ シテカラ npm test とおる か mite.",
+            "この PR の レバセ してから npm test とおる か mite."
+          ]
+        },
+        {
+          "id": "mixed-03-qwerty-all",
+          "group": "mixed-qwerty-all",
+          "raw": "kono PR no rebase shitekara npm test tooru ka mite.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "この PR の rebase してから npm test とおる か みて.",
+          "actual": "この PR の ればせ してから ㄙㄩㄣˉ吃ㄐㄧㄟˉㄇㄜˉㄍㄩㄡ",
+          "rank": 0,
+          "edits": 24,
+          "characters": 38,
+          "reachable": null,
+          "candidates": [
+            "この PR の ればせ してから ㄙㄩㄣˉ吃ㄐㄧㄟˉㄇㄜˉㄍㄩㄡ",
+            "この PR の ればせ シテカラ ㄙㄩㄣˉ吃ㄐㄧㄟˉㄇㄜˉㄍㄩㄡ",
+            "この PR の レバセ してから ㄙㄩㄣˉ吃ㄐㄧㄟˉㄇㄜˉㄍㄩㄡ",
+            "この PR ノ ればせ してから ㄙㄩㄣˉ吃ㄐㄧㄟˉㄇㄜˉㄍㄩㄡ",
+            "コノ PR の ればせ してから ㄙㄩㄣˉ吃ㄐㄧㄟˉㄇㄜˉㄍㄩㄡ"
+          ]
+        },
+        {
+          "id": "mixed-03-qwerty-en-jp",
+          "group": "mixed-qwerty-en-jp",
+          "raw": "kono PR no rebase shitekara npm test tooru ka mite.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "この PR の rebase してから npm test とおる か みて.",
+          "actual": "この PR の ればせ してから npm test とおる か mite.",
+          "rank": 0,
+          "edits": 10,
+          "characters": 38,
+          "reachable": null,
+          "candidates": [
+            "この PR の ればせ してから npm test とおる か mite.",
+            "この PR の ればせ してから npm test とおる カ mite.",
+            "この PR の ればせ してから npm test トオル か mite.",
+            "この PR の ればせ シテカラ npm test とおる か mite.",
+            "この PR の レバセ してから npm test とおる か mite."
+          ]
+        },
+        {
+          "id": "mixed-04-colemak-all",
+          "group": "mixed-colemak-all",
+          "raw": "afasadhll MacB;;n j; Wl-El ta eiajfklgk, VRJ nlsif; ja;si.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "actual": "",
+          "rank": 0,
+          "edits": 44,
+          "characters": 44,
+          "reachable": null,
+          "candidates": []
+        },
+        {
+          "id": "mixed-04-colemak-en-jp",
+          "group": "mixed-colemak-en-jp",
+          "raw": "afasadhll MacB;;n j; Wl-El ta eiajfklgk, VRJ nlsif; ja;si.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "actual": "あたらしい MacBook の うぃーふぃ が fuanteide, VPN きると naoru.",
+          "rank": 0,
+          "edits": 19,
+          "characters": 44,
+          "reachable": null,
+          "candidates": [
+            "あたらしい MacBook の うぃーふぃ が fuanteide, VPN きると naoru.",
+            "あたらしい MacBook の うぃーふぃ が fuanteide, VPN キルト naoru.",
+            "あたらしい MacBook の うぃーふぃ ガ fuanteide, VPN きると naoru.",
+            "あたらしい MacBook の ウィーフィ が fuanteide, VPN きると naoru.",
+            "アタラシイ MacBook の うぃーふぃ が fuanteide, VPN きると naoru."
+          ]
+        },
+        {
+          "id": "mixed-04-qwerty-all",
+          "group": "mixed-qwerty-all",
+          "raw": "atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "actual": "",
+          "rank": 0,
+          "edits": 44,
+          "characters": 44,
+          "reachable": null,
+          "candidates": []
+        },
+        {
+          "id": "mixed-04-qwerty-en-jp",
+          "group": "mixed-qwerty-en-jp",
+          "raw": "atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "actual": "あたらしい MacBook の うぃーふぃ が fuanteide, VPN きると naoru.",
+          "rank": 0,
+          "edits": 19,
+          "characters": 44,
+          "reachable": null,
+          "candidates": [
+            "あたらしい MacBook の うぃーふぃ が fuanteide, VPN きると naoru.",
+            "あたらしい MacBook の うぃーふぃ が fuanteide, VPN キルト naoru.",
+            "あたらしい MacBook の うぃーふぃ ガ fuanteide, VPN きると naoru.",
+            "あたらしい MacBook の ウィーフィ が fuanteide, VPN きると naoru.",
+            "アタラシイ MacBook の うぃーふぃ が fuanteide, VPN きると naoru."
+          ]
+        },
+        {
+          "id": "mixed-05-colemak-all",
+          "group": "mixed-colemak-all",
+          "raw": "Dkjg fhk mlfdim;sldh; ad RGE, elukjamk qi;fk_2026-09.rge",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+          "actual": "せんd the みつもりしょ あs PDF, ふぃぇなめ quote_2026-09.pdf",
+          "rank": 0,
+          "edits": 12,
+          "characters": 50,
+          "reachable": null,
+          "candidates": [
+            "せんd the みつもりしょ あs PDF, ふぃぇなめ quote_2026-09.pdf",
+            "せんd the みつもりしょ あs PDF, フィェナメ quote_2026-09.pdf",
+            "せんd the みつもりしょ アs PDF, ふぃぇなめ quote_2026-09.pdf",
+            "せんd the ミツモリショ あs PDF, ふぃぇなめ quote_2026-09.pdf",
+            "センd the みつもりしょ あs PDF, ふぃぇなめ quote_2026-09.pdf"
+          ]
+        },
+        {
+          "id": "mixed-05-colemak-en-jp",
+          "group": "mixed-colemak-en-jp",
+          "raw": "Dkjg fhk mlfdim;sldh; ad RGE, elukjamk qi;fk_2026-09.rge",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+          "actual": "せんd the みつもりしょ あs PDF, ふぃぇなめ quote_2026-09.pdf",
+          "rank": 0,
+          "edits": 12,
+          "characters": 50,
+          "reachable": null,
+          "candidates": [
+            "せんd the みつもりしょ あs PDF, ふぃぇなめ quote_2026-09.pdf",
+            "せんd the みつもりしょ あs PDF, フィェナメ quote_2026-09.pdf",
+            "せんd the みつもりしょ アs PDF, ふぃぇなめ quote_2026-09.pdf",
+            "せんd the ミツモリショ あs PDF, ふぃぇなめ quote_2026-09.pdf",
+            "センd the みつもりしょ あs PDF, ふぃぇなめ quote_2026-09.pdf"
+          ]
+        },
+        {
+          "id": "mixed-05-qwerty-all",
+          "group": "mixed-qwerty-all",
+          "raw": "Send the mitsumorisho as PDF, filename quote_2026-09.pdf",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+          "actual": "せんd the みつもりしょ あs PDF, ふぃぇなめ quote_2026-09.pdf",
+          "rank": 0,
+          "edits": 12,
+          "characters": 50,
+          "reachable": null,
+          "candidates": [
+            "せんd the みつもりしょ あs PDF, ふぃぇなめ quote_2026-09.pdf",
+            "せんd the みつもりしょ あs PDF, フィェナメ quote_2026-09.pdf",
+            "せんd the みつもりしょ アs PDF, ふぃぇなめ quote_2026-09.pdf",
+            "せんd the ミツモリショ あs PDF, ふぃぇなめ quote_2026-09.pdf",
+            "センd the みつもりしょ あs PDF, ふぃぇなめ quote_2026-09.pdf"
+          ]
+        },
+        {
+          "id": "mixed-05-qwerty-en-jp",
+          "group": "mixed-qwerty-en-jp",
+          "raw": "Send the mitsumorisho as PDF, filename quote_2026-09.pdf",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+          "actual": "せんd the みつもりしょ あs PDF, ふぃぇなめ quote_2026-09.pdf",
+          "rank": 0,
+          "edits": 12,
+          "characters": 50,
+          "reachable": null,
+          "candidates": [
+            "せんd the みつもりしょ あs PDF, ふぃぇなめ quote_2026-09.pdf",
+            "せんd the みつもりしょ あs PDF, フィェナメ quote_2026-09.pdf",
+            "せんd the みつもりしょ アs PDF, ふぃぇなめ quote_2026-09.pdf",
+            "せんd the ミツモリショ あs PDF, ふぃぇなめ quote_2026-09.pdf",
+            "センd the みつもりしょ あs PDF, ふぃぇなめ quote_2026-09.pdf"
+          ]
+        },
+        {
+          "id": "mixed-06-colemak-all",
+          "group": "mixed-colemak-all",
+          "raw": "o;oaniha FabukChkcn gk, jamakha Fajana / fajana gk lskfk;lfa.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
+          "actual": "よやくは TableCheck de, なまえは たなか / たなか で ㄇㄡ",
+          "rank": 0,
+          "edits": 21,
+          "characters": 49,
+          "reachable": null,
+          "candidates": [
+            "よやくは TableCheck de, なまえは たなか / たなか で ㄇㄡ",
+            "よやくは TableCheck de, なまえは たなか / たなか デ ㄇㄡ",
+            "よやくは TableCheck de, なまえは たなか / タナカ で ㄇㄡ",
+            "よやくは TableCheck de, なまえは タナカ / たなか で ㄇㄡ",
+            "よやくは TableCheck de, ナマエハ たなか / たなか で ㄇㄡ"
+          ]
+        },
+        {
+          "id": "mixed-06-colemak-en-jp",
+          "group": "mixed-colemak-en-jp",
+          "raw": "o;oaniha FabukChkcn gk, jamakha Fajana / fajana gk lskfk;lfa.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
+          "actual": "よやくは TableCheck de, なまえは たなか / たなか で ireteoita.",
+          "rank": 0,
+          "edits": 23,
+          "characters": 49,
+          "reachable": null,
+          "candidates": [
+            "よやくは TableCheck de, なまえは たなか / たなか で ireteoita.",
+            "よやくは TableCheck de, なまえは たなか / たなか デ ireteoita.",
+            "よやくは TableCheck de, なまえは たなか / タナカ で ireteoita.",
+            "よやくは TableCheck de, なまえは タナカ / たなか で ireteoita.",
+            "よやくは TableCheck de, ナマエハ たなか / たなか で ireteoita."
+          ]
+        },
+        {
+          "id": "mixed-06-qwerty-all",
+          "group": "mixed-qwerty-all",
+          "raw": "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
+          "actual": "よやくは TableCheck de, なまえは たなか / たなか で ㄇㄡ",
+          "rank": 0,
+          "edits": 21,
+          "characters": 49,
+          "reachable": null,
+          "candidates": [
+            "よやくは TableCheck de, なまえは たなか / たなか で ㄇㄡ",
+            "よやくは TableCheck de, なまえは たなか / たなか デ ㄇㄡ",
+            "よやくは TableCheck de, なまえは たなか / タナカ で ㄇㄡ",
+            "よやくは TableCheck de, なまえは タナカ / たなか で ㄇㄡ",
+            "よやくは TableCheck de, ナマエハ たなか / たなか で ㄇㄡ"
+          ]
+        },
+        {
+          "id": "mixed-06-qwerty-en-jp",
+          "group": "mixed-qwerty-en-jp",
+          "raw": "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
+          "actual": "よやくは TableCheck de, なまえは たなか / たなか で ireteoita.",
+          "rank": 0,
+          "edits": 23,
+          "characters": 49,
+          "reachable": null,
+          "candidates": [
+            "よやくは TableCheck de, なまえは たなか / たなか で ireteoita.",
+            "よやくは TableCheck de, なまえは たなか / たなか デ ireteoita.",
+            "よやくは TableCheck de, なまえは たなか / タナカ で ireteoita.",
+            "よやくは TableCheck de, なまえは タナカ / たなか で ireteoita.",
+            "よやくは TableCheck de, ナマエハ たなか / たなか で ireteoita."
+          ]
+        }
+      ]
+    },
+    "expanded": {
+      "dictionary": {
+        "builtIn": 181,
+        "custom": 0,
+        "englishImported": 101191,
+        "imported": 28184
+      },
+      "instanceCreationMs": 19.997379000000024,
+      "groups": {
+        "real-text": {
+          "cases": 20,
+          "top1": 12,
+          "top5": 17,
+          "characterErrorRate": 0.055793991416309016,
+          "reachable": 20
+        },
+        "guards": {
+          "cases": 22,
+          "top1": 22,
+          "top5": 22,
+          "characterErrorRate": 0,
+          "reachable": null
+        },
+        "user-feedback": {
+          "cases": 5,
+          "top1": 5,
+          "top5": 5,
+          "characterErrorRate": 0,
+          "reachable": null
+        },
+        "mixed-colemak-all": {
+          "cases": 6,
+          "top1": 4,
+          "top5": 4,
+          "characterErrorRate": 0.1992619926199262,
+          "reachable": null
+        },
+        "mixed-colemak-en-jp": {
+          "cases": 6,
+          "top1": 4,
+          "top5": 4,
+          "characterErrorRate": 0.05904059040590406,
+          "reachable": null
+        },
+        "mixed-qwerty-all": {
+          "cases": 6,
+          "top1": 4,
+          "top5": 4,
+          "characterErrorRate": 0.14022140221402213,
+          "reachable": null
+        },
+        "mixed-qwerty-en-jp": {
+          "cases": 6,
+          "top1": 4,
+          "top5": 4,
+          "characterErrorRate": 0.05904059040590406,
+          "reachable": null
+        }
+      },
+      "prefixLatency": {
+        "count": 2515,
+        "p50Ms": 0.42570200000000114,
+        "p95Ms": 2.6576970000000983,
+        "maxMs": 5.959399000000076
+      },
+      "rows": [
+        {
+          "id": "gsd-01",
+          "group": "real-text",
+          "raw": "5k4u;42k7tj3xu3u,3u03g/ xk7u vu, jp4wu6",
+          "expected": "這樣的處理也衍生了一些問題",
+          "actual": "這樣的處理也演生了一些問題",
+          "rank": 2,
+          "edits": 1,
+          "characters": 13,
+          "reachable": true,
+          "candidates": [
+            "這樣的處理也演生了一些問題",
+            "這樣的處理也衍生了一些問題",
+            "這樣的處理也眼生了一些問題",
+            "這樣的處理野演生了一些問題",
+            "5e4lo42e7gn3xl3l,3l03d/ xe7l vl, n;4wl6"
+          ]
+        },
+        {
+          "id": "gsd-02",
+          "group": "real-text",
+          "raw": "fu4u,4ru,4xj4vm4u.3bp6wu6ej/ rm0 dj03",
+          "expected": "企業界陸續有人提供捐款",
+          "actual": "企業界陸續有人提供捐款",
+          "rank": 1,
+          "edits": 0,
+          "characters": 11,
+          "reachable": true,
+          "candidates": [
+            "企業界陸續有人提供捐款",
+            "企業界陸續友人提供捐款",
+            "氣業界陸續有人提供捐款",
+            "企業解陸續有人提供捐款",
+            "tl4l,4pl,4xn4vm4l.3b;6wl6fn/ pm0 sn03"
+          ]
+        },
+        {
+          "id": "gsd-03",
+          "group": "real-text",
+          "raw": "2j4rm0 cj8 jo6jp 29456j4",
+          "expected": "杜鵑花為溫帶植物",
+          "actual": "杜鵑化為溫大植物",
+          "rank": 0,
+          "edits": 2,
+          "characters": 8,
+          "reachable": true,
+          "candidates": [
+            "杜鵑化為溫大植物",
+            "杜鵑化為溫大職務",
+            "杜鵑化為溫代植物",
+            "杜鵑化為塭大植物",
+            "2n4pm0 cn8 ny6n; 29456n4"
+          ]
+        },
+        {
+          "id": "gsd-04",
+          "group": "real-text",
+          "raw": "w961o3njo b06y94u84bk4294",
+          "expected": "台北雖然在亞熱帶",
+          "actual": "台北雖然在亞熱帶",
+          "rank": 1,
+          "edits": 0,
+          "characters": 8,
+          "reachable": true,
+          "candidates": [
+            "台北雖然在亞熱帶",
+            "台北雖然在訝熱帶",
+            "台北雖然在軋熱帶",
+            "台北雖然再亞熱帶",
+            "w961y3kny b06j94l84be4294"
+          ]
+        },
+        {
+          "id": "gsd-05",
+          "group": "real-text",
+          "raw": "u 2j/4xu;3h/6x.62k7ru045j6",
+          "expected": "一棟兩層樓的建築",
+          "actual": "一動兩層樓的建築",
+          "rank": 4,
+          "edits": 1,
+          "characters": 8,
+          "reachable": true,
+          "candidates": [
+            "一動兩層樓的建築",
+            "一動兩層樓地建築",
+            "一動倆層樓的建築",
+            "一棟兩層樓的建築",
+            "l 2n/4xlo3h/6x.62e7pl045n6"
+          ]
+        },
+        {
+          "id": "gsd-06",
+          "group": "real-text",
+          "raw": "x.62u/3u.3wu0 jp6w96",
+          "expected": "樓頂有天文台",
+          "actual": "樓頂有天文台",
+          "rank": 1,
+          "edits": 0,
+          "characters": 6,
+          "reachable": true,
+          "candidates": [
+            "樓頂有天文台",
+            "樓頂友天文台",
+            "樓鼎有天文台",
+            "嘍頂有天文台",
+            "x.62l/3l.3wl0 n;6w96"
+          ]
+        },
+        {
+          "id": "gsd-07",
+          "group": "real-text",
+          "raw": "vu04jo6wu0 jp6gk4g3m/4",
+          "expected": "現為天文社使用",
+          "actual": "現為天文社使用",
+          "rank": 1,
+          "edits": 0,
+          "characters": 7,
+          "reachable": true,
+          "candidates": [
+            "現為天文社使用",
+            "現為天文設使用",
+            "現維天文社使用",
+            "見為天文社使用",
+            "vl04ny6wl0 n;6de4d3m/4"
+          ]
+        },
+        {
+          "id": "gsd-08",
+          "group": "real-text",
+          "raw": "5j3ul4cji3104g4b41p3c04ao3eji6",
+          "expected": "主要夥伴是日本和美國",
+          "actual": "主要火辦事日本和美國",
+          "rank": 2,
+          "edits": 3,
+          "characters": 10,
+          "reachable": true,
+          "candidates": [
+            "主要火辦事日本和美國",
+            "主要夥伴是日本和美國",
+            "主要火辦事日本漢美國",
+            "主要夥伴是日本漢美國",
+            "5n3li4cnu3104d4b41;3c04ay3fnu6"
+          ]
+        },
+        {
+          "id": "gsd-09",
+          "group": "real-text",
+          "raw": "5k4vu, 2u04cj84ru/ rul cj04ru tj3xu3",
+          "expected": "這些電話經交換機處理",
+          "actual": "這些電話經教換機處理",
+          "rank": 4,
+          "edits": 1,
+          "characters": 10,
+          "reachable": true,
+          "candidates": [
+            "這些電話經教換機處理",
+            "這些電話經交換其處理",
+            "這些電話經交換基礎理",
+            "這些電話經交換機處理",
+            "5e4vl, 2l04cn84pl/ pli cn04pl gn3xl3"
+          ]
+        },
+        {
+          "id": "gsd-10",
+          "group": "real-text",
+          "raw": "g3m/42k7ao6ru,41l dji4c932u32u04x03",
+          "expected": "使用的媒介包括海底電纜",
+          "actual": "使用的媒介包括海底電纜",
+          "rank": 1,
+          "edits": 0,
+          "characters": 11,
+          "reachable": true,
+          "candidates": [
+            "使用的媒介包括海底電纜",
+            "使用地媒介包括海底電纜",
+            "使用得媒介包括海底電纜",
+            "使用的沒解包括海底電纜",
+            "d3m/42e7ay6pl,41i snu4c932l32l04x03"
+          ]
+        },
+        {
+          "id": "gsd-11",
+          "group": "real-text",
+          "raw": "wj06e.4j;35042k7t03qup3m06ru84c04e.4a93gj4xu;4",
+          "expected": "團購網站的產品原價和購買數量",
+          "actual": "團購網站的產品原價和購買數量",
+          "rank": 1,
+          "edits": 0,
+          "characters": 14,
+          "reachable": true,
+          "candidates": [
+            "團購網站的產品原價和購買數量",
+            "團購網站的產品原價漢購買數量",
+            "團購網站地產品原價和購買數量",
+            "團購網站的產品原價汗購買數量",
+            "wn06f.4no35042e7g03ql;3m06pl84c04f.4a93dn4xlo4"
+          ]
+        },
+        {
+          "id": "gsd-12",
+          "group": "real-text",
+          "raw": "wj06e.4j;35042k75j3ul4t03qup3zp jo6ru8 rm xo4",
+          "expected": "團購網站的主要產品分為家居類",
+          "actual": "團購網站的主要產品分為家車類",
+          "rank": 3,
+          "edits": 1,
+          "characters": 14,
+          "reachable": true,
+          "candidates": [
+            "團購網站的主要產品分為家車類",
+            "團購網站的主要產品分為家車累",
+            "團購網站的主要產品分為家居類",
+            "團購網站的主要產品紛為家車類",
+            "wn06f.4no35042e75n3li4g03ql;3z; ny6pl8 pm xy4"
+          ]
+        },
+        {
+          "id": "gsd-13",
+          "group": "real-text",
+          "raw": "up h3w.4eji4fu, ek rmp4b.41u04s/6zp 1u04-45k3",
+          "expected": "因此透過切割菌肉便能分辨二者",
+          "actual": "因此透過切割俊肉變能分辨二者",
+          "rank": 0,
+          "edits": 2,
+          "characters": 14,
+          "reachable": true,
+          "candidates": [
+            "因此透過切割俊肉變能分辨二者",
+            "因此透過切割俊肉變能分辨二赭",
+            "因此透過切割俊肉變能分辨貳者",
+            "因此透過切割俊肉便能分辨二者",
+            "l; h3w.4fnu4tl, fe pm;4b.41l04r/6z; 1l04-45e3"
+          ]
+        },
+        {
+          "id": "gsd-14",
+          "group": "real-text",
+          "raw": "y4b06ru,42k7wj3g4u.6u06g6ru/ z/ cj84",
+          "expected": "自然界的土是由岩石經風化",
+          "actual": "自然界的土是由岩石經風化",
+          "rank": 1,
+          "edits": 0,
+          "characters": 12,
+          "reachable": true,
+          "candidates": [
+            "自然界的土是由岩石經風化",
+            "自然界的土是由岩石更風化",
+            "自然界的土是遊岩石經風化",
+            "自然界的土事由岩石經風化",
+            "j4b06pl,42e7wn3d4l.6l06d6pl/ z/ cn84"
+          ]
+        },
+        {
+          "id": "gsd-15",
+          "group": "real-text",
+          "raw": "gp g.4e/ yji4g zo62/3bp6jo6up nj42k7u/3vu;3-6ru61j4jp32u/4",
+          "expected": "深受耕作施肥等人為因素的影響而極不穩定",
+          "actual": "深受耕作師肥等人為因素的影響而及不穩定",
+          "rank": 0,
+          "edits": 2,
+          "characters": 19,
+          "reachable": true,
+          "candidates": [
+            "深受耕作師肥等人為因素的影響而及不穩定",
+            "深受耕作師肥等人為因素的影響而及部穩定",
+            "深受耕作師肥等人為因素的影響而即不穩定",
+            "深受耕作師肥等人為因素的影響兒及不穩定",
+            "d; d.4f/ jnu4d zy62/3b;6ny6l; kn42e7l/3vlo3-6pl61n4n;32l/4"
+          ]
+        },
+        {
+          "id": "gsd-16",
+          "group": "real-text",
+          "raw": "wj3b;3g45j/4ul42k7y4b06y m06c04g/ t03y xul4",
+          "expected": "土壤是重要的自然資源和生產資料",
+          "actual": "土壤是重要的自然資源和生產資料",
+          "rank": 1,
+          "edits": 0,
+          "characters": 15,
+          "reachable": true,
+          "candidates": [
+            "土壤是重要的自然資源和生產資料",
+            "土壤是重要的自然資源漢生產資料",
+            "土壤事重要的自然資源和生產資料",
+            "土壤是重要的自然資源汗生產資料",
+            "wn3bo3d45n/4li42e7j4b06j m06c04d/ g03j xli4"
+          ]
+        },
+        {
+          "id": "gsd-17",
+          "group": "real-text",
+          "raw": "wj3b;32k756j4g/ t03s/6xu4g4c/6xu;6wj3b;3y m0656xu;42k71ul 54",
+          "expected": "土壤的植物生產能力是衡量土壤資源質量的標誌",
+          "actual": "土壤的植物生產能力是衡量土壤資源質量的標誌",
+          "rank": 1,
+          "edits": 0,
+          "characters": 21,
+          "reachable": true,
+          "candidates": [
+            "土壤的植物生產能力是衡量土壤資源質量的標誌",
+            "土壤的植物生產能力是衡量土壤資源質量地標誌",
+            "土壤的植物生產能力事衡量土壤資源質量的標誌",
+            "土壤的職務生產能力是衡量土壤資源質量的標誌",
+            "wn3bo32e756n4d/ g03r/6xl4d4c/6xlo6wn3bo3j m0656xlo42e71li 54"
+          ]
+        },
+        {
+          "id": "gsd-18",
+          "group": "real-text",
+          "raw": "5k4ek7ru4nj04ru dj/454xk7cji3ru04",
+          "expected": "這個計算機控制了火箭",
+          "actual": "這個計算機控制了火箭",
+          "rank": 1,
+          "edits": 0,
+          "characters": 10,
+          "reachable": true,
+          "candidates": [
+            "這個計算機控制了火箭",
+            "這個計算其控制了火箭",
+            "這個計算機空知了火箭",
+            "這個計算機控制了火間",
+            "5e4fe7pl4kn04pl sn/454xe7cnu3pl04"
+          ]
+        },
+        {
+          "id": "gsd-19",
+          "group": "real-text",
+          "raw": "rul4w;6j06t/6xk75j3wu3284vu. ej/ t/6",
+          "expected": "教堂完成了主體大修工程",
+          "actual": "教堂完成了主體大修工程",
+          "rank": 1,
+          "edits": 0,
+          "characters": 11,
+          "reachable": true,
+          "candidates": [
+            "教堂完成了主體大修工程",
+            "教堂完成了主體大休工程",
+            "教堂玩成了主體大修工程",
+            "教堂玩成了主體大休工程",
+            "pli4wo6n06g/6xe75n3wl3284vl. fn/ g/6"
+          ]
+        },
+        {
+          "id": "gsd-20",
+          "group": "real-text",
+          "raw": "ej/ t/61l dji4so41j4ru,6e.42k7wul65/3",
+          "expected": "工程包括內部結構的調整",
+          "actual": "工程包括內部結構的調整",
+          "rank": 1,
+          "edits": 0,
+          "characters": 11,
+          "reachable": true,
+          "candidates": [
+            "工程包括內部結構的調整",
+            "工程包括內部結構地調整",
+            "工程包括內部結構得調整",
+            "公成包括內部結構的調整",
+            "fn/ g/61i snu4ry41n4pl,6f.42e7wli65/3"
+          ]
+        },
+        {
+          "id": "acceptance-1",
+          "group": "guards",
+          "raw": "flldal 2k7u/ jp6g4 dmauu",
+          "expected": "小さい 的英文是 small",
+          "actual": "小さい 的英文是 small",
+          "rank": 1,
+          "edits": 0,
+          "characters": 14,
+          "reachable": null,
+          "candidates": [
+            "小さい 的英文是 small",
+            "ちいさい 的英文是 small",
+            "小さい 的英文事 small",
+            "小さい 地英文是 small",
+            "tiisai 2e7l/ n;6d4 small"
+          ]
+        },
+        {
+          "id": "acceptance-2",
+          "group": "guards",
+          "raw": "aj4fu06m/4fu3x96c961j6hji4 dk3u3y/ ru8 h6dj4a87?",
+          "expected": "目前用起來還不錯 可以增加詞庫嗎?",
+          "actual": "目前用起來還不錯 可以增加詞庫嗎?",
+          "rank": 1,
+          "edits": 0,
+          "characters": 17,
+          "reachable": null,
+          "candidates": [
+            "目前用起來還不錯 可以增加詞庫嗎?",
+            "目前用起來還不錯 可以增加詞庫嘛?",
+            "目前用起來還不錯 可以增加詞庫蟆?",
+            "目前佣起來還不錯 可以增加詞庫嗎?",
+            "an4tl06m/4tl3x96c961n6hnu4 se3l3j/ pl8 h6sn4a87?"
+          ]
+        },
+        {
+          "id": "acceptance-3",
+          "group": "guards",
+          "raw": "us3lc3",
+          "expected": "你好",
+          "actual": "你好",
+          "rank": 1,
+          "edits": 0,
+          "characters": 2,
+          "reachable": null,
+          "candidates": [
+            "你好",
+            "你郝",
+            "妳好",
+            "妳郝",
+            "lr3ic3"
+          ]
+        },
+        {
+          "id": "acceptance-4",
+          "group": "guards",
+          "raw": "/j5 ",
+          "expected": "中",
+          "actual": "中",
+          "rank": 1,
+          "edits": 0,
+          "characters": 1,
+          "reachable": null,
+          "candidates": [
+            "中",
+            "終",
+            "鐘",
+            "忠",
+            "/n5 "
+          ]
+        },
+        {
+          "id": "acceptance-5",
+          "group": "guards",
+          "raw": "sujo/5 ",
+          "expected": "中",
+          "actual": "中",
+          "rank": 1,
+          "edits": 0,
+          "characters": 1,
+          "reachable": null,
+          "candidates": [
+            "中",
+            "終",
+            "鐘",
+            "忠",
+            "rlny/5 "
+          ]
+        },
+        {
+          "id": "acceptance-6",
+          "group": "guards",
+          "raw": "m/4",
+          "expected": "用",
+          "actual": "用",
+          "rank": 1,
+          "edits": 0,
+          "characters": 1,
+          "reachable": null,
+          "candidates": [
+            "用",
+            "佣",
+            "m/4"
+          ]
+        },
+        {
+          "id": "acceptance-7",
+          "group": "guards",
+          "raw": "danisa",
+          "expected": "さくら",
+          "actual": "さくら",
+          "rank": 1,
+          "edits": 0,
+          "characters": 3,
+          "reachable": null,
+          "candidates": [
+            "さくら",
+            "サクラ",
+            "sakura",
+            "ㄇㄛ"
+          ]
+        },
+        {
+          "id": "acceptance-8",
+          "group": "guards",
+          "raw": "tann;i",
+          "expected": "がっこう",
+          "actual": "がっこう",
+          "rank": 1,
+          "edits": 0,
+          "characters": 4,
+          "reachable": null,
+          "candidates": [
+            "がっこう",
+            "ガッコウ",
+            "gakkou",
+            "ㄙㄛ"
+          ]
+        },
+        {
+          "id": "acceptance-9",
+          "group": "guards",
+          "raw": "so;n;i",
+          "expected": "りょこう",
+          "actual": "りょこう",
+          "rank": 1,
+          "edits": 0,
+          "characters": 4,
+          "reachable": null,
+          "candidates": [
+            "りょこう",
+            "リョコウ",
+            "ryokou",
+            "ㄙㄛ"
+          ]
+        },
+        {
+          "id": "acceptance-10",
+          "group": "guards",
+          "raw": "dhlj'o;i",
+          "expected": "しんよう",
+          "actual": "しんよう",
+          "rank": 1,
+          "edits": 0,
+          "characters": 4,
+          "reachable": null,
+          "candidates": [
+            "しんよう",
+            "シンヨウ",
+            "shin'you"
+          ]
+        },
+        {
+          "id": "acceptance-11",
+          "group": "guards",
+          "raw": "dhljo;i",
+          "expected": "しにょう",
+          "actual": "しにょう",
+          "rank": 1,
+          "edits": 0,
+          "characters": 4,
+          "reachable": null,
+          "candidates": [
+            "しにょう",
+            "シニョウ",
+            "shinyou",
+            "ㄘㄨㄛ"
+          ]
+        },
+        {
+          "id": "acceptance-12",
+          "group": "guards",
+          "raw": "n;-hl-",
+          "expected": "こーひー",
+          "actual": "こーひー",
+          "rank": 1,
+          "edits": 0,
+          "characters": 4,
+          "reachable": null,
+          "candidates": [
+            "こーひー",
+            "コーヒー",
+            "ko-hi-",
+            "ㄘㄦ"
+          ]
+        },
+        {
+          "id": "acceptance-13",
+          "group": "guards",
+          "raw": "naj  hkuu;!",
+          "expected": "かん  hello!",
+          "actual": "かん  hello!",
+          "rank": 1,
+          "edits": 0,
+          "characters": 10,
+          "reachable": null,
+          "candidates": [
+            "かん  hello!",
+            "kan  hello!",
+            "カン  hello!",
+            "ㄇㄨˉ hello!"
+          ]
+        },
+        {
+          "id": "acceptance-14",
+          "group": "guards",
+          "raw": "hkuu;",
+          "expected": "hello",
+          "actual": "hello",
+          "rank": 1,
+          "edits": 0,
+          "characters": 5,
+          "reachable": null,
+          "candidates": [
+            "hello",
+            "ㄘㄧㄤ"
+          ]
+        },
+        {
+          "id": "synthetic-1",
+          "group": "guards",
+          "raw": "hkuu; w;sug",
+          "expected": "hello world",
+          "actual": "hello world",
+          "rank": 1,
+          "edits": 0,
+          "characters": 11,
+          "reachable": null,
+          "candidates": [
+            "hello world",
+            "hello ㄕㄧㄤ",
+            "ㄘㄧㄤˉㄕㄧㄤ"
+          ]
+        },
+        {
+          "id": "synthetic-2",
+          "group": "guards",
+          "raw": "t;;g m;sjljt",
+          "expected": "good morning",
+          "actual": "good morning",
+          "rank": 1,
+          "edits": 0,
+          "characters": 12,
+          "reachable": null,
+          "candidates": [
+            "good morning",
+            "ごおd morning",
+            "ゴオd morning",
+            "good ㄔㄨㄠ",
+            "ごおd ㄔㄨㄠ"
+          ]
+        },
+        {
+          "id": "synthetic-3",
+          "group": "guards",
+          "raw": "fhld ld a fkdf",
+          "expected": "this is a test",
+          "actual": "this is a test",
+          "rank": 1,
+          "edits": 0,
+          "characters": 14,
+          "reachable": null,
+          "candidates": [
+            "this is a test",
+            "this is あ test",
+            "this is ア test",
+            "this いs a test",
+            "this イs a test"
+          ]
+        },
+        {
+          "id": "synthetic-4",
+          "group": "guards",
+          "raw": "rukadk ;rkj fhk bs;wdks",
+          "expected": "please open the browser",
+          "actual": "please open the browser",
+          "rank": 1,
+          "edits": 0,
+          "characters": 23,
+          "reachable": null,
+          "candidates": [
+            "please open the browser",
+            "please おぺん the browser",
+            "please オペン the browser",
+            "please open the ㄋㄜ",
+            "please おぺん the ㄋㄜ"
+          ]
+        },
+        {
+          "id": "synthetic-5",
+          "group": "guards",
+          "raw": "fhk nkob;asg ld w;snljt",
+          "expected": "the keyboard is working",
+          "actual": "the keyboard is working",
+          "rank": 1,
+          "edits": 0,
+          "characters": 23,
+          "reachable": null,
+          "candidates": [
+            "the keyboard is working",
+            "the keyboard いs working",
+            "the keyboard イs working",
+            "the keyboard 尻ㄔㄨㄠ",
+            "the keyboard is ㄔㄨㄠ"
+          ]
+        },
+        {
+          "id": "synthetic-6",
+          "group": "guards",
+          "raw": "danisa hkuu;",
+          "expected": "さくら hello",
+          "actual": "さくら hello",
+          "rank": 1,
+          "edits": 0,
+          "characters": 9,
+          "reachable": null,
+          "candidates": [
+            "さくら hello",
+            "サクラ hello",
+            "sakura hello",
+            "さくら ㄘㄧㄤ",
+            "サクラ ㄘㄧㄤ"
+          ]
+        },
+        {
+          "id": "synthetic-7",
+          "group": "guards",
+          "raw": "tann;i dmauu",
+          "expected": "がっこう small",
+          "actual": "がっこう small",
+          "rank": 1,
+          "edits": 0,
+          "characters": 10,
+          "reachable": null,
+          "candidates": [
+            "がっこう small",
+            "ガッコウ small",
+            "gakkou small",
+            "がっこう ㄇㄧ",
+            "ガッコウ ㄇㄧ"
+          ]
+        },
+        {
+          "id": "trilingual",
+          "group": "guards",
+          "raw": "tann;i us3lc3 hkuu;",
+          "expected": "がっこう 你好 hello",
+          "actual": "がっこう 你好 hello",
+          "rank": 1,
+          "edits": 0,
+          "characters": 13,
+          "reachable": null,
+          "candidates": [
+            "がっこう 你好 hello",
+            "ガッコウ 你好 hello",
+            "gakkou 你好 hello",
+            "がっこう 你郝 hello",
+            "gakkou lr3ic3 hello"
+          ]
+        },
+        {
+          "id": "feedback-code-loop",
+          "group": "user-feedback",
+          "raw": "e;s (ljf l = 0p l < 100p l++)",
+          "expected": "for (int i = 0; i < 100; i++)",
+          "actual": "for (int i = 0; i < 100; i++)",
+          "rank": 1,
+          "edits": 0,
+          "characters": 29,
+          "reachable": null,
+          "candidates": [
+            "for (int i = 0; i < 100; i++)"
+          ]
+        },
+        {
+          "id": "feedback-bug-raw",
+          "group": "user-feedback",
+          "raw": "Fhld ld a bit.",
+          "expected": "This is a bug.",
+          "actual": "This is a bug.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 14,
+          "reachable": null,
+          "candidates": [
+            "This is a bug.",
+            "This is あ bug.",
+            "This is ア bug.",
+            "This is a ぶg.",
+            "This is a ブg."
+          ]
+        },
+        {
+          "id": "feedback-short-word-period",
+          "group": "user-feedback",
+          "raw": "Fhld ld a blf.",
+          "expected": "This is a bit.",
+          "actual": "This is a bit.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 14,
+          "reachable": null,
+          "candidates": [
+            "This is a bit.",
+            "This is あ bit.",
+            "This is ア bit.",
+            "This is a びt.",
+            "This is a ビt."
+          ]
+        },
+        {
+          "id": "feedback-conclusion",
+          "group": "user-feedback",
+          "raw": "c;jcuidl;j",
+          "expected": "conclusion",
+          "actual": "conclusion",
+          "rank": 1,
+          "edits": 0,
+          "characters": 10,
+          "reachable": null,
+          "candidates": [
+            "conclusion",
+            "ㄎㄨㄤ"
+          ]
+        },
+        {
+          "id": "feedback-zhuyin-priority",
+          "group": "user-feedback",
+          "raw": "L fhljn 5j4up 'd rsl;slfo ld f;; hlth  (fhld ld aud; a t;;g fkdf dkjfkjck)",
+          "expected": "I think 注音's priority is too high  (this is also a good test sentence)",
+          "actual": "I think 注音's priority is too high  (this is also a good test sentence)",
+          "rank": 1,
+          "edits": 0,
+          "characters": 70,
+          "reachable": null,
+          "candidates": [
+            "I think 注音's priority is too high  (this is also a good test sentence)",
+            "I think 著因's priority is too high  (this is also a good test sentence)",
+            "I think 注音's priority is too high  (this is also あ good test sentence)",
+            "I think 注音's priority is too high  (this is also ア good test sentence)",
+            "I think 5n4l; 's priority is too high  (this is also a good test sentence)"
+          ]
+        },
+        {
+          "id": "mixed-01-colemak-all",
+          "group": "mixed-colemak-all",
+          "raw": "TRI fasljalnasa bafch dlzk 16 j;mama fsalj mawadi.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "GPU たりないから batch size 16 のまま train まわす.",
+          "actual": "GPU たりないから batch size 16 のまま train まわす.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 39,
+          "reachable": null,
+          "candidates": [
+            "GPU たりないから batch size 16 のまま train まわす.",
+            "GPU たりないから batch size 16 のまま train マワス.",
+            "GPU たりないから batch size 16 ノママ train まわす.",
+            "GPU タリナイカラ batch size 16 のまま train まわす.",
+            "GPU tarinaikara batch size 16 nomama train mawasu."
+          ]
+        },
+        {
+          "id": "mixed-01-colemak-en-jp",
+          "group": "mixed-colemak-en-jp",
+          "raw": "TRI fasljalnasa bafch dlzk 16 j;mama fsalj mawadi.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "GPU たりないから batch size 16 のまま train まわす.",
+          "actual": "GPU たりないから batch size 16 のまま train まわす.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 39,
+          "reachable": null,
+          "candidates": [
+            "GPU たりないから batch size 16 のまま train まわす.",
+            "GPU たりないから batch size 16 のまま train マワス.",
+            "GPU たりないから batch size 16 ノママ train まわす.",
+            "GPU タリナイカラ batch size 16 のまま train まわす.",
+            "GPU tarinaikara batch size 16 nomama train mawasu."
+          ]
+        },
+        {
+          "id": "mixed-01-qwerty-all",
+          "group": "mixed-qwerty-all",
+          "raw": "GPU tarinaikara batch size 16 nomama train mawasu.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "GPU たりないから batch size 16 のまま train まわす.",
+          "actual": "GPU たりないから batch size 16 のまま train まわす.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 39,
+          "reachable": null,
+          "candidates": [
+            "GPU たりないから batch size 16 のまま train まわす.",
+            "GPU たりないから batch size 16 のまま train マワス.",
+            "GPU たりないから batch size 16 ノママ train まわす.",
+            "GPU タリナイカラ batch size 16 のまま train まわす.",
+            "GPU tarinaikara batch size 16 nomama train mawasu."
+          ]
+        },
+        {
+          "id": "mixed-01-qwerty-en-jp",
+          "group": "mixed-qwerty-en-jp",
+          "raw": "GPU tarinaikara batch size 16 nomama train mawasu.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "GPU たりないから batch size 16 のまま train まわす.",
+          "actual": "GPU たりないから batch size 16 のまま train まわす.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 39,
+          "reachable": null,
+          "candidates": [
+            "GPU たりないから batch size 16 のまま train まわす.",
+            "GPU たりないから batch size 16 のまま train マワス.",
+            "GPU たりないから batch size 16 ノママ train まわす.",
+            "GPU タリナイカラ batch size 16 のまま train まわす.",
+            "GPU tarinaikara batch size 16 nomama train mawasu."
+          ]
+        },
+        {
+          "id": "mixed-02-colemak-all",
+          "group": "mixed-colemak-all",
+          "raw": "adhlfaj; dfajgir ha 10:00 nasa Z;;m gk, atkjga ha no;ioiizimlgkdi.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+          "actual": "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 51,
+          "reachable": null,
+          "candidates": [
+            "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom で, agenda は キョウユウズミデス.",
+            "あしたの standup は 10:00 から Zoom で, agenda ハ きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom デ, agenda は きょうゆうずみです.",
+            "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu."
+          ]
+        },
+        {
+          "id": "mixed-02-colemak-en-jp",
+          "group": "mixed-colemak-en-jp",
+          "raw": "adhlfaj; dfajgir ha 10:00 nasa Z;;m gk, atkjga ha no;ioiizimlgkdi.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+          "actual": "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 51,
+          "reachable": null,
+          "candidates": [
+            "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom で, agenda は キョウユウズミデス.",
+            "あしたの standup は 10:00 から Zoom で, agenda ハ きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom デ, agenda は きょうゆうずみです.",
+            "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu."
+          ]
+        },
+        {
+          "id": "mixed-02-qwerty-all",
+          "group": "mixed-qwerty-all",
+          "raw": "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+          "actual": "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 51,
+          "reachable": null,
+          "candidates": [
+            "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom で, agenda は キョウユウズミデス.",
+            "あしたの standup は 10:00 から Zoom で, agenda ハ きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom デ, agenda は きょうゆうずみです.",
+            "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu."
+          ]
+        },
+        {
+          "id": "mixed-02-qwerty-en-jp",
+          "group": "mixed-qwerty-en-jp",
+          "raw": "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+          "actual": "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 51,
+          "reachable": null,
+          "candidates": [
+            "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom で, agenda は キョウユウズミデス.",
+            "あしたの standup は 10:00 から Zoom で, agenda ハ きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom デ, agenda は きょうゆうずみです.",
+            "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu."
+          ]
+        },
+        {
+          "id": "mixed-03-colemak-all",
+          "group": "mixed-colemak-all",
+          "raw": "n;j; RS j; skbadk dhlfknasa jrm fkdf f;;si na mlfk.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "この PR の rebase してから npm test とおる か みて.",
+          "actual": "kono PR no rebase shitekara npm test tooru ka mite.",
+          "rank": 0,
+          "edits": 26,
+          "characters": 38,
+          "reachable": null,
+          "candidates": [
+            "kono PR no rebase shitekara npm test tooru ka mite.",
+            "この PR の ればせ してから 車ㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ",
+            "この PR の ればせ シテカラ 車ㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ",
+            "コノ PR の ればせ してから 車ㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ",
+            "この PR の レバセ してから 車ㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ"
+          ]
+        },
+        {
+          "id": "mixed-03-colemak-en-jp",
+          "group": "mixed-colemak-en-jp",
+          "raw": "n;j; RS j; skbadk dhlfknasa jrm fkdf f;;si na mlfk.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "この PR の rebase してから npm test とおる か みて.",
+          "actual": "この PR の ればせ してから npm test とおる か mite.",
+          "rank": 0,
+          "edits": 10,
+          "characters": 38,
+          "reachable": null,
+          "candidates": [
+            "この PR の ればせ してから npm test とおる か mite.",
+            "この PR の ればせ してから npm test とおる カ mite.",
+            "この PR の ればせ シテカラ npm test とおる か mite.",
+            "コノ PR の ればせ してから npm test とおる か mite.",
+            "kono PR no rebase shitekara npm test tooru ka mite."
+          ]
+        },
+        {
+          "id": "mixed-03-qwerty-all",
+          "group": "mixed-qwerty-all",
+          "raw": "kono PR no rebase shitekara npm test tooru ka mite.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "この PR の rebase してから npm test とおる か みて.",
+          "actual": "この PR の ればせ してから npm test とおる か mite.",
+          "rank": 0,
+          "edits": 10,
+          "characters": 38,
+          "reachable": null,
+          "candidates": [
+            "この PR の ればせ してから npm test とおる か mite.",
+            "この PR の ればせ してから npm test とおる カ mite.",
+            "この PR の ればせ シテカラ npm test とおる か mite.",
+            "コノ PR の ればせ してから npm test とおる か mite.",
+            "kono PR no rebase shitekara npm test tooru ka mite."
+          ]
+        },
+        {
+          "id": "mixed-03-qwerty-en-jp",
+          "group": "mixed-qwerty-en-jp",
+          "raw": "kono PR no rebase shitekara npm test tooru ka mite.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "この PR の rebase してから npm test とおる か みて.",
+          "actual": "この PR の ればせ してから npm test とおる か mite.",
+          "rank": 0,
+          "edits": 10,
+          "characters": 38,
+          "reachable": null,
+          "candidates": [
+            "この PR の ればせ してから npm test とおる か mite.",
+            "この PR の ればせ してから npm test とおる カ mite.",
+            "この PR の ればせ シテカラ npm test とおる か mite.",
+            "コノ PR の ればせ してから npm test とおる か mite.",
+            "kono PR no rebase shitekara npm test tooru ka mite."
+          ]
+        },
+        {
+          "id": "mixed-04-colemak-all",
+          "group": "mixed-colemak-all",
+          "raw": "afasadhll MacB;;n j; Wl-El ta eiajfklgk, VRJ nlsif; ja;si.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "actual": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 44,
+          "reachable": null,
+          "candidates": [
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると ナオル.",
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN キルト なおる.",
+            "あたらしい MacBook の Wi-Fi が フアンテイデ, VPN きると なおる.",
+            "atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru."
+          ]
+        },
+        {
+          "id": "mixed-04-colemak-en-jp",
+          "group": "mixed-colemak-en-jp",
+          "raw": "afasadhll MacB;;n j; Wl-El ta eiajfklgk, VRJ nlsif; ja;si.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "actual": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 44,
+          "reachable": null,
+          "candidates": [
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると ナオル.",
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN キルト なおる.",
+            "あたらしい MacBook の Wi-Fi が フアンテイデ, VPN きると なおる.",
+            "atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru."
+          ]
+        },
+        {
+          "id": "mixed-04-qwerty-all",
+          "group": "mixed-qwerty-all",
+          "raw": "atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "actual": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 44,
+          "reachable": null,
+          "candidates": [
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると ナオル.",
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN キルト なおる.",
+            "あたらしい MacBook の Wi-Fi が フアンテイデ, VPN きると なおる.",
+            "atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru."
+          ]
+        },
+        {
+          "id": "mixed-04-qwerty-en-jp",
+          "group": "mixed-qwerty-en-jp",
+          "raw": "atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "actual": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "rank": 1,
+          "edits": 0,
+          "characters": 44,
+          "reachable": null,
+          "candidates": [
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると ナオル.",
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN キルト なおる.",
+            "あたらしい MacBook の Wi-Fi が フアンテイデ, VPN きると なおる.",
+            "atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru."
+          ]
+        },
+        {
+          "id": "mixed-05-colemak-all",
+          "group": "mixed-colemak-all",
+          "raw": "Dkjg fhk mlfdim;sldh; ad RGE, elukjamk qi;fk_2026-09.rge",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+          "actual": "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+          "rank": 1,
+          "edits": 0,
+          "characters": 50,
+          "reachable": null,
+          "candidates": [
+            "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+            "Send the ミツモリショ as PDF, filename quote_2026-09.pdf",
+            "Send the mitsumorisho as PDF, filename quote_2026-09.pdf",
+            "Send the みつもりしょ as PDF, ふぃぇなめ quote_2026-09.pdf",
+            "Send the みつもりしょ as PDF, フィェナメ quote_2026-09.pdf"
+          ]
+        },
+        {
+          "id": "mixed-05-colemak-en-jp",
+          "group": "mixed-colemak-en-jp",
+          "raw": "Dkjg fhk mlfdim;sldh; ad RGE, elukjamk qi;fk_2026-09.rge",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+          "actual": "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+          "rank": 1,
+          "edits": 0,
+          "characters": 50,
+          "reachable": null,
+          "candidates": [
+            "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+            "Send the ミツモリショ as PDF, filename quote_2026-09.pdf",
+            "Send the mitsumorisho as PDF, filename quote_2026-09.pdf",
+            "Send the みつもりしょ as PDF, ふぃぇなめ quote_2026-09.pdf",
+            "Send the みつもりしょ as PDF, フィェナメ quote_2026-09.pdf"
+          ]
+        },
+        {
+          "id": "mixed-05-qwerty-all",
+          "group": "mixed-qwerty-all",
+          "raw": "Send the mitsumorisho as PDF, filename quote_2026-09.pdf",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+          "actual": "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+          "rank": 1,
+          "edits": 0,
+          "characters": 50,
+          "reachable": null,
+          "candidates": [
+            "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+            "Send the ミツモリショ as PDF, filename quote_2026-09.pdf",
+            "Send the mitsumorisho as PDF, filename quote_2026-09.pdf",
+            "Send the みつもりしょ as PDF, ふぃぇなめ quote_2026-09.pdf",
+            "Send the みつもりしょ as PDF, フィェナメ quote_2026-09.pdf"
+          ]
+        },
+        {
+          "id": "mixed-05-qwerty-en-jp",
+          "group": "mixed-qwerty-en-jp",
+          "raw": "Send the mitsumorisho as PDF, filename quote_2026-09.pdf",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+          "actual": "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+          "rank": 1,
+          "edits": 0,
+          "characters": 50,
+          "reachable": null,
+          "candidates": [
+            "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
+            "Send the ミツモリショ as PDF, filename quote_2026-09.pdf",
+            "Send the mitsumorisho as PDF, filename quote_2026-09.pdf",
+            "Send the みつもりしょ as PDF, ふぃぇなめ quote_2026-09.pdf",
+            "Send the みつもりしょ as PDF, フィェナメ quote_2026-09.pdf"
+          ]
+        },
+        {
+          "id": "mixed-06-colemak-all",
+          "group": "mixed-colemak-all",
+          "raw": "o;oaniha FabukChkcn gk, jamakha Fajana / fajana gk lskfk;lfa.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
+          "actual": "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.",
+          "rank": 0,
+          "edits": 28,
+          "characters": 49,
+          "reachable": null,
+          "candidates": [
+            "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.",
+            "よやくは TableCheck で, なまえは Tanaka ㄥˉㄇㄨˉ奢ㄇㄡ",
+            "よやくは TableCheck で, ナマエハ Tanaka ㄥˉㄇㄨˉ奢ㄇㄡ",
+            "ヨヤクハ TableCheck で, なまえは Tanaka ㄥˉㄇㄨˉ奢ㄇㄡ",
+            "よやくは TableCheck デ, なまえは Tanaka ㄥˉㄇㄨˉ奢ㄇㄡ"
+          ]
+        },
+        {
+          "id": "mixed-06-colemak-en-jp",
+          "group": "mixed-colemak-en-jp",
+          "raw": "o;oaniha FabukChkcn gk, jamakha Fajana / fajana gk lskfk;lfa.",
+          "options": {
+            "layout": "colemak",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
+          "actual": "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+          "rank": 0,
+          "edits": 6,
+          "characters": 49,
+          "reachable": null,
+          "candidates": [
+            "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+            "よやくは TableCheck で, ナマエハ Tanaka / たなか で いれておいた.",
+            "ヨヤクハ TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+            "よやくは TableCheck デ, なまえは Tanaka / たなか で いれておいた.",
+            "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita."
+          ]
+        },
+        {
+          "id": "mixed-06-qwerty-all",
+          "group": "mixed-qwerty-all",
+          "raw": "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": true
+          },
+          "expected": "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
+          "actual": "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.",
+          "rank": 0,
+          "edits": 28,
+          "characters": 49,
+          "reachable": null,
+          "candidates": [
+            "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.",
+            "よやくは TableCheck で, なまえは Tanaka ㄥˉㄇㄜˉㄍˉㄇㄡ",
+            "よやくは TableCheck で, ナマエハ Tanaka ㄥˉㄇㄜˉㄍˉㄇㄡ",
+            "ヨヤクハ TableCheck で, なまえは Tanaka ㄥˉㄇㄜˉㄍˉㄇㄡ",
+            "よやくは TableCheck デ, なまえは Tanaka ㄥˉㄇㄜˉㄍˉㄇㄡ"
+          ]
+        },
+        {
+          "id": "mixed-06-qwerty-en-jp",
+          "group": "mixed-qwerty-en-jp",
+          "raw": "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.",
+          "options": {
+            "layout": "qwerty",
+            "english": true,
+            "japanese": true,
+            "zhuyin": false
+          },
+          "expected": "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
+          "actual": "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+          "rank": 0,
+          "edits": 6,
+          "characters": 49,
+          "reachable": null,
+          "candidates": [
+            "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+            "よやくは TableCheck で, ナマエハ Tanaka / たなか で いれておいた.",
+            "ヨヤクハ TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+            "よやくは TableCheck デ, なまえは Tanaka / たなか で いれておいた.",
+            "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita."
+          ]
+        }
+      ]
+    }
+  },
+  "regressions": [],
+  "top5Regressions": []
+}

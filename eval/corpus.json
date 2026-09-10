@@ -1,0 +1,29 @@
+{
+  "source": "UniversalDependencies/UD_Chinese-GSD",
+  "revision": "22f73e87f7ddc530bb131a6b7587971a03e1a712",
+  "license": "CC-BY-SA-4.0",
+  "selection": "20 manually selected contiguous excerpts from the first 35 test sentences, selected before evaluating the expanded dictionary. Digits, unsupported punctuation and foreign proper names are excluded. This is a small development diagnostic, not a representative held-out benchmark.",
+  "annotation": "Zhuyin readings manually annotated for this evaluation, independently of the imported dictionary. Dictionary citation tones are used; no spoken tone-sandhi model. No corpus text or annotations feed the dictionary importer.",
+  "cases": [
+    {"id":"gsd-01","sourceSent":"test-s1","text":"這樣的處理也衍生了一些問題","reading":"ㄓㄜˋ ㄧㄤˋ ㄉㄜ˙ ㄔㄨˇ ㄌㄧˇ ㄧㄝˇ ㄧㄢˇ ㄕㄥ ㄌㄜ˙ ㄧ ㄒㄧㄝ ㄨㄣˋ ㄊㄧˊ"},
+    {"id":"gsd-02","sourceSent":"test-s2","text":"企業界陸續有人提供捐款","reading":"ㄑㄧˋ ㄧㄝˋ ㄐㄧㄝˋ ㄌㄨˋ ㄒㄩˋ ㄧㄡˇ ㄖㄣˊ ㄊㄧˊ ㄍㄨㄥ ㄐㄩㄢ ㄎㄨㄢˇ"},
+    {"id":"gsd-03","sourceSent":"test-s3","text":"杜鵑花為溫帶植物","reading":"ㄉㄨˋ ㄐㄩㄢ ㄏㄨㄚ ㄨㄟˊ ㄨㄣ ㄉㄞˋ ㄓˊ ㄨˋ"},
+    {"id":"gsd-04","sourceSent":"test-s3","text":"台北雖然在亞熱帶","reading":"ㄊㄞˊ ㄅㄟˇ ㄙㄨㄟ ㄖㄢˊ ㄗㄞˋ ㄧㄚˋ ㄖㄜˋ ㄉㄞˋ"},
+    {"id":"gsd-05","sourceSent":"test-s4","text":"一棟兩層樓的建築","reading":"ㄧ ㄉㄨㄥˋ ㄌㄧㄤˇ ㄘㄥˊ ㄌㄡˊ ㄉㄜ˙ ㄐㄧㄢˋ ㄓㄨˊ"},
+    {"id":"gsd-06","sourceSent":"test-s5","text":"樓頂有天文台","reading":"ㄌㄡˊ ㄉㄧㄥˇ ㄧㄡˇ ㄊㄧㄢ ㄨㄣˊ ㄊㄞˊ"},
+    {"id":"gsd-07","sourceSent":"test-s5","text":"現為天文社使用","reading":"ㄒㄧㄢˋ ㄨㄟˊ ㄊㄧㄢ ㄨㄣˊ ㄕㄜˋ ㄕˇ ㄩㄥˋ"},
+    {"id":"gsd-08","sourceSent":"test-s6","text":"主要夥伴是日本和美國","reading":"ㄓㄨˇ ㄧㄠˋ ㄏㄨㄛˇ ㄅㄢˋ ㄕˋ ㄖˋ ㄅㄣˇ ㄏㄢˋ ㄇㄟˇ ㄍㄨㄛˊ"},
+    {"id":"gsd-09","sourceSent":"test-s9","text":"這些電話經交換機處理","reading":"ㄓㄜˋ ㄒㄧㄝ ㄉㄧㄢˋ ㄏㄨㄚˋ ㄐㄧㄥ ㄐㄧㄠ ㄏㄨㄢˋ ㄐㄧ ㄔㄨˇ ㄌㄧˇ"},
+    {"id":"gsd-10","sourceSent":"test-s9","text":"使用的媒介包括海底電纜","reading":"ㄕˇ ㄩㄥˋ ㄉㄜ˙ ㄇㄟˊ ㄐㄧㄝˋ ㄅㄠ ㄎㄨㄛˋ ㄏㄞˇ ㄉㄧˇ ㄉㄧㄢˋ ㄌㄢˇ"},
+    {"id":"gsd-11","sourceSent":"test-s13","text":"團購網站的產品原價和購買數量","reading":"ㄊㄨㄢˊ ㄍㄡˋ ㄨㄤˇ ㄓㄢˋ ㄉㄜ˙ ㄔㄢˇ ㄆㄧㄣˇ ㄩㄢˊ ㄐㄧㄚˋ ㄏㄢˋ ㄍㄡˋ ㄇㄞˇ ㄕㄨˋ ㄌㄧㄤˋ"},
+    {"id":"gsd-12","sourceSent":"test-s14","text":"團購網站的主要產品分為家居類","reading":"ㄊㄨㄢˊ ㄍㄡˋ ㄨㄤˇ ㄓㄢˋ ㄉㄜ˙ ㄓㄨˇ ㄧㄠˋ ㄔㄢˇ ㄆㄧㄣˇ ㄈㄣ ㄨㄟˊ ㄐㄧㄚ ㄐㄩ ㄌㄟˋ"},
+    {"id":"gsd-13","sourceSent":"test-s15","text":"因此透過切割菌肉便能分辨二者","reading":"ㄧㄣ ㄘˇ ㄊㄡˋ ㄍㄨㄛˋ ㄑㄧㄝ ㄍㄜ ㄐㄩㄣˋ ㄖㄡˋ ㄅㄧㄢˋ ㄋㄥˊ ㄈㄣ ㄅㄧㄢˋ ㄦˋ ㄓㄜˇ"},
+    {"id":"gsd-14","sourceSent":"test-s17","text":"自然界的土是由岩石經風化","reading":"ㄗˋ ㄖㄢˊ ㄐㄧㄝˋ ㄉㄜ˙ ㄊㄨˇ ㄕˋ ㄧㄡˊ ㄧㄢˊ ㄕˊ ㄐㄧㄥ ㄈㄥ ㄏㄨㄚˋ"},
+    {"id":"gsd-15","sourceSent":"test-s19","text":"深受耕作施肥等人為因素的影響而極不穩定","reading":"ㄕㄣ ㄕㄡˋ ㄍㄥ ㄗㄨㄛˋ ㄕ ㄈㄟˊ ㄉㄥˇ ㄖㄣˊ ㄨㄟˊ ㄧㄣ ㄙㄨˋ ㄉㄜ˙ ㄧㄥˇ ㄒㄧㄤˇ ㄦˊ ㄐㄧˊ ㄅㄨˋ ㄨㄣˇ ㄉㄧㄥˋ"},
+    {"id":"gsd-16","sourceSent":"test-s20","text":"土壤是重要的自然資源和生產資料","reading":"ㄊㄨˇ ㄖㄤˇ ㄕˋ ㄓㄨㄥˋ ㄧㄠˋ ㄉㄜ˙ ㄗˋ ㄖㄢˊ ㄗ ㄩㄢˊ ㄏㄢˋ ㄕㄥ ㄔㄢˇ ㄗ ㄌㄧㄠˋ"},
+    {"id":"gsd-17","sourceSent":"test-s20","text":"土壤的植物生產能力是衡量土壤資源質量的標誌","reading":"ㄊㄨˇ ㄖㄤˇ ㄉㄜ˙ ㄓˊ ㄨˋ ㄕㄥ ㄔㄢˇ ㄋㄥˊ ㄌㄧˋ ㄕˋ ㄏㄥˊ ㄌㄧㄤˊ ㄊㄨˇ ㄖㄤˇ ㄗ ㄩㄢˊ ㄓˊ ㄌㄧㄤˋ ㄉㄜ˙ ㄅㄧㄠ ㄓˋ"},
+    {"id":"gsd-18","sourceSent":"test-s23","text":"這個計算機控制了火箭","reading":"ㄓㄜˋ ㄍㄜ˙ ㄐㄧˋ ㄙㄨㄢˋ ㄐㄧ ㄎㄨㄥˋ ㄓˋ ㄌㄜ˙ ㄏㄨㄛˇ ㄐㄧㄢˋ"},
+    {"id":"gsd-19","sourceSent":"test-s31","text":"教堂完成了主體大修工程","reading":"ㄐㄧㄠˋ ㄊㄤˊ ㄨㄢˊ ㄔㄥˊ ㄌㄜ˙ ㄓㄨˇ ㄊㄧˇ ㄉㄚˋ ㄒㄧㄡ ㄍㄨㄥ ㄔㄥˊ"},
+    {"id":"gsd-20","sourceSent":"test-s31","text":"工程包括內部結構的調整","reading":"ㄍㄨㄥ ㄔㄥˊ ㄅㄠ ㄎㄨㄛˋ ㄋㄟˋ ㄅㄨˋ ㄐㄧㄝˊ ㄍㄡˋ ㄉㄜ˙ ㄊㄧㄠˊ ㄓㄥˇ"}
+  ]
+}
