@@ -1,0 +1,31 @@
+{
+  "notes": "Authored and frozen before this sprint's diagnostic runs or search changes. Synthetic development controls, not held-out real-world accuracy or user-confirmed gold. Japanese targets use kana unless an existing explicit dictionary example is intended. Spaces and punctuation are exact. Ambiguous names are reported separately and are not success gates.",
+  "cases": [
+    {"id":"english-report","group":"english","input":"please send the report.","text":"please send the report."},
+    {"id":"english-chapter","group":"english","input":"read the next chapter","text":"read the next chapter"},
+    {"id":"english-house","group":"english","input":"a small house","text":"a small house"},
+    {"id":"english-test","group":"english","input":"we can test this","text":"we can test this"},
+    {"id":"english-train","group":"english","input":"the train is late.","text":"the train is late."},
+    {"id":"english-spaces","group":"english","input":"keep  two spaces","text":"keep  two spaces"},
+    {"id":"japanese-tomorrow","group":"japanese","input":"ashita","text":"あした"},
+    {"id":"japanese-school","group":"japanese","input":"gakkou","text":"がっこう","alternatives":["ガッコウ"]},
+    {"id":"japanese-repeat","group":"japanese","input":"sakura sakura","text":"さくら さくら","alternatives":["サクラ サクラ"]},
+    {"id":"japanese-rain","group":"japanese","input":"kyouha ame desu.","text":"きょうは あめ です."},
+    {"id":"japanese-apostrophe","group":"japanese","input":"shin'you","text":"しんよう"},
+    {"id":"japanese-pending","group":"japanese","input":"kan","text":"かん","alternatives":["カン"]},
+    {"id":"chinese-hello","group":"chinese","chunks":[{"keys":"us3lc3"}],"text":"你好"},
+    {"id":"chinese-use","group":"chinese","chunks":[{"keys":"m/4"}],"text":"用"},
+    {"id":"chinese-tone","group":"chinese","chunks":[{"keys":"/j5 "}],"text":"中"},
+    {"id":"chinese-replacement","group":"chinese","chunks":[{"keys":"sujo/5 "}],"text":"中"},
+    {"id":"mixed-meeting","group":"mixed","input":"ashita meeting ha 14:30 kara.","text":"あした meeting は 14:30 から."},
+    {"id":"mixed-issue","group":"mixed","input":"kono issue ha fixed desu.","text":"この issue は fixed です."},
+    {"id":"mixed-slash","group":"mixed","input":"sakura / hello","text":"さくら / hello"},
+    {"id":"mixed-slashes","group":"mixed","input":"gakkou / browser / sakura","text":"がっこう / browser / さくら"},
+    {"id":"mixed-request","group":"mixed","input":"please type sakura","text":"please type さくら"},
+    {"id":"mixed-three","group":"mixed","chunks":[{"roman":"sakura "},{"keys":"us3lc3"},{"roman":" hello"}],"text":"さくら 你好 hello"},
+    {"id":"mixed-chinese-first","group":"mixed","chunks":[{"keys":"us3lc3"},{"roman":" gakkou please"}],"text":"你好 がっこう please"},
+    {"id":"mixed-double-space","group":"mixed","input":"ashita  browser test","text":"あした  browser test"},
+    {"id":"ambiguous-name","group":"ambiguous","input":"namaeha tanaka desu.","text":"なまえは たなか です.","alternatives":["なまえは tanaka です."]},
+    {"id":"ambiguous-mite","group":"ambiguous","input":"mite","text":"mite","alternatives":["みて"]}
+  ]
+}
