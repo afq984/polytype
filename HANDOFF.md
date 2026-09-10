@@ -13,8 +13,9 @@ Pages preparation: npm run build:pages builds an allowlisted dist/ artifact;
 npm run preview:pages serves it at http://127.0.0.1:4174/polytype/. Rust build
 paths are remapped, and npm run audit:public checks dist and recursively decoded
 standalone payloads for host identifiers/private paths/credential markers.
-The GitHub workflow builds/tests automatically but deploys only by explicit manual
-opt-in on the default branch. Public main is a fresh root snapshot under MIT;
+The GitHub workflow builds/tests automatically and deploys successful main push
+builds. Pull requests never deploy; manual main runs need the deploy checkbox.
+Pages must use GitHub Actions as its publishing source. Public main is a fresh root snapshot under MIT;
 the source remote is git@github.com:afq984/polytype.git. IMPORTANT: the local
 private-prepublication bookmark retains older history containing host paths.
 Never push it, merge it into main, or use an all-bookmarks push. Push only main.

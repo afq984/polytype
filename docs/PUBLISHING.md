@@ -1,7 +1,7 @@
 # Pages build and privacy boundary
 
 The source remote is git@github.com:afq984/polytype.git. Public main starts at a
-fresh audited root snapshot. Source publication is separate from Pages deployment.
+fresh audited root snapshot. Successful main push builds deploy the audited demo.
 
 ## Build and test
 
@@ -84,14 +84,27 @@ and 11 ancestor snapshots: both affected files appeared in nine snapshots each.
 The generated WASM also passed the current-host network/machine-identifier check.
 These counts describe that audit, not a guarantee about future revisions.
 
-## Enable deployment later
+## Enable automatic deployment
 
-After the publication/history decision, configure the GitHub repository's Pages
-source to **GitHub Actions**. The workflow builds/tests PRs and pushes to main or
-master, but those events never deploy. Manually run **Demo build and optional
-Pages deployment** from the default branch and explicitly check **deploy** to
-publish. Leave it unchecked for a build-only run. Configure the github-pages
-environment's protection rules as desired. No custom domain is assumed.
+In repository **Settings → Pages → Build and deployment**, select **GitHub Actions**
+as the source. Do not select a branch/folder publishing source or add another
+starter workflow; this repository already has a custom workflow.
+
+The workflow deploys after all build, test and privacy checks pass on pushes to
+main. Pull requests only build/test. Manually run **Demo build and Pages deployment**
+on main and check **deploy** to publish; leave it unchecked for a build-only run.
+Other branches and events cannot enter the deploy job.
+
+Under **Settings → Environments → github-pages**, allow main as a deployment
+branch. Leave required reviewers/wait timers off if deployment should be fully
+automatic. Keep Enforce HTTPS enabled in Pages; no custom domain is assumed.
+Actions must be enabled with the workflow's actions allowed by repository or
+organization policy. The deploy job requests pages:write and id-token:write from
+the automatic GITHUB_TOKEN; no personal access token or new secret is required.
+The repository-wide default token permission can remain read-only.
+
+The expected site is https://afq984.github.io/polytype/. If the first deploy fails
+because Pages was not enabled, enable it and rerun the failed job in Actions.
 
 Deployment receives only the audited dist artifact, with Pages/OIDC write
 permissions confined to the deploy job. Build jobs have read-only contents access
