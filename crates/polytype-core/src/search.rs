@@ -48,6 +48,55 @@ impl Candidate {
 struct BeamEntry {
     candidate: Candidate,
     family: usize,
+    protected: bool,
+}
+
+#[derive(Clone, Copy)]
+struct Policy {
+    diversity: bool,
+    floor: bool,
+    discards: bool,
+    identifiers: bool,
+    first_tone: bool,
+}
+
+impl Default for Policy {
+    fn default() -> Self {
+        Self {
+            diversity: true,
+            floor: true,
+            discards: false,
+            identifiers: false,
+            first_tone: false,
+        }
+    }
+}
+
+fn continuation_mask(lang: Option<&str>) -> u8 {
+    match lang {
+        Some("EN") => 1,
+        Some("JP") => 2,
+        Some("TW") => 4,
+        _ => 7,
+    }
+}
+
+fn protect_continuations(beam: &mut [BeamEntry], enabled: u8) {
+    let mut missing = enabled;
+    for entry in beam {
+        let mask = continuation_mask(entry.lang.as_deref());
+        entry.protected = mask & missing != 0;
+        missing &= !mask;
+    }
+}
+
+fn discard_cost(count: usize, stronger: bool) -> f64 {
+    (count * 2
+        + if stronger {
+            count.saturating_sub(3) * 4
+        } else {
+            0
+        }) as f64
 }
 
 impl Deref for BeamEntry {
@@ -104,6 +153,7 @@ struct Lattice {
     states: Vec<Vec<BeamEntry>>,
     width: usize,
     families: Option<HashMap<FamilyKey, usize>>,
+    floor: u8,
 }
 
 // A soft family cap: keep spare script variants when capacity permits, but
@@ -113,13 +163,16 @@ fn trim_families(beam: &mut Vec<BeamEntry>, limit: usize, cap: usize) {
         let remove = (0..beam.len())
             .rev()
             .find(|&i| {
-                beam.iter()
-                    .filter(|c| c.family == beam[i].family)
-                    .take(cap + 1)
-                    .count()
-                    > cap
+                !beam[i].protected
+                    && beam
+                        .iter()
+                        .filter(|c| c.family == beam[i].family)
+                        .take(cap + 1)
+                        .count()
+                        > cap
             })
-            .unwrap_or(beam.len() - 1);
+            .or_else(|| beam.iter().rposition(|entry| !entry.protected))
+            .expect("beam limit must accommodate protected continuations");
         beam.remove(remove);
     }
 }
@@ -148,6 +201,7 @@ fn push(
     let beam = &mut beams.states[at];
     beam.push(BeamEntry {
         family,
+        protected: false,
         candidate: Candidate {
             text,
             score: state.score + score,
@@ -159,8 +213,13 @@ fn push(
     beam.sort_by(|a, b| b.score.total_cmp(&a.score));
     let mut seen = HashSet::new();
     beam.retain(|candidate| seen.insert((candidate.text.clone(), candidate.lang.clone())));
+    if beams.floor != 0 {
+        protect_continuations(beam, beams.floor);
+    }
     if beams.families.is_some() {
         trim_families(beam, beams.width, 2);
+    } else if beams.floor != 0 {
+        trim_families(beam, beams.width, beams.width);
     } else {
         beam.truncate(beams.width);
     }
@@ -187,7 +246,7 @@ pub(crate) fn decode(
     dictionary: &Dictionary,
     options: &DecodeOptions,
 ) -> Vec<Candidate> {
-    decode_configured(input, dictionary, options, 12, 5, true)
+    decode_configured(input, dictionary, options, 12, 5, Policy::default())
 }
 
 fn decode_configured(
@@ -196,9 +255,9 @@ fn decode_configured(
     options: &DecodeOptions,
     width: usize,
     limit: usize,
-    diversity: bool,
+    policy: Policy,
 ) -> Vec<Candidate> {
-    let mut result = decode_lattice(input, dictionary, options, width, limit, diversity);
+    let mut result = decode_lattice(input, dictionary, options, width, limit, policy);
     // A bounded mixed-language beam can discard every English path before a
     // later operator arrives. Reserve a slot for an independently decoded
     // literal-English path, even when phonetic scores crowd it out.
@@ -209,7 +268,7 @@ fn decode_configured(
             ..options.clone()
         };
         if let Some(literal) =
-            decode_lattice(input, dictionary, &literal_options, width, limit, diversity)
+            decode_lattice(input, dictionary, &literal_options, width, limit, policy)
                 .into_iter()
                 .next()
             && !result
@@ -232,7 +291,12 @@ pub(crate) fn diagnose(
     width: usize,
     diversity: bool,
 ) -> serde_json::Value {
-    let candidates = decode_configured(input, dictionary, options, width, 5, diversity);
+    let policy = Policy {
+        diversity,
+        floor: diversity,
+        ..Policy::default()
+    };
+    let candidates = decode_configured(input, dictionary, options, width, 5, policy);
     let displayed_families = candidates
         .iter()
         .map(diagnostic_family)
@@ -241,10 +305,34 @@ pub(crate) fn diagnose(
     serde_json::json!({
         "candidates": candidates,
         "displayedFamilies": displayed_families,
-        "lattice": decode_lattice(input, dictionary, options, width, width, diversity).iter().map(|c| {
+        "lattice": decode_lattice(input, dictionary, options, width, width, policy).iter().map(|c| {
             serde_json::json!({"text":c.commit_text(),"score":c.score,"family":diagnostic_family(c)})
         }).collect::<Vec<_>>(),
     })
+}
+
+#[cfg(feature = "diagnostics")]
+pub(crate) fn experiment(
+    input: &str,
+    dictionary: &Dictionary,
+    options: &DecodeOptions,
+    name: &str,
+) -> Result<Vec<Candidate>, String> {
+    let mut policy = Policy {
+        floor: false,
+        ..Policy::default()
+    };
+    for flag in name.split('+') {
+        match flag {
+            "baseline" => {}
+            "floor" => policy.floor = true,
+            "discards" => policy.discards = true,
+            "identifiers" => policy.identifiers = true,
+            "first-tone" => policy.first_tone = true,
+            _ => return Err("Unknown search experiment".into()),
+        }
+    }
+    Ok(decode_configured(input, dictionary, options, 12, 5, policy))
 }
 
 #[cfg(feature = "diagnostics")]
@@ -265,7 +353,7 @@ fn decode_lattice(
     options: &DecodeOptions,
     width: usize,
     limit: usize,
-    diversity: bool,
+    policy: Policy,
 ) -> Vec<Candidate> {
     if !options.english && !options.japanese && !options.zhuyin {
         return Vec::new();
@@ -274,11 +362,30 @@ fn decode_lattice(
     let mut beams = Lattice {
         states: vec![Vec::new(); raw.len() + 1],
         width,
-        families: (diversity && dictionary.expanded && options.japanese).then(HashMap::new),
+        families: (policy.diversity && dictionary.expanded && options.japanese).then(HashMap::new),
+        floor: if policy.floor && dictionary.expanded {
+            u8::from(options.english)
+                | (u8::from(options.japanese) << 1)
+                | (u8::from(options.zhuyin) << 2)
+        } else {
+            0
+        },
     };
     beams.states[0].push(BeamEntry::default());
     for i in 0..raw.len() {
-        for state in beams.states[i].clone() {
+        for mut state in beams.states[i].clone() {
+            // Diagnostic-only: consume first-tone Space once, without inserting
+            // a literal output space or modifying the completed Chinese part.
+            if policy.first_tone
+                && dictionary.expanded
+                && state.lang.as_deref() == Some("TW")
+                && state
+                    .parts
+                    .last()
+                    .is_some_and(|p| p.complete == Some(true) && p.raw.ends_with(' '))
+            {
+                state.candidate.lang = None;
+            }
             if punctuation(raw[i], dictionary.expanded) {
                 let text = segment(&raw, i, i + 1);
                 push(
@@ -317,6 +424,7 @@ fn decode_lattice(
                 let mut at = i;
                 let mut keys = Vec::new();
                 let mut length = 0;
+                let mut discard_penalty = 0.0;
                 let mut readings = Vec::new();
                 let mut changes = Vec::new();
                 // The JS reference shares the changes array with prior phrase
@@ -330,6 +438,10 @@ fn decode_lattice(
                     let Some(part) = read_units(&raw, at).filter(|p| p.complete) else {
                         break;
                     };
+                    discard_penalty += discard_cost(
+                        (part.end - at).saturating_sub(part.key.len()),
+                        policy.discards,
+                    );
                     at = part.end;
                     length += part.key.len();
                     readings.push(zhuyin(&part.key));
@@ -337,13 +449,20 @@ fn decode_lattice(
                     keys.push(part.key);
                     let id = keys.join("|");
                     if let Some(texts) = dictionary.phrases.get(&id) {
-                        matches.push((at, length, keys.len(), readings.join(" "), texts));
+                        matches.push((
+                            at,
+                            length,
+                            keys.len(),
+                            readings.join(" "),
+                            texts,
+                            discard_penalty,
+                        ));
                     }
                     if !dictionary.prefixes.contains(&id) {
                         break;
                     }
                 }
-                for (at, length, syllables, reading, texts) in matches {
+                for (at, length, syllables, reading, texts, discard_penalty) in matches {
                     // Scores decrease with n. Values beyond this beam width
                     // from the same state cannot survive at this offset.
                     for (n, text) in texts.iter().take(width).enumerate() {
@@ -363,7 +482,7 @@ fn decode_lattice(
                             (length * 2 + syllables) as f64
                                 - n as f64 * 0.8
                                 - if dictionary.expanded {
-                                    (at - i).saturating_sub(length) as f64 * 2.0
+                                    discard_penalty
                                 } else {
                                     0.0
                                 },
@@ -411,8 +530,10 @@ fn decode_lattice(
                             },
                             score
                                 - if dictionary.expanded {
-                                    (syllable.end - i).saturating_sub(syllable.key.len()) as f64
-                                        * 2.0
+                                    discard_cost(
+                                        (syllable.end - i).saturating_sub(syllable.key.len()),
+                                        policy.discards,
+                                    )
                                 } else {
                                     0.0
                                 },
@@ -644,6 +765,14 @@ fn decode_lattice(
                         // Standalone and Chinese-context tone keys keep their
                         // normal competition.
                         spelling_len * 2.5
+                    } else if policy.identifiers
+                        && dictionary.expanded
+                        && spelling.chars().any(|c| c.is_ascii_alphabetic())
+                        && spelling.chars().any(|c| c.is_ascii_digit())
+                        && spelling.chars().all(|c| c.is_ascii_alphanumeric())
+                        && read_units(&raw, i).is_some_and(|s| !s.changes.is_empty())
+                    {
+                        spelling_len * 0.9 + transition("EN")
                     } else if dictionary.expanded
                         && spelling.chars().any(|c| c.is_ascii_alphabetic())
                         && spelling
@@ -663,6 +792,9 @@ fn decode_lattice(
         }
     }
     let mut result = beams.states.pop().unwrap();
+    for entry in &mut result {
+        entry.protected = false;
+    }
     result.sort_by(|a, b| b.score.total_cmp(&a.score));
     let mut seen = HashSet::new();
     result.retain(|c| seen.insert(c.text.clone()));
@@ -677,6 +809,46 @@ fn decode_lattice(
 #[cfg(test)]
 mod diversity_tests {
     use super::*;
+
+    #[test]
+    fn retention_preserves_continuations_within_the_same_budget() {
+        let entry = |lang: Option<&str>, family| BeamEntry {
+            candidate: Candidate {
+                lang: lang.map(str::to_owned),
+                ..Candidate::default()
+            },
+            family,
+            ..BeamEntry::default()
+        };
+        let mut beam = vec![
+            entry(Some("TW"), 1),
+            entry(Some("TW"), 2),
+            entry(Some("TW"), 3),
+            entry(Some("EN"), 4),
+            entry(Some("JP"), 5),
+        ];
+        protect_continuations(&mut beam, 7);
+        trim_families(&mut beam, 3, 2);
+        assert_eq!(beam.len(), 3);
+        assert_eq!(
+            beam.iter().map(|c| c.lang.as_deref()).collect::<Vec<_>>(),
+            [Some("TW"), Some("EN"), Some("JP")]
+        );
+        let mut beam = vec![entry(None, 1), entry(Some("TW"), 2), entry(Some("EN"), 3)];
+        protect_continuations(&mut beam, 7);
+        assert_eq!(beam.iter().filter(|c| c.protected).count(), 1);
+        protect_continuations(&mut beam, 0);
+        assert!(beam.iter().all(|c| !c.protected));
+    }
+
+    #[test]
+    fn discard_experiment_is_per_syllable_and_preserves_small_corrections() {
+        for n in 0..=3 {
+            assert_eq!(discard_cost(n, true), discard_cost(n, false));
+        }
+        assert_eq!(discard_cost(4, true), 12.0);
+        assert_eq!(discard_cost(2, true) + discard_cost(2, true), 8.0);
+    }
 
     #[test]
     fn spare_variants_survive_but_do_not_evict_distinct_families() {

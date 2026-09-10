@@ -1,5 +1,10 @@
 # Text evaluation
 
+The [English-island experiment](ISLANDS.md) compares continuation retention,
+discard penalties, identifier evidence and a diagnostic-only first-tone boundary
+variant against a frozen family-v1 baseline. Only retention ships; see the report
+for the remaining boundary failure and rejected variants.
+
 The [candidate-diversity experiment](DIVERSITY.md) adds frozen synthetic controls,
 native-only wider-beam diagnostics, explicit baseline comparisons, and same-machine
 latency measurements. Its finite search results are not a dictionary-reachability

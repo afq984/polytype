@@ -6,6 +6,7 @@ import {mkdtemp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {feedbackCases,mixedCases} from '../eval/cases.mjs';
+import {captureA,captureB} from '../eval/island-cases.mjs';
 
 const profile = await mkdtemp(join(tmpdir(), 'polytype-browser-'));
 const chrome = spawn(process.env.CHROME_BIN || 'google-chrome', [
@@ -218,6 +219,16 @@ try {
     await evaluate("document.getElementById('raw').value='kan.'; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
     await evaluate("document.getElementById('keyboard-layout').value='colemak'; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
     assert.equal(await evaluate("document.getElementById('raw').value"),'kan.');
+    await evaluate(`document.getElementById('raw').value=${JSON.stringify(captureA)}; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'量到的 p95 latency 曾加了 11.6% 還在範圍之內');
+    const islandTarget='量到的 p95 latency 增加了 11.6% 還在範圍之內';
+    await evaluate(`[...document.querySelectorAll('#candidates button')].find(b=>b.textContent.slice(1)===${JSON.stringify(islandTarget)}).click(); document.getElementById('commit').click()`);
+    assert.ok(await evaluate(`document.getElementById('committed').textContent.endsWith(${JSON.stringify(islandTarget)})`));
+    await evaluate(`document.getElementById('raw').value=${JSON.stringify(captureB.replace('ep cuaigk','ep  cuaigk'))}; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
+    assert.ok((await evaluate("document.getElementById('preedit').textContent")).includes('跟 claude 討論'));
+    const islandReport=await evaluate("(async()=>{await document.getElementById('copy-debug').onclick();return JSON.parse(document.getElementById('debug-report').value)})()");
+    assert.equal(islandReport.ranking,'scowl-context-v4+family-v1+island-v1');
+    await evaluate("document.getElementById('raw').value='kan.'; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
     // Capturing does not save until the expected output is reviewed. Later
     // typing must not silently change the captured input or options.
     await evaluate("document.getElementById('capture-case').click()");

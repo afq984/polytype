@@ -97,6 +97,17 @@ impl Engine {
         ))
     }
 
+    /// Native-only ablations; never exposed through the JSON/web request protocol.
+    #[cfg(feature = "diagnostics")]
+    pub fn experiment(
+        &self,
+        raw: &str,
+        options: &DecodeOptions,
+        name: &str,
+    ) -> Result<Vec<Candidate>, String> {
+        search::experiment(raw, &self.dictionary, options, name)
+    }
+
     /// Replace entries atomically. Validation never mutates the active dictionary.
     pub fn set_custom_entries(&mut self, entries: Vec<Entry>) -> Result<Vec<Entry>, String> {
         let entries = validate_entries(entries)?;
@@ -185,6 +196,34 @@ impl Engine {
 #[cfg(all(test, feature = "diagnostics"))]
 mod diagnostic_tests {
     use super::*;
+    #[test]
+    fn island_experiments_are_native_only_and_leave_prototype_unchanged() {
+        let options = DecodeOptions::default();
+        let mut engine = Engine::prototype();
+        for raw in ["sujo/5 ", "ep cuaigk", "xu;62l42k7 r95 uafkjco "] {
+            let expected = json!(engine.decode_with_options(raw, &options));
+            for policy in [
+                "baseline",
+                "floor",
+                "discards",
+                "identifiers",
+                "first-tone",
+                "floor+discards+identifiers+first-tone",
+            ] {
+                assert_eq!(
+                    json!(engine.experiment(raw, &options, policy).unwrap()),
+                    expected
+                );
+            }
+        }
+        assert!(engine.experiment("hello", &options, "unknown").is_err());
+        assert!(
+            engine
+                .request(r#"{"version":1,"op":"experiment","input":"ep cuaigk"}"#)
+                .is_err()
+        );
+        assert!(engine.request(r#"{"version":1,"op":"decode","input":"ep cuaigk","options":{"firstTone":true}}"#).is_err());
+    }
     #[test]
     fn diagnostic_widths_are_bounded_and_default_results_match() {
         let options = DecodeOptions {

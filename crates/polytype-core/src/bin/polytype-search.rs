@@ -15,9 +15,19 @@ struct Request {
 fn main() {
     let engine = Engine::default();
     let diversity = !std::env::args().any(|arg| arg == "--baseline");
+    let experiment =
+        std::env::args().find_map(|arg| arg.strip_prefix("--experiment=").map(str::to_owned));
     for line in io::stdin().lock().lines() {
         let result = line.map_err(|e| e.to_string()).and_then(|line| {
             let request: Request = serde_json::from_str(&line).map_err(|e| e.to_string())?;
+            if let Some(name) = &experiment {
+                if request.width != 12 {
+                    return Err("Island experiments require beam width 12".into());
+                }
+                return engine
+                    .experiment(&request.raw, &request.options, name)
+                    .map(|c| serde_json::json!({"candidates":c}));
+            }
             engine.diagnose(&request.raw, &request.options, request.width, diversity)
         });
         match result {

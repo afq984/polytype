@@ -5,6 +5,11 @@ One Rust decoder for Traditional Chinese (Zhuyin), Japanese (romaji) and English
 handles physical keyboard events, UI and browser storage. Native OS adapters are
 not implemented yet.
 
+The [English-island sprint](eval/ISLANDS.md) preserves alternative language paths
+within the existing search budget. It recovers `p95 latency` inside Chinese
+without changing scores or dictionaries. First-tone Space still completes a
+Chinese syllable; press Space again for a separator before another language.
+
 ## Build and run
 
 Requires Rust (validated with 1.95.0), Node.js 22+, and the matching wasm-bindgen CLI.

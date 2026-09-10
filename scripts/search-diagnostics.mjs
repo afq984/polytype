@@ -20,7 +20,7 @@ const answers=result.stdout.trim().split('\n').map(line=>{
 if(answers.length!==requests.length)throw new Error('Diagnostic response count mismatch');
 const commit=c=>c.parts.map(p=>p.commitText??p.text).join('');
 const report={controlsSha256:createHash('sha256').update(await readFile(new URL('../eval/diversity-controls.json',import.meta.url))).digest('hex'),
-  policy:baseline?'baseline':'family-diverse',
+  policy:baseline?'baseline':'family-diverse+continuation-floor',
   notes:'Frozen synthetic controls plus existing diagnostic cases. Width 192 is finite, not an oracle. Alternative-aware ranks are reported separately from exact target ranks. Full lattice excludes the independent literal fallback; displayed candidates include it.',
   rows:rows.map((row,index)=>{
     const accepted=[row.text,...(row.alternatives??[])];

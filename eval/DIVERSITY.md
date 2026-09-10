@@ -1,5 +1,11 @@
 # Candidate-diversity sprint
 
+Historical experiment: the checked-in reports predate continuation retention.
+Current normal diagnostics also include the [English-island change](ISLANDS.md).
+The native `--experiment=baseline` mode reproduces family-v1 at width 12;
+`--baseline` remains the older pre-family baseline. Do not overwrite these
+historical reports and attribute later improvements to family retention alone.
+
 ## Frozen experiment plan
 
 diversity-controls.json contains 24 synthetic controls plus two explicitly

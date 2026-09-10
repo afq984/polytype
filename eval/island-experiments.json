@@ -1,0 +1,2191 @@
+{
+  "notes": "Independent and combined native beam-12 ablations. First-tone is diagnostic-only. Rank zero means absent. Prefix changes include incomplete phonetics, not automatic errors.",
+  "cases": 376,
+  "results": [
+    {
+      "policy": "baseline",
+      "regressions": [],
+      "changes": [],
+      "prefixChanges": [],
+      "islands": [
+        {
+          "id": "capture-a",
+          "boundary": false,
+          "before": 0,
+          "after": 0,
+          "top1": "量到的 齊揮曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟ㄕㄧㄜˉ討論"
+        },
+        {
+          "id": "capture-b-separated",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟 claude 討論"
+        },
+        {
+          "id": "island-qwerty-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-qwerty-1",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 sync 很好"
+        },
+        {
+          "id": "island-qwerty-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-qwerty-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-qwerty-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-qwerty-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-qwerty-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-qwerty-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-qwerty-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-qwerty",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "ep claude 討論"
+        },
+        {
+          "id": "island-colemak-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-colemak-1",
+          "boundary": false,
+          "before": 2,
+          "after": 2,
+          "top1": "資料 揮很好"
+        },
+        {
+          "id": "island-colemak-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-colemak-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-colemak-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-colemak-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-colemak-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-colemak-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-colemak-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-colemak",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "f; claude 討論"
+        }
+      ]
+    },
+    {
+      "policy": "floor",
+      "regressions": [],
+      "changes": [
+        {
+          "id": "capture-a",
+          "before": "量到的 齊揮曾加了 11.6% 還在範圍之內",
+          "after": "量到的 p95 latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "before": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟ㄕㄧㄜˉ討論",
+          "after": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr f; claude 討論"
+        }
+      ],
+      "prefixChanges": [],
+      "islands": [
+        {
+          "id": "capture-a",
+          "boundary": false,
+          "before": 0,
+          "after": 1,
+          "top1": "量到的 p95 latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr f; claude 討論"
+        },
+        {
+          "id": "capture-b-separated",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟 claude 討論"
+        },
+        {
+          "id": "island-qwerty-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-qwerty-1",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 sync 很好"
+        },
+        {
+          "id": "island-qwerty-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-qwerty-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-qwerty-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-qwerty-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-qwerty-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-qwerty-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-qwerty-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-qwerty",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "ep claude 討論"
+        },
+        {
+          "id": "island-colemak-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-colemak-1",
+          "boundary": false,
+          "before": 2,
+          "after": 2,
+          "top1": "資料 揮很好"
+        },
+        {
+          "id": "island-colemak-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-colemak-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-colemak-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-colemak-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-colemak-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-colemak-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-colemak-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-colemak",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "f; claude 討論"
+        }
+      ]
+    },
+    {
+      "policy": "discards",
+      "regressions": [],
+      "changes": [],
+      "prefixChanges": [],
+      "islands": [
+        {
+          "id": "capture-a",
+          "boundary": false,
+          "before": 0,
+          "after": 0,
+          "top1": "量到的 齊揮曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟ㄕㄧㄜˉ討論"
+        },
+        {
+          "id": "capture-b-separated",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟 claude 討論"
+        },
+        {
+          "id": "island-qwerty-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-qwerty-1",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 sync 很好"
+        },
+        {
+          "id": "island-qwerty-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-qwerty-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-qwerty-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-qwerty-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-qwerty-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-qwerty-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-qwerty-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-qwerty",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "ep claude 討論"
+        },
+        {
+          "id": "island-colemak-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-colemak-1",
+          "boundary": false,
+          "before": 2,
+          "after": 2,
+          "top1": "資料 揮很好"
+        },
+        {
+          "id": "island-colemak-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-colemak-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-colemak-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-colemak-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-colemak-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-colemak-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-colemak-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-colemak",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "f; claude 討論"
+        }
+      ]
+    },
+    {
+      "policy": "identifiers",
+      "regressions": [],
+      "changes": [
+        {
+          "id": "capture-a",
+          "before": "量到的 齊揮曾加了 11.6% 還在範圍之內",
+          "after": "量到的 p95 latency 曾加了 11.6% 還在範圍之內"
+        }
+      ],
+      "prefixChanges": [],
+      "islands": [
+        {
+          "id": "capture-a",
+          "boundary": false,
+          "before": 0,
+          "after": 1,
+          "top1": "量到的 p95 latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟ㄕㄧㄜˉ討論"
+        },
+        {
+          "id": "capture-b-separated",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟 claude 討論"
+        },
+        {
+          "id": "island-qwerty-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-qwerty-1",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 sync 很好"
+        },
+        {
+          "id": "island-qwerty-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-qwerty-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-qwerty-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-qwerty-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-qwerty-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-qwerty-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-qwerty-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-qwerty",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "ep claude 討論"
+        },
+        {
+          "id": "island-colemak-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-colemak-1",
+          "boundary": false,
+          "before": 2,
+          "after": 2,
+          "top1": "資料 揮很好"
+        },
+        {
+          "id": "island-colemak-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-colemak-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-colemak-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-colemak-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-colemak-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-colemak-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-colemak-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-colemak",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "f; claude 討論"
+        }
+      ]
+    },
+    {
+      "policy": "floor+discards",
+      "regressions": [],
+      "changes": [
+        {
+          "id": "capture-a",
+          "before": "量到的 齊揮曾加了 11.6% 還在範圍之內",
+          "after": "量到的 p95 latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "before": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟ㄕㄧㄜˉ討論",
+          "after": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr f; claude 討論"
+        }
+      ],
+      "prefixChanges": [],
+      "islands": [
+        {
+          "id": "capture-a",
+          "boundary": false,
+          "before": 0,
+          "after": 1,
+          "top1": "量到的 p95 latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr f; claude 討論"
+        },
+        {
+          "id": "capture-b-separated",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟 claude 討論"
+        },
+        {
+          "id": "island-qwerty-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-qwerty-1",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 sync 很好"
+        },
+        {
+          "id": "island-qwerty-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-qwerty-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-qwerty-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-qwerty-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-qwerty-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-qwerty-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-qwerty-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-qwerty",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "ep claude 討論"
+        },
+        {
+          "id": "island-colemak-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-colemak-1",
+          "boundary": false,
+          "before": 2,
+          "after": 2,
+          "top1": "資料 揮很好"
+        },
+        {
+          "id": "island-colemak-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-colemak-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-colemak-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-colemak-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-colemak-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-colemak-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-colemak-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-colemak",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "f; claude 討論"
+        }
+      ]
+    },
+    {
+      "policy": "floor+identifiers",
+      "regressions": [],
+      "changes": [
+        {
+          "id": "capture-a",
+          "before": "量到的 齊揮曾加了 11.6% 還在範圍之內",
+          "after": "量到的 p95 latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "before": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟ㄕㄧㄜˉ討論",
+          "after": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr f; claude 討論"
+        }
+      ],
+      "prefixChanges": [],
+      "islands": [
+        {
+          "id": "capture-a",
+          "boundary": false,
+          "before": 0,
+          "after": 1,
+          "top1": "量到的 p95 latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr f; claude 討論"
+        },
+        {
+          "id": "capture-b-separated",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟 claude 討論"
+        },
+        {
+          "id": "island-qwerty-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-qwerty-1",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 sync 很好"
+        },
+        {
+          "id": "island-qwerty-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-qwerty-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-qwerty-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-qwerty-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-qwerty-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-qwerty-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-qwerty-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-qwerty",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "ep claude 討論"
+        },
+        {
+          "id": "island-colemak-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-colemak-1",
+          "boundary": false,
+          "before": 2,
+          "after": 2,
+          "top1": "資料 揮很好"
+        },
+        {
+          "id": "island-colemak-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-colemak-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-colemak-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-colemak-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-colemak-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-colemak-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-colemak-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-colemak",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "f; claude 討論"
+        }
+      ]
+    },
+    {
+      "policy": "floor+discards+identifiers",
+      "regressions": [],
+      "changes": [
+        {
+          "id": "capture-a",
+          "before": "量到的 齊揮曾加了 11.6% 還在範圍之內",
+          "after": "量到的 p95 latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "before": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟ㄕㄧㄜˉ討論",
+          "after": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr f; claude 討論"
+        }
+      ],
+      "prefixChanges": [],
+      "islands": [
+        {
+          "id": "capture-a",
+          "boundary": false,
+          "before": 0,
+          "after": 1,
+          "top1": "量到的 p95 latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr f; claude 討論"
+        },
+        {
+          "id": "capture-b-separated",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟 claude 討論"
+        },
+        {
+          "id": "island-qwerty-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-qwerty-1",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 sync 很好"
+        },
+        {
+          "id": "island-qwerty-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-qwerty-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-qwerty-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-qwerty-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-qwerty-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-qwerty-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-qwerty-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-qwerty",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "ep claude 討論"
+        },
+        {
+          "id": "island-colemak-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-colemak-1",
+          "boundary": false,
+          "before": 2,
+          "after": 2,
+          "top1": "資料 揮很好"
+        },
+        {
+          "id": "island-colemak-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-colemak-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-colemak-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-colemak-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-colemak-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-colemak-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-colemak-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-colemak",
+          "boundary": true,
+          "before": 0,
+          "after": 0,
+          "top1": "f; claude 討論"
+        }
+      ]
+    },
+    {
+      "policy": "first-tone",
+      "regressions": [
+        {
+          "id": "synthetic-3",
+          "kind": "top1",
+          "before": "this is a test",
+          "after": "this 尻a test"
+        },
+        {
+          "id": "synthetic-5",
+          "kind": "top1",
+          "before": "the keyboard is working",
+          "after": "the keyboard 尻working"
+        },
+        {
+          "id": "feedback-code-loop",
+          "kind": "top1",
+          "before": "for (int i = 0; i < 100; i++)",
+          "after": "for (int 凹= 0; 凹< 100; i++)"
+        },
+        {
+          "id": "feedback-bug-raw",
+          "kind": "top1",
+          "before": "This is a bug.",
+          "after": "This 尻a bug."
+        },
+        {
+          "id": "feedback-short-word-period",
+          "kind": "top1",
+          "before": "This is a bit.",
+          "after": "This 尻a bit."
+        },
+        {
+          "id": "feedback-zhuyin-priority",
+          "kind": "top1",
+          "before": "I think 注音's priority is too high  (this is also a good test sentence)",
+          "after": "I think 注音's priority 尻too high  (this 尻also a good test sentence)"
+        },
+        {
+          "id": "mixed-04-colemak-all",
+          "kind": "top1",
+          "before": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "after": "あたらしい MacBook 汪Wi-Fi が ふあんていで, VPN きると なおる."
+        },
+        {
+          "id": "mixed-06-qwerty-all",
+          "kind": "top5"
+        },
+        {
+          "id": "diversity-english-train-colemak-all",
+          "kind": "top1",
+          "before": "the train is late.",
+          "after": "the train 尻late."
+        },
+        {
+          "id": "diversity-mixed-slash-colemak-all",
+          "kind": "top1",
+          "before": "さくら / hello",
+          "after": "さくら ㄥˉhello"
+        },
+        {
+          "id": "diversity-mixed-slash-qwerty-all",
+          "kind": "top1",
+          "before": "さくら / hello",
+          "after": "さくら ㄥˉhello"
+        },
+        {
+          "id": "diversity-mixed-slashes-colemak-all",
+          "kind": "top1",
+          "before": "がっこう / browser / さくら",
+          "after": "がっこう ㄥˉbrowser ㄥˉさくら"
+        },
+        {
+          "id": "diversity-mixed-slashes-colemak-all",
+          "kind": "top5"
+        },
+        {
+          "id": "diversity-mixed-slashes-qwerty-all",
+          "kind": "top1",
+          "before": "がっこう / browser / さくら",
+          "after": "がっこう ㄥˉbrowser ㄥˉさくら"
+        },
+        {
+          "id": "diversity-mixed-slashes-qwerty-all",
+          "kind": "top5"
+        }
+      ],
+      "changes": [
+        {
+          "id": "synthetic-3",
+          "before": "this is a test",
+          "after": "this 尻a test"
+        },
+        {
+          "id": "synthetic-5",
+          "before": "the keyboard is working",
+          "after": "the keyboard 尻working"
+        },
+        {
+          "id": "feedback-code-loop",
+          "before": "for (int i = 0; i < 100; i++)",
+          "after": "for (int 凹= 0; 凹< 100; i++)"
+        },
+        {
+          "id": "feedback-bug-raw",
+          "before": "This is a bug.",
+          "after": "This 尻a bug."
+        },
+        {
+          "id": "feedback-short-word-period",
+          "before": "This is a bit.",
+          "after": "This 尻a bit."
+        },
+        {
+          "id": "feedback-zhuyin-priority",
+          "before": "I think 注音's priority is too high  (this is also a good test sentence)",
+          "after": "I think 注音's priority 尻too high  (this 尻also a good test sentence)"
+        },
+        {
+          "id": "mixed-03-colemak-all",
+          "before": "この PR の ればせ してから npm test とおる か mite.",
+          "after": "この PR の ればせ してから 車test とおる か mite."
+        },
+        {
+          "id": "mixed-04-colemak-all",
+          "before": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "after": "あたらしい MacBook 汪Wi-Fi が ふあんていで, VPN きると なおる."
+        },
+        {
+          "id": "mixed-06-colemak-all",
+          "before": "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+          "after": "よやくは TableCheck で, なまえは Tanaka ㄥˉたなか で いれておいた."
+        },
+        {
+          "id": "mixed-06-qwerty-all",
+          "before": "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+          "after": "よやくは TableCheck で, なまえは Tanaka ㄥˉたなか で いれておいた."
+        },
+        {
+          "id": "diversity-english-train-colemak-all",
+          "before": "the train is late.",
+          "after": "the train 尻late."
+        },
+        {
+          "id": "diversity-mixed-slash-colemak-all",
+          "before": "さくら / hello",
+          "after": "さくら ㄥˉhello"
+        },
+        {
+          "id": "diversity-mixed-slash-qwerty-all",
+          "before": "さくら / hello",
+          "after": "さくら ㄥˉhello"
+        },
+        {
+          "id": "diversity-mixed-slashes-colemak-all",
+          "before": "がっこう / browser / さくら",
+          "after": "がっこう ㄥˉbrowser ㄥˉさくら"
+        },
+        {
+          "id": "diversity-mixed-slashes-qwerty-all",
+          "before": "がっこう / browser / さくら",
+          "after": "がっこう ㄥˉbrowser ㄥˉさくら"
+        },
+        {
+          "id": "capture-a",
+          "before": "量到的 齊揮曾加了 11.6% 還在範圍之內",
+          "after": "量到的 齊latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "before": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟ㄕㄧㄜˉ討論",
+          "after": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟claude 討論"
+        },
+        {
+          "id": "island-qwerty-5",
+          "before": "資料 p99 throughput 很好",
+          "after": "資料 哀throughput 很好"
+        },
+        {
+          "id": "tone-boundary-qwerty",
+          "before": "ep claude 討論",
+          "after": "跟claude 討論"
+        },
+        {
+          "id": "tone-boundary-colemak",
+          "before": "f; claude 討論",
+          "after": "跟claude 討論"
+        }
+      ],
+      "prefixChanges": [
+        {
+          "id": "chinese-qwerty-0-prefix-5",
+          "before": "中ㄋ",
+          "after": "中s"
+        },
+        {
+          "id": "chinese-qwerty-0-prefix-6",
+          "before": "中ㄋㄟ",
+          "after": "中so"
+        },
+        {
+          "id": "chinese-qwerty-1-prefix-5",
+          "before": "說ㄕ",
+          "after": "說g"
+        },
+        {
+          "id": "chinese-qwerty-1-prefix-6",
+          "before": "說ㄕㄨ",
+          "after": "說gj"
+        },
+        {
+          "id": "chinese-qwerty-1-prefix-7",
+          "before": "說ㄕㄨㄛ",
+          "after": "說gji"
+        },
+        {
+          "id": "chinese-qwerty-2-prefix-5",
+          "before": "天ㄑ",
+          "after": "天f"
+        },
+        {
+          "id": "chinese-qwerty-2-prefix-6",
+          "before": "天ㄑㄧ",
+          "after": "天ふ"
+        },
+        {
+          "id": "chinese-qwerty-3-prefix-4",
+          "before": "跟ㄋ",
+          "after": "跟s"
+        },
+        {
+          "id": "chinese-qwerty-3-prefix-5",
+          "before": "跟ㄋㄧ",
+          "after": "跟す"
+        },
+        {
+          "id": "chinese-qwerty-4-prefix-3",
+          "before": "資ㄌ",
+          "after": "資x"
+        },
+        {
+          "id": "chinese-qwerty-4-prefix-4",
+          "before": "資ㄌㄧ",
+          "after": "資ぅ"
+        },
+        {
+          "id": "chinese-qwerty-4-prefix-5",
+          "before": "資ㄌㄧㄠ",
+          "after": "資xul"
+        },
+        {
+          "id": "chinese-colemak-0-prefix-5",
+          "before": "中ㄋ",
+          "after": "中r"
+        },
+        {
+          "id": "chinese-colemak-0-prefix-6",
+          "before": "中ㄋㄟ",
+          "after": "中ry"
+        },
+        {
+          "id": "chinese-colemak-1-prefix-5",
+          "before": "說ㄕ",
+          "after": "說d"
+        },
+        {
+          "id": "chinese-colemak-1-prefix-6",
+          "before": "說ㄕㄨ",
+          "after": "說dn"
+        },
+        {
+          "id": "chinese-colemak-1-prefix-7",
+          "before": "說ㄕㄨㄛ",
+          "after": "說dnu"
+        },
+        {
+          "id": "chinese-colemak-2-prefix-5",
+          "before": "天ㄑ",
+          "after": "天t"
+        },
+        {
+          "id": "chinese-colemak-2-prefix-6",
+          "before": "天ㄑㄧ",
+          "after": "天tl"
+        },
+        {
+          "id": "chinese-colemak-3-prefix-4",
+          "before": "跟ㄋ",
+          "after": "跟r"
+        },
+        {
+          "id": "chinese-colemak-3-prefix-5",
+          "before": "跟ㄋㄧ",
+          "after": "跟rl"
+        },
+        {
+          "id": "chinese-colemak-4-prefix-3",
+          "before": "資ㄌ",
+          "after": "資x"
+        },
+        {
+          "id": "chinese-colemak-4-prefix-4",
+          "before": "資ㄌㄧ",
+          "after": "資xl"
+        },
+        {
+          "id": "chinese-colemak-4-prefix-5",
+          "before": "資ㄌㄧㄠ",
+          "after": "資xli"
+        }
+      ],
+      "islands": [
+        {
+          "id": "capture-a",
+          "boundary": false,
+          "before": 0,
+          "after": 0,
+          "top1": "量到的 齊latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "boundary": true,
+          "before": 0,
+          "after": 1,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟claude 討論"
+        },
+        {
+          "id": "capture-b-separated",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟 claude 討論"
+        },
+        {
+          "id": "island-qwerty-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-qwerty-1",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 sync 很好"
+        },
+        {
+          "id": "island-qwerty-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-qwerty-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-qwerty-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-qwerty-5",
+          "boundary": false,
+          "before": 1,
+          "after": 3,
+          "top1": "資料 哀throughput 很好"
+        },
+        {
+          "id": "island-qwerty-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-qwerty-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-qwerty-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-qwerty",
+          "boundary": true,
+          "before": 0,
+          "after": 1,
+          "top1": "跟claude 討論"
+        },
+        {
+          "id": "island-colemak-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-colemak-1",
+          "boundary": false,
+          "before": 2,
+          "after": 2,
+          "top1": "資料 揮很好"
+        },
+        {
+          "id": "island-colemak-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-colemak-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-colemak-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-colemak-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-colemak-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-colemak-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-colemak-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-colemak",
+          "boundary": true,
+          "before": 0,
+          "after": 1,
+          "top1": "跟claude 討論"
+        }
+      ]
+    },
+    {
+      "policy": "floor+first-tone",
+      "regressions": [
+        {
+          "id": "synthetic-3",
+          "kind": "top1",
+          "before": "this is a test",
+          "after": "this 尻a test"
+        },
+        {
+          "id": "synthetic-5",
+          "kind": "top1",
+          "before": "the keyboard is working",
+          "after": "the keyboard 尻working"
+        },
+        {
+          "id": "feedback-code-loop",
+          "kind": "top1",
+          "before": "for (int i = 0; i < 100; i++)",
+          "after": "for (int 凹= 0; 凹< 100; i++)"
+        },
+        {
+          "id": "feedback-bug-raw",
+          "kind": "top1",
+          "before": "This is a bug.",
+          "after": "This 尻a bug."
+        },
+        {
+          "id": "feedback-short-word-period",
+          "kind": "top1",
+          "before": "This is a bit.",
+          "after": "This 尻a bit."
+        },
+        {
+          "id": "feedback-zhuyin-priority",
+          "kind": "top1",
+          "before": "I think 注音's priority is too high  (this is also a good test sentence)",
+          "after": "I think 注音's priority 尻too high  (this 尻also a good test sentence)"
+        },
+        {
+          "id": "mixed-04-colemak-all",
+          "kind": "top1",
+          "before": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "after": "あたらしい MacBook 汪Wi-Fi が ふあんていで, VPN きると なおる."
+        },
+        {
+          "id": "mixed-06-qwerty-all",
+          "kind": "top5"
+        },
+        {
+          "id": "diversity-english-train-colemak-all",
+          "kind": "top1",
+          "before": "the train is late.",
+          "after": "the train 尻late."
+        },
+        {
+          "id": "diversity-mixed-slash-colemak-all",
+          "kind": "top1",
+          "before": "さくら / hello",
+          "after": "さくら ㄥˉhello"
+        },
+        {
+          "id": "diversity-mixed-slash-qwerty-all",
+          "kind": "top1",
+          "before": "さくら / hello",
+          "after": "さくら ㄥˉhello"
+        },
+        {
+          "id": "diversity-mixed-slashes-colemak-all",
+          "kind": "top1",
+          "before": "がっこう / browser / さくら",
+          "after": "がっこう ㄥˉbrowser ㄥˉさくら"
+        },
+        {
+          "id": "diversity-mixed-slashes-colemak-all",
+          "kind": "top5"
+        },
+        {
+          "id": "diversity-mixed-slashes-qwerty-all",
+          "kind": "top1",
+          "before": "がっこう / browser / さくら",
+          "after": "がっこう ㄥˉbrowser ㄥˉさくら"
+        },
+        {
+          "id": "diversity-mixed-slashes-qwerty-all",
+          "kind": "top5"
+        }
+      ],
+      "changes": [
+        {
+          "id": "synthetic-3",
+          "before": "this is a test",
+          "after": "this 尻a test"
+        },
+        {
+          "id": "synthetic-5",
+          "before": "the keyboard is working",
+          "after": "the keyboard 尻working"
+        },
+        {
+          "id": "feedback-code-loop",
+          "before": "for (int i = 0; i < 100; i++)",
+          "after": "for (int 凹= 0; 凹< 100; i++)"
+        },
+        {
+          "id": "feedback-bug-raw",
+          "before": "This is a bug.",
+          "after": "This 尻a bug."
+        },
+        {
+          "id": "feedback-short-word-period",
+          "before": "This is a bit.",
+          "after": "This 尻a bit."
+        },
+        {
+          "id": "feedback-zhuyin-priority",
+          "before": "I think 注音's priority is too high  (this is also a good test sentence)",
+          "after": "I think 注音's priority 尻too high  (this 尻also a good test sentence)"
+        },
+        {
+          "id": "mixed-03-colemak-all",
+          "before": "この PR の ればせ してから npm test とおる か mite.",
+          "after": "この PR の ればせ してから 車test とおる か mite."
+        },
+        {
+          "id": "mixed-04-colemak-all",
+          "before": "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
+          "after": "あたらしい MacBook 汪Wi-Fi が ふあんていで, VPN きると なおる."
+        },
+        {
+          "id": "mixed-06-colemak-all",
+          "before": "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+          "after": "よやくは TableCheck で, なまえは Tanaka ㄥˉたなか で いれておいた."
+        },
+        {
+          "id": "mixed-06-qwerty-all",
+          "before": "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+          "after": "よやくは TableCheck で, なまえは Tanaka ㄥˉたなか で いれておいた."
+        },
+        {
+          "id": "diversity-english-train-colemak-all",
+          "before": "the train is late.",
+          "after": "the train 尻late."
+        },
+        {
+          "id": "diversity-mixed-slash-colemak-all",
+          "before": "さくら / hello",
+          "after": "さくら ㄥˉhello"
+        },
+        {
+          "id": "diversity-mixed-slash-qwerty-all",
+          "before": "さくら / hello",
+          "after": "さくら ㄥˉhello"
+        },
+        {
+          "id": "diversity-mixed-slashes-colemak-all",
+          "before": "がっこう / browser / さくら",
+          "after": "がっこう ㄥˉbrowser ㄥˉさくら"
+        },
+        {
+          "id": "diversity-mixed-slashes-qwerty-all",
+          "before": "がっこう / browser / さくら",
+          "after": "がっこう ㄥˉbrowser ㄥˉさくら"
+        },
+        {
+          "id": "capture-a",
+          "before": "量到的 齊揮曾加了 11.6% 還在範圍之內",
+          "after": "量到的 齊latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "before": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟ㄕㄧㄜˉ討論",
+          "after": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟claude 討論"
+        },
+        {
+          "id": "island-qwerty-5",
+          "before": "資料 p99 throughput 很好",
+          "after": "資料 哀throughput 很好"
+        },
+        {
+          "id": "tone-boundary-qwerty",
+          "before": "ep claude 討論",
+          "after": "跟claude 討論"
+        },
+        {
+          "id": "tone-boundary-colemak",
+          "before": "f; claude 討論",
+          "after": "跟claude 討論"
+        }
+      ],
+      "prefixChanges": [
+        {
+          "id": "chinese-qwerty-0-prefix-5",
+          "before": "中ㄋ",
+          "after": "中s"
+        },
+        {
+          "id": "chinese-qwerty-0-prefix-6",
+          "before": "中ㄋㄟ",
+          "after": "中so"
+        },
+        {
+          "id": "chinese-qwerty-1-prefix-5",
+          "before": "說ㄕ",
+          "after": "說g"
+        },
+        {
+          "id": "chinese-qwerty-1-prefix-6",
+          "before": "說ㄕㄨ",
+          "after": "說gj"
+        },
+        {
+          "id": "chinese-qwerty-1-prefix-7",
+          "before": "說ㄕㄨㄛ",
+          "after": "說gji"
+        },
+        {
+          "id": "chinese-qwerty-2-prefix-5",
+          "before": "天ㄑ",
+          "after": "天f"
+        },
+        {
+          "id": "chinese-qwerty-2-prefix-6",
+          "before": "天ㄑㄧ",
+          "after": "天ふ"
+        },
+        {
+          "id": "chinese-qwerty-3-prefix-4",
+          "before": "跟ㄋ",
+          "after": "跟s"
+        },
+        {
+          "id": "chinese-qwerty-3-prefix-5",
+          "before": "跟ㄋㄧ",
+          "after": "跟す"
+        },
+        {
+          "id": "chinese-qwerty-4-prefix-3",
+          "before": "資ㄌ",
+          "after": "資x"
+        },
+        {
+          "id": "chinese-qwerty-4-prefix-4",
+          "before": "資ㄌㄧ",
+          "after": "資ぅ"
+        },
+        {
+          "id": "chinese-qwerty-4-prefix-5",
+          "before": "資ㄌㄧㄠ",
+          "after": "資xul"
+        },
+        {
+          "id": "chinese-colemak-0-prefix-5",
+          "before": "中ㄋ",
+          "after": "中r"
+        },
+        {
+          "id": "chinese-colemak-0-prefix-6",
+          "before": "中ㄋㄟ",
+          "after": "中ry"
+        },
+        {
+          "id": "chinese-colemak-1-prefix-5",
+          "before": "說ㄕ",
+          "after": "說d"
+        },
+        {
+          "id": "chinese-colemak-1-prefix-6",
+          "before": "說ㄕㄨ",
+          "after": "說dn"
+        },
+        {
+          "id": "chinese-colemak-1-prefix-7",
+          "before": "說ㄕㄨㄛ",
+          "after": "說dnu"
+        },
+        {
+          "id": "chinese-colemak-2-prefix-5",
+          "before": "天ㄑ",
+          "after": "天t"
+        },
+        {
+          "id": "chinese-colemak-2-prefix-6",
+          "before": "天ㄑㄧ",
+          "after": "天tl"
+        },
+        {
+          "id": "chinese-colemak-3-prefix-4",
+          "before": "跟ㄋ",
+          "after": "跟r"
+        },
+        {
+          "id": "chinese-colemak-3-prefix-5",
+          "before": "跟ㄋㄧ",
+          "after": "跟rl"
+        },
+        {
+          "id": "chinese-colemak-4-prefix-3",
+          "before": "資ㄌ",
+          "after": "資x"
+        },
+        {
+          "id": "chinese-colemak-4-prefix-4",
+          "before": "資ㄌㄧ",
+          "after": "資xl"
+        },
+        {
+          "id": "chinese-colemak-4-prefix-5",
+          "before": "資ㄌㄧㄠ",
+          "after": "資xli"
+        }
+      ],
+      "islands": [
+        {
+          "id": "capture-a",
+          "boundary": false,
+          "before": 0,
+          "after": 0,
+          "top1": "量到的 齊latency 曾加了 11.6% 還在範圍之內"
+        },
+        {
+          "id": "capture-b",
+          "boundary": true,
+          "before": 0,
+          "after": 1,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟claude 討論"
+        },
+        {
+          "id": "capture-b-separated",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "我想不到還可以策什麼 你說說下個 sprint 要幹嘛吧 和是用 herdr 跟 claude 討論"
+        },
+        {
+          "id": "island-qwerty-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-qwerty-1",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 sync 很好"
+        },
+        {
+          "id": "island-qwerty-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-qwerty-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-qwerty-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-qwerty-5",
+          "boundary": false,
+          "before": 1,
+          "after": 3,
+          "top1": "資料 哀throughput 很好"
+        },
+        {
+          "id": "island-qwerty-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-qwerty-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-qwerty-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-qwerty",
+          "boundary": true,
+          "before": 0,
+          "after": 1,
+          "top1": "跟claude 討論"
+        },
+        {
+          "id": "island-colemak-0",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 deadline 很好"
+        },
+        {
+          "id": "island-colemak-1",
+          "boundary": false,
+          "before": 2,
+          "after": 2,
+          "top1": "資料 揮很好"
+        },
+        {
+          "id": "island-colemak-2",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 case 很好"
+        },
+        {
+          "id": "island-colemak-3",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 point 很好"
+        },
+        {
+          "id": "island-colemak-4",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 care 很好"
+        },
+        {
+          "id": "island-colemak-5",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 p99 throughput 很好"
+        },
+        {
+          "id": "island-colemak-6",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 v2 release 很好"
+        },
+        {
+          "id": "island-colemak-7",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 abc123 report 很好"
+        },
+        {
+          "id": "island-colemak-8",
+          "boundary": false,
+          "before": 1,
+          "after": 1,
+          "top1": "資料 r2 update 很好"
+        },
+        {
+          "id": "tone-boundary-colemak",
+          "boundary": true,
+          "before": 0,
+          "after": 1,
+          "top1": "跟claude 討論"
+        }
+      ]
+    }
+  ]
+}

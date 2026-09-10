@@ -2,6 +2,25 @@
 
 ## Current state
 
+English-island sprint: expanded search now protects enabled language-continuation
+possibilities within the same beam of 12. No scores/dictionaries/boundaries change.
+Ranking ID: scowl-context-v4+family-v1+island-v1. The new p95 latency capture now
+retains its English island at top one; 增加了 is second behind tied 曾加了.
+See eval/ISLANDS.md and island-experiments.json for frozen baselines and ablations.
+The stronger discard and identifier hypotheses were measured separately and are
+not enabled. Simple first-tone switching regressed old English/code cases and
+Chinese typing prefixes; it is native-diagnostic-only, not a web option.
+Single-space 跟claude still fails (now f; claude); two spaces after first-tone 跟
+produce 跟 claude. The demo explains this. No arbitrary unspaced switching.
+The user's doubled-n aside (dljjo;i / shinnyou) is recorded as a separate TODO.
+All 376 frozen baseline rows are checked for retained correct targets and scores;
+Chinese-control prefix top-ones are unchanged. Median incremental p95 ratio is
+0.996 against family-v1 over 4,883 prefixes, effectively unchanged.
+The sections below retain prior milestone measurements for context.
+Current local verification: 10 native tests, 36 passing Node tests plus three
+explicit TODOs (the two existing ranking targets and doubled-n), browser smoke
+for Pages subpath and standalone, formatting/clippy, and artifact privacy audit.
+
 Candidate-diversity sprint: the expanded beam remains 12 but evicts excess
 rule-generated kana-script siblings before distinct interpretation families.
 Soft caps are two per family in search and one in the final five, with spare
