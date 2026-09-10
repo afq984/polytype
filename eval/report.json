@@ -10,7 +10,7 @@
         "custom": 0,
         "imported": 0
       },
-      "instanceCreationMs": 0.22733800000000315,
+      "instanceCreationMs": 0.1631579999999957,
       "groups": {
         "real-text": {
           "cases": 20,
@@ -64,9 +64,9 @@
       },
       "prefixLatency": {
         "count": 2515,
-        "p50Ms": 0.1630080000001044,
-        "p95Ms": 0.9477660000000014,
-        "maxMs": 1.9414179999999988
+        "p50Ms": 0.13196900000002643,
+        "p95Ms": 0.9227919999999585,
+        "maxMs": 1.5089980000000054
       },
       "rows": [
         {
@@ -1445,7 +1445,7 @@
         "englishImported": 101191,
         "imported": 28184
       },
-      "instanceCreationMs": 19.997379000000024,
+      "instanceCreationMs": 19.088281999999936,
       "groups": {
         "real-text": {
           "cases": 20,
@@ -1472,36 +1472,36 @@
           "cases": 6,
           "top1": 4,
           "top5": 4,
-          "characterErrorRate": 0.1992619926199262,
+          "characterErrorRate": 0.05904059040590406,
           "reachable": null
         },
         "mixed-colemak-en-jp": {
           "cases": 6,
           "top1": 4,
-          "top5": 4,
+          "top5": 5,
           "characterErrorRate": 0.05904059040590406,
           "reachable": null
         },
         "mixed-qwerty-all": {
           "cases": 6,
           "top1": 4,
-          "top5": 4,
-          "characterErrorRate": 0.14022140221402213,
+          "top5": 5,
+          "characterErrorRate": 0.05904059040590406,
           "reachable": null
         },
         "mixed-qwerty-en-jp": {
           "cases": 6,
           "top1": 4,
-          "top5": 4,
+          "top5": 5,
           "characterErrorRate": 0.05904059040590406,
           "reachable": null
         }
       },
       "prefixLatency": {
         "count": 2515,
-        "p50Ms": 0.42570200000000114,
-        "p95Ms": 2.6576970000000983,
-        "maxMs": 5.959399000000076
+        "p50Ms": 0.4770309999998972,
+        "p95Ms": 2.9563590000000204,
+        "maxMs": 6.684293999999909
       },
       "rows": [
         {
@@ -2132,9 +2132,9 @@
           "candidates": [
             "good morning",
             "ごおd morning",
-            "ゴオd morning",
             "good ㄔㄨㄠ",
-            "ごおd ㄔㄨㄠ"
+            "ごおd ㄔㄨㄠ",
+            "商ㄔㄨㄠ"
           ]
         },
         {
@@ -2150,9 +2150,9 @@
           "candidates": [
             "this is a test",
             "this is あ test",
-            "this is ア test",
             "this いs a test",
-            "this イs a test"
+            "this いs あ test",
+            "てぃs is a test"
           ]
         },
         {
@@ -2168,9 +2168,9 @@
           "candidates": [
             "please open the browser",
             "please おぺん the browser",
-            "please オペン the browser",
             "please open the ㄋㄜ",
-            "please おぺん the ㄋㄜ"
+            "please おぺん the ㄋㄜ",
+            "please open ㄘㄜˉㄋㄜ"
           ]
         },
         {
@@ -2186,9 +2186,9 @@
           "candidates": [
             "the keyboard is working",
             "the keyboard いs working",
-            "the keyboard イs working",
             "the keyboard 尻ㄔㄨㄠ",
-            "the keyboard is ㄔㄨㄠ"
+            "the keyboard is ㄔㄨㄠ",
+            "the keyboard いs ㄔㄨㄠ"
           ]
         },
         {
@@ -2203,10 +2203,10 @@
           "reachable": null,
           "candidates": [
             "さくら hello",
-            "サクラ hello",
             "sakura hello",
             "さくら ㄘㄧㄤ",
-            "サクラ ㄘㄧㄤ"
+            "sakura ㄘㄧㄤ",
+            "摸ㄘㄧㄤ"
           ]
         },
         {
@@ -2221,10 +2221,10 @@
           "reachable": null,
           "candidates": [
             "がっこう small",
-            "ガッコウ small",
             "gakkou small",
             "がっこう ㄇㄧ",
-            "ガッコウ ㄇㄧ"
+            "gakkou ㄇㄧ",
+            "ㄙㄛˉㄇㄧ"
           ]
         },
         {
@@ -2239,9 +2239,9 @@
           "reachable": null,
           "candidates": [
             "がっこう 你好 hello",
-            "ガッコウ 你好 hello",
             "gakkou 你好 hello",
             "がっこう 你郝 hello",
+            "がっこう 妳好 hello",
             "gakkou lr3ic3 hello"
           ]
         },
@@ -2272,9 +2272,9 @@
           "candidates": [
             "This is a bug.",
             "This is あ bug.",
-            "This is ア bug.",
             "This is a ぶg.",
-            "This is a ブg."
+            "This いs a bug.",
+            "This is あ ぶg."
           ]
         },
         {
@@ -2290,9 +2290,9 @@
           "candidates": [
             "This is a bit.",
             "This is あ bit.",
-            "This is ア bit.",
             "This is a びt.",
-            "This is a ビt."
+            "This いs a bit.",
+            "This is あ びt."
           ]
         },
         {
@@ -2324,7 +2324,7 @@
             "I think 注音's priority is too high  (this is also a good test sentence)",
             "I think 著因's priority is too high  (this is also a good test sentence)",
             "I think 注音's priority is too high  (this is also あ good test sentence)",
-            "I think 注音's priority is too high  (this is also ア good test sentence)",
+            "I think 著音's priority is too high  (this is also a good test sentence)",
             "I think 5n4l; 's priority is too high  (this is also a good test sentence)"
           ]
         },
@@ -2346,9 +2346,9 @@
           "reachable": null,
           "candidates": [
             "GPU たりないから batch size 16 のまま train まわす.",
-            "GPU たりないから batch size 16 のまま train マワス.",
-            "GPU たりないから batch size 16 ノママ train まわす.",
-            "GPU タリナイカラ batch size 16 のまま train まわす.",
+            "GPU たりないから batch size 16 nomama train まわす.",
+            "GPU たりないから batch size 16 のまま train mawasu.",
+            "GPU たりないから batch size 16 nomama train mawasu.",
             "GPU tarinaikara batch size 16 nomama train mawasu."
           ]
         },
@@ -2370,9 +2370,9 @@
           "reachable": null,
           "candidates": [
             "GPU たりないから batch size 16 のまま train まわす.",
-            "GPU たりないから batch size 16 のまま train マワス.",
-            "GPU たりないから batch size 16 ノママ train まわす.",
-            "GPU タリナイカラ batch size 16 のまま train まわす.",
+            "GPU たりないから batch size 16 nomama train まわす.",
+            "GPU たりないから batch size 16 のまま train mawasu.",
+            "GPU たりないから batch size 16 nomama train mawasu.",
             "GPU tarinaikara batch size 16 nomama train mawasu."
           ]
         },
@@ -2394,9 +2394,9 @@
           "reachable": null,
           "candidates": [
             "GPU たりないから batch size 16 のまま train まわす.",
-            "GPU たりないから batch size 16 のまま train マワス.",
-            "GPU たりないから batch size 16 ノママ train まわす.",
-            "GPU タリナイカラ batch size 16 のまま train まわす.",
+            "GPU たりないから batch size 16 nomama train まわす.",
+            "GPU たりないから batch size 16 のまま train mawasu.",
+            "GPU たりないから batch size 16 nomama train mawasu.",
             "GPU tarinaikara batch size 16 nomama train mawasu."
           ]
         },
@@ -2418,9 +2418,9 @@
           "reachable": null,
           "candidates": [
             "GPU たりないから batch size 16 のまま train まわす.",
-            "GPU たりないから batch size 16 のまま train マワス.",
-            "GPU たりないから batch size 16 ノママ train まわす.",
-            "GPU タリナイカラ batch size 16 のまま train まわす.",
+            "GPU たりないから batch size 16 nomama train まわす.",
+            "GPU たりないから batch size 16 のまま train mawasu.",
+            "GPU たりないから batch size 16 nomama train mawasu.",
             "GPU tarinaikara batch size 16 nomama train mawasu."
           ]
         },
@@ -2442,9 +2442,9 @@
           "reachable": null,
           "candidates": [
             "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
-            "あしたの standup は 10:00 から Zoom で, agenda は キョウユウズミデス.",
-            "あしたの standup は 10:00 から Zoom で, agenda ハ きょうゆうずみです.",
-            "あしたの standup は 10:00 から Zoom デ, agenda は きょうゆうずみです.",
+            "あしたの standup ha 10:00 から Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom で, agenda ha きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom de, agenda は きょうゆうずみです.",
             "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu."
           ]
         },
@@ -2466,9 +2466,9 @@
           "reachable": null,
           "candidates": [
             "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
-            "あしたの standup は 10:00 から Zoom で, agenda は キョウユウズミデス.",
-            "あしたの standup は 10:00 から Zoom で, agenda ハ きょうゆうずみです.",
-            "あしたの standup は 10:00 から Zoom デ, agenda は きょうゆうずみです.",
+            "あしたの standup ha 10:00 から Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom で, agenda ha きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom de, agenda は きょうゆうずみです.",
             "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu."
           ]
         },
@@ -2490,9 +2490,9 @@
           "reachable": null,
           "candidates": [
             "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
-            "あしたの standup は 10:00 から Zoom で, agenda は キョウユウズミデス.",
-            "あしたの standup は 10:00 から Zoom で, agenda ハ きょうゆうずみです.",
-            "あしたの standup は 10:00 から Zoom デ, agenda は きょうゆうずみです.",
+            "あしたの standup ha 10:00 から Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom で, agenda ha きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom de, agenda は きょうゆうずみです.",
             "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu."
           ]
         },
@@ -2514,9 +2514,9 @@
           "reachable": null,
           "candidates": [
             "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
-            "あしたの standup は 10:00 から Zoom で, agenda は キョウユウズミデス.",
-            "あしたの standup は 10:00 から Zoom で, agenda ハ きょうゆうずみです.",
-            "あしたの standup は 10:00 から Zoom デ, agenda は きょうゆうずみです.",
+            "あしたの standup ha 10:00 から Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom で, agenda ha きょうゆうずみです.",
+            "あしたの standup は 10:00 から Zoom de, agenda は きょうゆうずみです.",
             "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu."
           ]
         },
@@ -2531,17 +2531,17 @@
             "zhuyin": true
           },
           "expected": "この PR の rebase してから npm test とおる か みて.",
-          "actual": "kono PR no rebase shitekara npm test tooru ka mite.",
+          "actual": "この PR の ればせ してから npm test とおる か mite.",
           "rank": 0,
-          "edits": 26,
+          "edits": 10,
           "characters": 38,
           "reachable": null,
           "candidates": [
-            "kono PR no rebase shitekara npm test tooru ka mite.",
-            "この PR の ればせ してから 車ㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ",
-            "この PR の ればせ シテカラ 車ㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ",
-            "コノ PR の ればせ してから 車ㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ",
-            "この PR の レバセ してから 車ㄑㄜˉㄋㄛˉㄇˉㄑㄩㄡ"
+            "この PR の ればせ してから npm test とおる か mite.",
+            "この PR の ればせ してから npm test tooru か mite.",
+            "この PR の ればせ してから npm test とおる か みて.",
+            "この PR の ればせ してから npm test tooru か みて.",
+            "kono PR no rebase shitekara npm test tooru ka mite."
           ]
         },
         {
@@ -2562,9 +2562,9 @@
           "reachable": null,
           "candidates": [
             "この PR の ればせ してから npm test とおる か mite.",
-            "この PR の ればせ してから npm test とおる カ mite.",
-            "この PR の ればせ シテカラ npm test とおる か mite.",
-            "コノ PR の ればせ してから npm test とおる か mite.",
+            "この PR の rebase してから npm test とおる か mite.",
+            "この PR no rebase してから npm test とおる か mite.",
+            "この PR の ればせ してから npm test tooru か mite.",
             "kono PR no rebase shitekara npm test tooru ka mite."
           ]
         },
@@ -2586,9 +2586,9 @@
           "reachable": null,
           "candidates": [
             "この PR の ればせ してから npm test とおる か mite.",
-            "この PR の ればせ してから npm test とおる カ mite.",
-            "この PR の ればせ シテカラ npm test とおる か mite.",
-            "コノ PR の ればせ してから npm test とおる か mite.",
+            "この PR の rebase してから npm test とおる か mite.",
+            "この PR no rebase してから npm test とおる か mite.",
+            "この PR の ればせ してから npm test tooru か mite.",
             "kono PR no rebase shitekara npm test tooru ka mite."
           ]
         },
@@ -2610,9 +2610,9 @@
           "reachable": null,
           "candidates": [
             "この PR の ればせ してから npm test とおる か mite.",
-            "この PR の ればせ してから npm test とおる カ mite.",
-            "この PR の ればせ シテカラ npm test とおる か mite.",
-            "コノ PR の ればせ してから npm test とおる か mite.",
+            "この PR の rebase してから npm test とおる か mite.",
+            "この PR no rebase してから npm test とおる か mite.",
+            "この PR の ればせ してから npm test tooru か mite.",
             "kono PR no rebase shitekara npm test tooru ka mite."
           ]
         },
@@ -2634,9 +2634,9 @@
           "reachable": null,
           "candidates": [
             "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
-            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると ナオル.",
-            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN キルト なおる.",
-            "あたらしい MacBook の Wi-Fi が フアンテイデ, VPN きると なおる.",
+            "あたらしい MacBook no Wi-Fi が ふあんていで, VPN きると なおる.",
+            "あたらしい MacBook の うぃーふぃ が ふあんていで, VPN きると なおる.",
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN kiruto なおる.",
             "atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru."
           ]
         },
@@ -2658,9 +2658,9 @@
           "reachable": null,
           "candidates": [
             "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
-            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると ナオル.",
-            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN キルト なおる.",
-            "あたらしい MacBook の Wi-Fi が フアンテイデ, VPN きると なおる.",
+            "あたらしい MacBook no Wi-Fi が ふあんていで, VPN きると なおる.",
+            "あたらしい MacBook の うぃーふぃ が ふあんていで, VPN きると なおる.",
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN kiruto なおる.",
             "atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru."
           ]
         },
@@ -2682,9 +2682,9 @@
           "reachable": null,
           "candidates": [
             "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
-            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると ナオル.",
-            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN キルト なおる.",
-            "あたらしい MacBook の Wi-Fi が フアンテイデ, VPN きると なおる.",
+            "あたらしい MacBook no Wi-Fi が ふあんていで, VPN きると なおる.",
+            "あたらしい MacBook の うぃーふぃ が ふあんていで, VPN きると なおる.",
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN kiruto なおる.",
             "atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru."
           ]
         },
@@ -2706,9 +2706,9 @@
           "reachable": null,
           "candidates": [
             "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると なおる.",
-            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN きると ナオル.",
-            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN キルト なおる.",
-            "あたらしい MacBook の Wi-Fi が フアンテイデ, VPN きると なおる.",
+            "あたらしい MacBook no Wi-Fi が ふあんていで, VPN きると なおる.",
+            "あたらしい MacBook の うぃーふぃ が ふあんていで, VPN きると なおる.",
+            "あたらしい MacBook の Wi-Fi が ふあんていで, VPN kiruto なおる.",
             "atarashii MacBook no Wi-Fi ga fuanteide, VPN kiruto naoru."
           ]
         },
@@ -2730,10 +2730,10 @@
           "reachable": null,
           "candidates": [
             "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
-            "Send the ミツモリショ as PDF, filename quote_2026-09.pdf",
             "Send the mitsumorisho as PDF, filename quote_2026-09.pdf",
             "Send the みつもりしょ as PDF, ふぃぇなめ quote_2026-09.pdf",
-            "Send the みつもりしょ as PDF, フィェナメ quote_2026-09.pdf"
+            "Send the みつもりしょ あs PDF, filename quote_2026-09.pdf",
+            "Send the mitsumorisho as PDF, ふぃぇなめ quote_2026-09.pdf"
           ]
         },
         {
@@ -2754,10 +2754,10 @@
           "reachable": null,
           "candidates": [
             "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
-            "Send the ミツモリショ as PDF, filename quote_2026-09.pdf",
             "Send the mitsumorisho as PDF, filename quote_2026-09.pdf",
             "Send the みつもりしょ as PDF, ふぃぇなめ quote_2026-09.pdf",
-            "Send the みつもりしょ as PDF, フィェナメ quote_2026-09.pdf"
+            "Send the みつもりしょ あs PDF, filename quote_2026-09.pdf",
+            "Send the mitsumorisho as PDF, ふぃぇなめ quote_2026-09.pdf"
           ]
         },
         {
@@ -2778,10 +2778,10 @@
           "reachable": null,
           "candidates": [
             "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
-            "Send the ミツモリショ as PDF, filename quote_2026-09.pdf",
             "Send the mitsumorisho as PDF, filename quote_2026-09.pdf",
             "Send the みつもりしょ as PDF, ふぃぇなめ quote_2026-09.pdf",
-            "Send the みつもりしょ as PDF, フィェナメ quote_2026-09.pdf"
+            "Send the みつもりしょ あs PDF, filename quote_2026-09.pdf",
+            "Send the mitsumorisho as PDF, ふぃぇなめ quote_2026-09.pdf"
           ]
         },
         {
@@ -2802,10 +2802,10 @@
           "reachable": null,
           "candidates": [
             "Send the みつもりしょ as PDF, filename quote_2026-09.pdf",
-            "Send the ミツモリショ as PDF, filename quote_2026-09.pdf",
             "Send the mitsumorisho as PDF, filename quote_2026-09.pdf",
             "Send the みつもりしょ as PDF, ふぃぇなめ quote_2026-09.pdf",
-            "Send the みつもりしょ as PDF, フィェナメ quote_2026-09.pdf"
+            "Send the みつもりしょ あs PDF, filename quote_2026-09.pdf",
+            "Send the mitsumorisho as PDF, ふぃぇなめ quote_2026-09.pdf"
           ]
         },
         {
@@ -2819,17 +2819,17 @@
             "zhuyin": true
           },
           "expected": "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
-          "actual": "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.",
+          "actual": "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
           "rank": 0,
-          "edits": 28,
+          "edits": 6,
           "characters": 49,
           "reachable": null,
           "candidates": [
-            "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.",
-            "よやくは TableCheck で, なまえは Tanaka ㄥˉㄇㄨˉ奢ㄇㄡ",
-            "よやくは TableCheck で, ナマエハ Tanaka ㄥˉㄇㄨˉ奢ㄇㄡ",
-            "ヨヤクハ TableCheck で, なまえは Tanaka ㄥˉㄇㄨˉ奢ㄇㄡ",
-            "よやくは TableCheck デ, なまえは Tanaka ㄥˉㄇㄨˉ奢ㄇㄡ"
+            "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+            "よやくは TableCheck で, なまえは たなか / たなか で いれておいた.",
+            "よやくは TableCheck で, なまえは Tanaka / たなか で ireteoita.",
+            "よやくは TableCheck で, なまえは たなか / たなか で ireteoita.",
+            "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita."
           ]
         },
         {
@@ -2844,15 +2844,15 @@
           },
           "expected": "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
           "actual": "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
-          "rank": 0,
+          "rank": 3,
           "edits": 6,
           "characters": 49,
           "reachable": null,
           "candidates": [
             "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
-            "よやくは TableCheck で, ナマエハ Tanaka / たなか で いれておいた.",
-            "ヨヤクハ TableCheck で, なまえは Tanaka / たなか で いれておいた.",
-            "よやくは TableCheck デ, なまえは Tanaka / たなか で いれておいた.",
+            "よやくは TableCheck で, なまえは たなか / たなか で いれておいた.",
+            "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
+            "よやくは TableCheck で, namaeha Tanaka / たなか で いれておいた.",
             "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita."
           ]
         },
@@ -2867,17 +2867,17 @@
             "zhuyin": true
           },
           "expected": "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
-          "actual": "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.",
-          "rank": 0,
-          "edits": 28,
+          "actual": "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+          "rank": 3,
+          "edits": 6,
           "characters": 49,
           "reachable": null,
           "candidates": [
-            "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita.",
-            "よやくは TableCheck で, なまえは Tanaka ㄥˉㄇㄜˉㄍˉㄇㄡ",
-            "よやくは TableCheck で, ナマエハ Tanaka ㄥˉㄇㄜˉㄍˉㄇㄡ",
-            "ヨヤクハ TableCheck で, なまえは Tanaka ㄥˉㄇㄜˉㄍˉㄇㄡ",
-            "よやくは TableCheck デ, なまえは Tanaka ㄥˉㄇㄜˉㄍˉㄇㄡ"
+            "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
+            "よやくは TableCheck で, なまえは たなか / たなか で いれておいた.",
+            "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
+            "よやくは TableCheck で, なまえは たなか / tanaka で いれておいた.",
+            "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita."
           ]
         },
         {
@@ -2892,15 +2892,15 @@
           },
           "expected": "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
           "actual": "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
-          "rank": 0,
+          "rank": 3,
           "edits": 6,
           "characters": 49,
           "reachable": null,
           "candidates": [
             "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
-            "よやくは TableCheck で, ナマエハ Tanaka / たなか で いれておいた.",
-            "ヨヤクハ TableCheck で, なまえは Tanaka / たなか で いれておいた.",
-            "よやくは TableCheck デ, なまえは Tanaka / たなか で いれておいた.",
+            "よやくは TableCheck で, なまえは たなか / たなか で いれておいた.",
+            "よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた.",
+            "よやくは TableCheck で, namaeha Tanaka / たなか で いれておいた.",
             "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita."
           ]
         }

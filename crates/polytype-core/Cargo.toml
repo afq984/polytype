@@ -5,6 +5,13 @@ edition = "2024"
 license = "MIT"
 publish = false
 
+[features]
+diagnostics = []
+
+[[bin]]
+name = "polytype-search"
+required-features = ["diagnostics"]
+
 [dependencies]
 serde.workspace = true
 serde_json.workspace = true

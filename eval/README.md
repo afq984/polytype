@@ -1,5 +1,10 @@
 # Text evaluation
 
+The [candidate-diversity experiment](DIVERSITY.md) adds frozen synthetic controls,
+native-only wider-beam diagnostics, explicit baseline comparisons, and same-machine
+latency measurements. Its finite search results are not a dictionary-reachability
+oracle; see diversity-report.md for remaining cases and methodological limits.
+
 Run `npm run evaluate` to rebuild WASM and regenerate REPORT.md and report.json.
 Evaluation is entirely local. For your own cases, run
 `node scripts/evaluate.mjs /path/to/cases.jsonl` after building WASM. Each line is

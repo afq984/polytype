@@ -18,16 +18,16 @@ User-supplied input, one sentence per case. Targets are provisional developer an
 | expanded / real-text | 12/20 | 17/20 | 5.6% | 20 |
 | expanded / guards | 22/22 | 22/22 | 0.0% | n/a |
 | expanded / user-feedback | 5/5 | 5/5 | 0.0% | n/a |
-| expanded / mixed-colemak-all | 4/6 | 4/6 | 19.9% | n/a |
-| expanded / mixed-colemak-en-jp | 4/6 | 4/6 | 5.9% | n/a |
-| expanded / mixed-qwerty-all | 4/6 | 4/6 | 14.0% | n/a |
-| expanded / mixed-qwerty-en-jp | 4/6 | 4/6 | 5.9% | n/a |
+| expanded / mixed-colemak-all | 4/6 | 4/6 | 5.9% | n/a |
+| expanded / mixed-colemak-en-jp | 4/6 | 5/6 | 5.9% | n/a |
+| expanded / mixed-qwerty-all | 4/6 | 5/6 | 5.9% | n/a |
+| expanded / mixed-qwerty-en-jp | 4/6 | 5/6 | 5.9% | n/a |
 
 Top-1 regressions: none.
 Top-5 regressions: none.
 
-prototype: engine instance 0.2 ms; prefix decode p50 0.16 ms, p95 0.95 ms (this run; module already loaded).
-expanded: engine instance 20.0 ms; prefix decode p50 0.43 ms, p95 2.66 ms (this run; module already loaded).
+prototype: engine instance 0.2 ms; prefix decode p50 0.13 ms, p95 0.92 ms (this run; module already loaded).
+expanded: engine instance 19.1 ms; prefix decode p50 0.48 ms, p95 2.96 ms (this run; module already loaded).
 
 ## Remaining expanded-profile errors
 
@@ -39,11 +39,11 @@ expanded: engine instance 20.0 ms; prefix decode p50 0.43 ms, p95 2.66 ms (this 
 - gsd-12: 團購網站的主要產品分為家居類 → 團購網站的主要產品分為家車類 (target rank: 3; dictionary reachable: true)
 - gsd-13: 因此透過切割菌肉便能分辨二者 → 因此透過切割俊肉變能分辨二者 (target rank: outside top 5; dictionary reachable: true)
 - gsd-15: 深受耕作施肥等人為因素的影響而極不穩定 → 深受耕作師肥等人為因素的影響而及不穩定 (target rank: outside top 5; dictionary reachable: true)
-- mixed-03-colemak-all: この PR の rebase してから npm test とおる か みて. → kono PR no rebase shitekara npm test tooru ka mite. (target rank: outside top 5; dictionary reachable: not measured)
+- mixed-03-colemak-all: この PR の rebase してから npm test とおる か みて. → この PR の ればせ してから npm test とおる か mite. (target rank: outside top 5; dictionary reachable: not measured)
 - mixed-03-colemak-en-jp: この PR の rebase してから npm test とおる か みて. → この PR の ればせ してから npm test とおる か mite. (target rank: outside top 5; dictionary reachable: not measured)
 - mixed-03-qwerty-all: この PR の rebase してから npm test とおる か みて. → この PR の ればせ してから npm test とおる か mite. (target rank: outside top 5; dictionary reachable: not measured)
 - mixed-03-qwerty-en-jp: この PR の rebase してから npm test とおる か みて. → この PR の ればせ してから npm test とおる か mite. (target rank: outside top 5; dictionary reachable: not measured)
-- mixed-06-colemak-all: よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた. → yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita. (target rank: outside top 5; dictionary reachable: not measured)
-- mixed-06-colemak-en-jp: よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた. → よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた. (target rank: outside top 5; dictionary reachable: not measured)
-- mixed-06-qwerty-all: よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた. → yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita. (target rank: outside top 5; dictionary reachable: not measured)
-- mixed-06-qwerty-en-jp: よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた. → よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた. (target rank: outside top 5; dictionary reachable: not measured)
+- mixed-06-colemak-all: よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた. → よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた. (target rank: outside top 5; dictionary reachable: not measured)
+- mixed-06-colemak-en-jp: よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた. → よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた. (target rank: 3; dictionary reachable: not measured)
+- mixed-06-qwerty-all: よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた. → よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた. (target rank: 3; dictionary reachable: not measured)
+- mixed-06-qwerty-en-jp: よやくは TableCheck で, なまえは Tanaka / tanaka で いれておいた. → よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた. (target rank: 3; dictionary reachable: not measured)

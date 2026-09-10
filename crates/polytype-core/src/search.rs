@@ -5,7 +5,8 @@ use crate::{
     phonetic::{read_units, utf16_len, zhuyin},
 };
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+use std::ops::Deref;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -43,29 +44,126 @@ impl Candidate {
     }
 }
 
+#[derive(Clone, Default)]
+struct BeamEntry {
+    candidate: Candidate,
+    family: usize,
+}
+
+impl Deref for BeamEntry {
+    type Target = Candidate;
+    fn deref(&self) -> &Self::Target {
+        &self.candidate
+    }
+}
+
+#[derive(Hash, PartialEq, Eq, Serialize)]
+struct FamilyKey {
+    parent: usize,
+    raw: String,
+    lang: String,
+    text: String,
+    commit_text: Option<String>,
+    pending: Option<String>,
+    complete: Option<bool>,
+}
+
+fn fold_kana(text: &str) -> String {
+    text.chars()
+        .map(|c| {
+            if ('\u{30a1}'..='\u{30f6}').contains(&c) {
+                char::from_u32(c as u32 - 0x60).unwrap()
+            } else {
+                c
+            }
+        })
+        .collect()
+}
+
+fn family_part(parent: usize, part: &Part) -> FamilyKey {
+    let kana = part.lang == "JP" && part.pending.is_some();
+    FamilyKey {
+        parent,
+        raw: part.raw.clone(),
+        lang: part.lang.clone(),
+        text: if kana {
+            fold_kana(&part.text)
+        } else {
+            part.text.clone()
+        },
+        commit_text: part
+            .commit_text
+            .as_ref()
+            .map(|text| if kana { fold_kana(text) } else { text.clone() }),
+        pending: part.pending.clone(),
+        complete: part.complete,
+    }
+}
+
+struct Lattice {
+    states: Vec<Vec<BeamEntry>>,
+    width: usize,
+    families: Option<HashMap<FamilyKey, usize>>,
+}
+
+// A soft family cap: keep spare script variants when capacity permits, but
+// evict them before a genuinely different path. Sorting still uses raw scores.
+fn trim_families(beam: &mut Vec<BeamEntry>, limit: usize, cap: usize) {
+    while beam.len() > limit {
+        let remove = (0..beam.len())
+            .rev()
+            .find(|&i| {
+                beam.iter()
+                    .filter(|c| c.family == beam[i].family)
+                    .take(cap + 1)
+                    .count()
+                    > cap
+            })
+            .unwrap_or(beam.len() - 1);
+        beam.remove(remove);
+    }
+}
+
 fn push(
-    beams: &mut [Vec<Candidate>],
+    beams: &mut Lattice,
     at: usize,
-    state: &Candidate,
+    state: &BeamEntry,
     part: Part,
     score: f64,
     lang: Option<&str>,
 ) {
+    let family = if let Some(families) = &mut beams.families {
+        // Only rule-generated kana variants are equivalent. Dictionary words,
+        // raw segmentation, language history, pending state and commit behavior
+        // remain distinct, including across spaces and punctuation.
+        let key = family_part(state.family, &part);
+        let next = families.len() + 1;
+        *families.entry(key).or_insert(next)
+    } else {
+        0
+    };
     let mut parts = state.parts.clone();
     let text = format!("{}{}", state.text, part.text);
     parts.push(part);
-    let beam = &mut beams[at];
-    beam.push(Candidate {
-        text,
-        score: state.score + score,
-        lang: lang.map(str::to_owned),
-        parts,
+    let beam = &mut beams.states[at];
+    beam.push(BeamEntry {
+        family,
+        candidate: Candidate {
+            text,
+            score: state.score + score,
+            lang: lang.map(str::to_owned),
+            parts,
+        },
     });
     // Stable ordering matches JavaScript's stable sort, including tied scores.
     beam.sort_by(|a, b| b.score.total_cmp(&a.score));
     let mut seen = HashSet::new();
     beam.retain(|candidate| seen.insert((candidate.text.clone(), candidate.lang.clone())));
-    beam.truncate(12);
+    if beams.families.is_some() {
+        trim_families(beam, beams.width, 2);
+    } else {
+        beam.truncate(beams.width);
+    }
 }
 
 fn punctuation(unit: u16, expanded: bool) -> bool {
@@ -89,7 +187,18 @@ pub(crate) fn decode(
     dictionary: &Dictionary,
     options: &DecodeOptions,
 ) -> Vec<Candidate> {
-    let mut result = decode_lattice(input, dictionary, options);
+    decode_configured(input, dictionary, options, 12, 5, true)
+}
+
+fn decode_configured(
+    input: &str,
+    dictionary: &Dictionary,
+    options: &DecodeOptions,
+    width: usize,
+    limit: usize,
+    diversity: bool,
+) -> Vec<Candidate> {
+    let mut result = decode_lattice(input, dictionary, options, width, limit, diversity);
     // A bounded mixed-language beam can discard every English path before a
     // later operator arrives. Reserve a slot for an independently decoded
     // literal-English path, even when phonetic scores crowd it out.
@@ -99,14 +208,15 @@ pub(crate) fn decode(
             zhuyin: false,
             ..options.clone()
         };
-        if let Some(literal) = decode_lattice(input, dictionary, &literal_options)
-            .into_iter()
-            .next()
+        if let Some(literal) =
+            decode_lattice(input, dictionary, &literal_options, width, limit, diversity)
+                .into_iter()
+                .next()
             && !result
                 .iter()
                 .any(|candidate| candidate.text == literal.text)
         {
-            result.truncate(4);
+            result.truncate(limit.saturating_sub(1));
             result.push(literal);
             result.sort_by(|a, b| b.score.total_cmp(&a.score));
         }
@@ -114,15 +224,61 @@ pub(crate) fn decode(
     result
 }
 
-fn decode_lattice(input: &str, dictionary: &Dictionary, options: &DecodeOptions) -> Vec<Candidate> {
+#[cfg(feature = "diagnostics")]
+pub(crate) fn diagnose(
+    input: &str,
+    dictionary: &Dictionary,
+    options: &DecodeOptions,
+    width: usize,
+    diversity: bool,
+) -> serde_json::Value {
+    let candidates = decode_configured(input, dictionary, options, width, 5, diversity);
+    let displayed_families = candidates
+        .iter()
+        .map(diagnostic_family)
+        .collect::<HashSet<_>>()
+        .len();
+    serde_json::json!({
+        "candidates": candidates,
+        "displayedFamilies": displayed_families,
+        "lattice": decode_lattice(input, dictionary, options, width, width, diversity).iter().map(|c| {
+            serde_json::json!({"text":c.commit_text(),"score":c.score,"family":diagnostic_family(c)})
+        }).collect::<Vec<_>>(),
+    })
+}
+
+#[cfg(feature = "diagnostics")]
+fn diagnostic_family(candidate: &Candidate) -> String {
+    serde_json::to_string(
+        &candidate
+            .parts
+            .iter()
+            .map(|part| family_part(0, part))
+            .collect::<Vec<_>>(),
+    )
+    .unwrap()
+}
+
+fn decode_lattice(
+    input: &str,
+    dictionary: &Dictionary,
+    options: &DecodeOptions,
+    width: usize,
+    limit: usize,
+    diversity: bool,
+) -> Vec<Candidate> {
     if !options.english && !options.japanese && !options.zhuyin {
         return Vec::new();
     }
     let raw: Vec<u16> = input.encode_utf16().take(400).collect();
-    let mut beams = vec![Vec::new(); raw.len() + 1];
-    beams[0].push(Candidate::default());
+    let mut beams = Lattice {
+        states: vec![Vec::new(); raw.len() + 1],
+        width,
+        families: (diversity && dictionary.expanded && options.japanese).then(HashMap::new),
+    };
+    beams.states[0].push(BeamEntry::default());
     for i in 0..raw.len() {
-        for state in beams[i].clone() {
+        for state in beams.states[i].clone() {
             if punctuation(raw[i], dictionary.expanded) {
                 let text = segment(&raw, i, i + 1);
                 push(
@@ -188,9 +344,9 @@ fn decode_lattice(input: &str, dictionary: &Dictionary, options: &DecodeOptions)
                     }
                 }
                 for (at, length, syllables, reading, texts) in matches {
-                    // Scores decrease with n. A 13th distinct value from this
-                    // same state cannot enter a beam of 12 at this offset.
-                    for (n, text) in texts.iter().take(12).enumerate() {
+                    // Scores decrease with n. Values beyond this beam width
+                    // from the same state cannot survive at this offset.
+                    for (n, text) in texts.iter().take(width).enumerate() {
                         push(
                             &mut beams,
                             at,
@@ -233,7 +389,7 @@ fn decode_lattice(input: &str, dictionary: &Dictionary, options: &DecodeOptions)
                         note.push_str(" · outside demo dictionary");
                     }
                     let fallback = vec![zhuyin(&syllable.key)];
-                    for (n, text) in values.unwrap_or(&fallback).iter().take(12).enumerate() {
+                    for (n, text) in values.unwrap_or(&fallback).iter().take(width).enumerate() {
                         let score = if values.is_some() {
                             syllable.key.len() as f64 * 2.0 - n as f64 * 0.8
                         } else {
@@ -506,10 +662,91 @@ fn decode_lattice(input: &str, dictionary: &Dictionary, options: &DecodeOptions)
             }
         }
     }
-    let mut result = beams.pop().unwrap();
+    let mut result = beams.states.pop().unwrap();
     result.sort_by(|a, b| b.score.total_cmp(&a.score));
     let mut seen = HashSet::new();
     result.retain(|c| seen.insert(c.text.clone()));
-    result.truncate(5);
-    result
+    if beams.families.is_some() {
+        trim_families(&mut result, limit, 1);
+    } else {
+        result.truncate(limit);
+    }
+    result.into_iter().map(|entry| entry.candidate).collect()
+}
+
+#[cfg(test)]
+mod diversity_tests {
+    use super::*;
+
+    #[test]
+    fn spare_variants_survive_but_do_not_evict_distinct_families() {
+        let mut beam = vec![
+            BeamEntry {
+                family: 1,
+                ..BeamEntry::default()
+            },
+            BeamEntry {
+                family: 1,
+                ..BeamEntry::default()
+            },
+            BeamEntry {
+                family: 1,
+                ..BeamEntry::default()
+            },
+            BeamEntry {
+                family: 2,
+                ..BeamEntry::default()
+            },
+        ];
+        trim_families(&mut beam, 4, 1);
+        assert_eq!(beam.len(), 4);
+        trim_families(&mut beam, 3, 2);
+        assert_eq!(beam.iter().map(|e| e.family).collect::<Vec<_>>(), [1, 1, 2]);
+        trim_families(&mut beam, 2, 1);
+        assert_eq!(beam.iter().map(|e| e.family).collect::<Vec<_>>(), [1, 2]);
+    }
+
+    #[test]
+    fn families_preserve_history_boundaries_and_commit_state() {
+        let hira = Part {
+            raw: "kan".into(),
+            text: "かn".into(),
+            lang: "JP".into(),
+            pending: Some("n".into()),
+            commit_text: Some("かん".into()),
+            complete: Some(false),
+            ..Part::default()
+        };
+        let kata = Part {
+            text: "カn".into(),
+            commit_text: Some("カン".into()),
+            ..hira.clone()
+        };
+        assert!(family_part(1, &hira) == family_part(1, &kata));
+        assert!(family_part(1, &hira) != family_part(2, &kata));
+        for changed in [
+            Part {
+                raw: "kan ".into(),
+                ..kata.clone()
+            },
+            Part {
+                complete: Some(true),
+                ..kata.clone()
+            },
+            Part {
+                commit_text: Some("カ".into()),
+                ..kata.clone()
+            },
+            Part {
+                pending: None,
+                ..kata.clone()
+            },
+            Part {
+                lang: "EN".into(),
+                ..kata
+            },
+        ] {
+            assert!(family_part(1, &hira) != family_part(1, &changed));
+        }
+    }
 }

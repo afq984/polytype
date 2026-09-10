@@ -5,7 +5,7 @@ import {spawn} from 'node:child_process';
 import {mkdtemp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {feedbackCases} from '../eval/cases.mjs';
+import {feedbackCases,mixedCases} from '../eval/cases.mjs';
 
 const profile = await mkdtemp(join(tmpdir(), 'polytype-browser-'));
 const chrome = spawn(process.env.CHROME_BIN || 'google-chrome', [
@@ -210,6 +210,12 @@ try {
     await key('.','Period');
     const settingsReport=await evaluate("(async()=>{await document.getElementById('copy-debug').onclick();return JSON.parse(document.getElementById('debug-report').value)})()");
     assert.deepEqual(settingsReport.options,{layout:'qwerty',english:true,japanese:true,zhuyin:true});
+    const recovered=mixedCases.find(row=>row.id==='mixed-06-qwerty-all');
+    await evaluate(`document.getElementById('raw').value=${JSON.stringify(recovered.raw)}; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
+    assert.notEqual(await evaluate("document.getElementById('preedit').textContent"),recovered.input);
+    await evaluate(`[...document.querySelectorAll('#candidates button')].find(b=>b.textContent.slice(1)===${JSON.stringify(recovered.text)}).click(); document.getElementById('commit').click()`);
+    assert.ok(await evaluate(`document.getElementById('committed').textContent.endsWith(${JSON.stringify(recovered.text)})`));
+    await evaluate("document.getElementById('raw').value='kan.'; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
     await evaluate("document.getElementById('keyboard-layout').value='colemak'; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
     assert.equal(await evaluate("document.getElementById('raw').value"),'kan.');
     // Capturing does not save until the expected output is reviewed. Later

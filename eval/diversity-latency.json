@@ -1,0 +1,63 @@
+{
+  "notes": "Same-process alternating built-WASM snapshots, five measured rounds after one warmup each. Prefix decode plus JS/JSON transport; excludes initialization and UI rendering. Milliseconds. Not a portable performance guarantee.",
+  "prefixes": 3889,
+  "runs": [
+    {
+      "baseline": {
+        "p50": 0.14260900000044785,
+        "p95": 2.2257690000005823
+      },
+      "current": {
+        "p50": 0.15615400000024238,
+        "p95": 2.4502430000002278
+      },
+      "p95Ratio": 1.100852334631126
+    },
+    {
+      "current": {
+        "p50": 0.15567400000145426,
+        "p95": 2.4508740000001126
+      },
+      "baseline": {
+        "p50": 0.14232799999990675,
+        "p95": 2.188609999999244
+      },
+      "p95Ratio": 1.1198313084564904
+    },
+    {
+      "baseline": {
+        "p50": 0.1394930000005843,
+        "p95": 2.2088980000007723
+      },
+      "current": {
+        "p50": 0.15724599999884958,
+        "p95": 2.467305000000124
+      },
+      "p95Ratio": 1.1169845778298777
+    },
+    {
+      "current": {
+        "p50": 0.1574770000006538,
+        "p95": 2.472185000002355
+      },
+      "baseline": {
+        "p50": 0.1405750000012631,
+        "p95": 2.215840000000753
+      },
+      "p95Ratio": 1.1156875045136447
+    },
+    {
+      "baseline": {
+        "p50": 0.1406860000024608,
+        "p95": 2.2514779999983148
+      },
+      "current": {
+        "p50": 0.1557539999994333,
+        "p95": 2.454330000000482
+      },
+      "p95Ratio": 1.0900972605560966
+    }
+  ],
+  "medianP95Ratio": 1.1156875045136447,
+  "budgetRatio": 1.15
+}

@@ -2,6 +2,31 @@
 
 ## Current state
 
+Candidate-diversity sprint: the expanded beam remains 12 but evicts excess
+rule-generated kana-script siblings before distinct interpretation families.
+Soft caps are two per family in search and one in the final five, with spare
+capacity available to variants. Family keys preserve raw segmentation, full
+language/context history, pending/completion and commit behavior. Original
+scores, dictionaries, literal-English retention and prototype behavior are unchanged.
+Debug/capture ranking ID is scowl-context-v4+family-v1.
+
+The three diagnosed all-English collapses now retain useful mixed top-one paths.
+Six-sentence top one is still 4/6; top five is 5/6 except Colemak/all (4/6).
+Mixed CER is now 5.9% in all four configurations. Latin tanaka is selectable
+at rank 3 in three configurations; rebase/mite and Colemak/all tanaka remain
+unresolved. Existing Chinese 12/20 top one / 17/20 top five, 22 guards and five
+feedback cases are unchanged. The 24 frozen synthetic controls and two ambiguous
+probes have 92 layout/language configurations; no prior correct target was lost.
+These are development annotations, not user-confirmed accuracy claims.
+
+eval/DIVERSITY.md records the frozen experiment plan and reproduction commands;
+diversity-report.md lists results and unresolved cases. Diagnostic widths 12/48/192
+are finite, not an oracle. The opt-in native diagnostics feature is not exposed
+by the web protocol. Per-segment correction and dictionary expansion are deferred.
+Final alternating baseline/current WASM measurements over 3,889 prefixes show
+11.6% median p95 overhead (five rounds, 9.0–12.0%), within the frozen 15% budget.
+Both browser formats pass candidate recovery/selection/commit and prior smoke tests.
+
 The demo defaults to QWERTY and restores layout plus all three language toggles
 from polytype-input-options-v1 before generating examples or decoding. It saves
 only these four preferences, on explicit settings changes. All-off is valid;
@@ -20,7 +45,7 @@ the source remote is git@github.com:afq984/polytype.git. IMPORTANT: the local
 private-prepublication bookmark retains older history containing host paths.
 Never push it, merge it into main, or use an all-bookmarks push. Push only main.
 See docs/PUBLISHING.md for build prerequisites, checks, limits and setup.
-Validated locally: 4 native tests, 31 passing Node tests with the same 2 ranking
+Validated locally: 7 native tests, 34 passing Node tests with the same 2 ranking
 TODOs, privacy guards, and browser smoke at the Pages subpath and standalone file.
 GitHub Actions build and Pages deployment passed, and browser smoke passed against
 the live site at https://afq984.github.io/polytype/. Public publishing notes describe
@@ -44,7 +69,7 @@ punctuation boundary. A short particle alone cannot establish that anchor, keepi
 English `ha ha` intact. This is still heuristic, not a learned language model.
 Zhuyin scoring and frozen prototype behavior are unchanged.
 
-The six mixed cases now score 4/6 exact top 1/top 5 in every layout/language
+Before family retention, the six mixed cases scored 4/6 exact top 1/top 5 in every layout/language
 configuration. EN+JP CER is 5.9% (was 22.5%); all-language CER is 19.9% Colemak
 and 14.0% QWERTY. Cases 3 and 6 remain TODO: rebase/mite, lowercase tanaka, and
 beam loss with Zhuyin active. Existing 22 guards, five earlier feedback cases,

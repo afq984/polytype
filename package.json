@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "test": "cargo test --workspace --locked && cargo build --locked -p polytype-core --bin polytype-json && npm run build:wasm && node --test tests/*.test.mjs",
+    "test": "cargo test --workspace --all-features --locked && cargo build --locked -p polytype-core --bin polytype-json && npm run build:wasm && node --test tests/*.test.mjs",
     "build:wasm": "node scripts/build-wasm.mjs",
     "build:pages": "npm run build:wasm && node scripts/build-pages.mjs",
     "preview:pages": "node scripts/serve.mjs --pages",
@@ -19,6 +19,7 @@
     "dictionary:import": "node scripts/import-chinese.mjs",
     "dictionary:import-english": "node scripts/import-english.mjs",
     "evaluate": "npm run build:wasm && node scripts/evaluate.mjs",
+    "diagnose:search": "cargo build --release --locked -p polytype-core --features diagnostics --bin polytype-search && node scripts/search-diagnostics.mjs",
     "corpus:verify": "node scripts/verify-corpus.mjs"
   }
 }

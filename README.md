@@ -38,6 +38,11 @@ notices live in `data/english-source.json` and `data/sources/scowl/Copyright` an
 are bundled in both demos. `npm run dictionary:import-english` explicitly fetches
 the pinned archive; builds and tests use checked-in data offline.
 
+Candidate lists now favor distinct interpretations over near-duplicate kana-script
+permutations when space is tight. Single-token katakana selection remains available;
+no scores or dictionary entries changed. The [candidate-diversity report](eval/DIVERSITY.md)
+records improvements, remaining ambiguities, and the latency tradeoff.
+
 ```sh
 npm test
 npm run build:standalone

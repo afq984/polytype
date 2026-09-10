@@ -76,6 +76,27 @@ impl Engine {
         search::decode(raw, &self.dictionary, options)
     }
 
+    /// Bounded native-only search experiment; not part of the browser protocol.
+    #[cfg(feature = "diagnostics")]
+    pub fn diagnose(
+        &self,
+        raw: &str,
+        options: &DecodeOptions,
+        width: usize,
+        diversity: bool,
+    ) -> Result<Value, String> {
+        if !(5..=192).contains(&width) {
+            return Err("Diagnostic beam width must be between 5 and 192".into());
+        }
+        Ok(search::diagnose(
+            raw,
+            &self.dictionary,
+            options,
+            width,
+            diversity,
+        ))
+    }
+
     /// Replace entries atomically. Validation never mutates the active dictionary.
     pub fn set_custom_entries(&mut self, entries: Vec<Entry>) -> Result<Vec<Entry>, String> {
         let entries = validate_entries(entries)?;
@@ -158,5 +179,27 @@ impl Engine {
             _ => return Err("Unknown Polytype operation".into()),
         };
         serde_json::to_string(&result).map_err(|e| e.to_string())
+    }
+}
+
+#[cfg(all(test, feature = "diagnostics"))]
+mod diagnostic_tests {
+    use super::*;
+    #[test]
+    fn diagnostic_widths_are_bounded_and_default_results_match() {
+        let options = DecodeOptions {
+            layout: Layout::Qwerty,
+            ..DecodeOptions::default()
+        };
+        for engine in [Engine::default(), Engine::prototype()] {
+            assert!(engine.diagnose("hello", &options, 4, true).is_err());
+            assert!(engine.diagnose("hello", &options, 193, true).is_err());
+            for raw in ["", "gakkou", "sakura / hello", "us3lc3"] {
+                assert_eq!(
+                    engine.diagnose(raw, &options, 12, true).unwrap()["candidates"],
+                    serde_json::json!(engine.decode_with_options(raw, &options))
+                );
+            }
+        }
     }
 }
