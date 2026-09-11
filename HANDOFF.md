@@ -2,6 +2,22 @@
 
 ## Current state
 
+Expanded Japanese now uses Mozc-style nn consumption: both n keys become ん,
+never retaining the second as an onset. shinnyou -> しんよう, konna -> こんあ,
+konnna -> こんな. Public Rust compose_japanese and expanded JSON/search agree;
+prototype composition, dictionary lookup and frozen JS parity remain historical.
+The existing greeting lookup uses konnnichiha or kon'nichiha in expanded mode;
+old konnichiha now composes こんいちは without a dictionary override. Bundled
+lexicon/kana files are unchanged. See docs/ROMAJI.md for the upstream source.
+Ranking ID: scowl-context-v4+family-v1+island-v1+nn-v1. The doubled-n TODO is
+resolved; only the two contextual-ranking TODOs remain. Island baseline shinnyou
+probes have explicit expected-output migrations; historical files are untouched.
+Native named search ablations and --baseline retain the old n convention to
+reproduce their frozen evidence; normal diagnostics use the corrected composer.
+Verification: 11 native tests, 40 passing Node tests and two existing ranking
+TODOs. Both browser formats cover exact Colemak sinnyou input, backspace and
+katakana selection/commit. Existing Chinese and six-line mixed metrics unchanged.
+
 English-island sprint: expanded search now protects enabled language-continuation
 possibilities within the same beam of 12. No scores/dictionaries/boundaries change.
 Ranking ID: scowl-context-v4+family-v1+island-v1. The new p95 latency capture now

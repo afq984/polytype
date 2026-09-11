@@ -77,6 +77,21 @@ pub(crate) struct Dictionary {
 }
 
 impl Dictionary {
+    pub(crate) fn japanese(&self, spelling: &str, modern: bool) -> Option<&Vec<String>> {
+        // Keep the bundled prototype lexicon untouched. Migrate this existing
+        // reading to standard nn / n' spellings, not an alias for the old rule.
+        let key = if modern {
+            match spelling {
+                "konnichiha" => return None,
+                "konnnichiha" | "kon'nichiha" => "konnichiha",
+                _ => spelling,
+            }
+        } else {
+            spelling
+        };
+        LEXICON.japanese.get(key)
+    }
+
     pub fn new(custom: Vec<Entry>, expanded: bool) -> Self {
         let mut dict = Self {
             expanded,

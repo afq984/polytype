@@ -1,7 +1,7 @@
 use crate::{
     DecodeOptions, Layout,
     dictionary::{Dictionary, LEXICON, english_tier},
-    japanese::{compose_japanese, to_katakana},
+    japanese::{compose_with_convention, to_katakana},
     phonetic::{read_units, utf16_len, zhuyin},
 };
 use serde::{Deserialize, Serialize};
@@ -58,6 +58,7 @@ struct Policy {
     discards: bool,
     identifiers: bool,
     first_tone: bool,
+    legacy_romaji: bool,
 }
 
 impl Default for Policy {
@@ -68,6 +69,7 @@ impl Default for Policy {
             discards: false,
             identifiers: false,
             first_tone: false,
+            legacy_romaji: false,
         }
     }
 }
@@ -294,6 +296,7 @@ pub(crate) fn diagnose(
     let policy = Policy {
         diversity,
         floor: diversity,
+        legacy_romaji: !diversity,
         ..Policy::default()
     };
     let candidates = decode_configured(input, dictionary, options, width, 5, policy);
@@ -320,6 +323,8 @@ pub(crate) fn experiment(
 ) -> Result<Vec<Candidate>, String> {
     let mut policy = Policy {
         floor: false,
+        // These named ablations reproduce the frozen family-v1 experiment.
+        legacy_romaji: true,
         ..Policy::default()
     };
     for flag in name.split('+') {
@@ -359,6 +364,7 @@ fn decode_lattice(
         return Vec::new();
     }
     let raw: Vec<u16> = input.encode_utf16().take(400).collect();
+    let modern_romaji = dictionary.expanded && !policy.legacy_romaji;
     let mut beams = Lattice {
         states: vec![Vec::new(); raw.len() + 1],
         width,
@@ -632,7 +638,7 @@ fn decode_lattice(
                 && !token.is_empty()
                 && (state.lang.is_none() || state.lang.as_deref() == Some("JP"))
             {
-                if let Some(texts) = LEXICON.japanese.get(spelling) {
+                if let Some(texts) = dictionary.japanese(spelling, modern_romaji) {
                     for (n, text) in texts.iter().enumerate() {
                         push(
                             &mut beams,
@@ -651,9 +657,11 @@ fn decode_lattice(
                         );
                     }
                 }
-                if let Some(composition) =
-                    compose_japanese(spelling, end < raw.len() || !suffix.is_empty())
-                {
+                if let Some(composition) = compose_with_convention(
+                    spelling,
+                    end < raw.len() || !suffix.is_empty(),
+                    modern_romaji,
+                ) {
                     let resolved = if composition.pending == "n" {
                         format!("{}ん", composition.kana)
                     } else {

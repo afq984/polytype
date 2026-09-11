@@ -5,6 +5,10 @@ One Rust decoder for Traditional Chinese (Zhuyin), Japanese (romaji) and English
 handles physical keyboard events, UI and browser storage. Native OS adapters are
 not implemented yet.
 
+Japanese `nn` now consumes both letters as `ん`, following Mozc's table:
+`shinnyou` → `しんよう`, `konna` → `こんあ`, `konnna` → `こんな`.
+See [the n convention and compatibility notes](docs/ROMAJI.md).
+
 The [English-island sprint](eval/ISLANDS.md) preserves alternative language paths
 within the existing search budget. It recovers `p95 latency` inside Chinese
 without changing scores or dictionaries. First-tone Space still completes a

@@ -24,7 +24,9 @@ test('English islands survive with unchanged scores and tone boundaries',()=>{
       const candidates=e.decode(row.raw,row.options),texts=candidates.map(c=>e.commitCandidate(c));
       if(row.text&&row.candidates[0]?.text===row.text)assert.equal(texts[0],row.text,row.id);
       if(row.text&&row.candidates.some(c=>[row.text,...(row.alternatives??[])].includes(c.text)))assert.ok(texts.some(t=>[row.text,...(row.alternatives??[])].includes(t)),row.id);
-      if(row.chinese||row.id.startsWith('probe-')||row.id.startsWith('abbreviation-'))assert.equal(texts[0],row.candidates[0]?.text,row.id);
+      // Explicit convention migration, not a silent rewrite of frozen evidence.
+      const expected=row.id==='probe-colemak-5'||row.id==='probe-qwerty-5'?'しんよう':row.candidates[0]?.text;
+      if(row.chinese||row.id.startsWith('probe-')||row.id.startsWith('abbreviation-'))assert.equal(texts[0],expected,row.id);
       for(const old of row.candidates){const same=candidates.find(c=>e.commitCandidate(c)===old.text);if(same)assert.ok(Math.abs(same.score-old.score)<1e-9,row.id+' score')}
     }
     for(const english of [false,true])for(const japanese of [false,true])for(const zhuyin of [false,true]){
@@ -44,7 +46,7 @@ test('native and WASM match island cases and Chinese typing prefixes',()=>{
   assert.ok(islandCases.length>60);
 });
 
-test('doubled n before y: Colemak dljjo;i should commit しんよう',{todo:'Separate user-reported romaji issue, deferred'},()=>{
+test('doubled n before y: Colemak dljjo;i commits しんよう',()=>{
   const e=createEngine();
   try{assert.equal(e.commitCandidate(e.decode('dljjo;i',{layout:'colemak',english:false,zhuyin:false})[0]),'しんよう')}
   finally{e.dispose()}

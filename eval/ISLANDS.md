@@ -1,5 +1,9 @@
 # English-island sprint
 
+Historical results: the later [n-convention correction](../docs/ROMAJI.md) changes
+the two shinnyou probe outputs intentionally. Native named ablations retain the
+old convention for reproducibility; current normal decoding uses the corrected one.
+
 Plan frozen before experiments. Two user captures diagnose different failures:
 `p95 latency` is pruned at the space after `p95`; `跟claude` cannot switch
 after a first-tone space under the current boundary contract. User-provided text
@@ -24,7 +28,7 @@ the baseline explicitly (not a cumulative budget). Do not ship unmeasured tuning
 First-tone switching is diagnostic-only, not a default behavior change. No general
 intra-token splitting, dictionary expansion or homophone scoring in this sprint.
 
-Aside: user reports Colemak `dljjo;i` (`shinnyou`) yields `しんにょう` instead
+Aside: user reports Colemak `dljjo;i` (`sinnyou`) yields `しんにょう` instead
 of intended `しんよう`. Deferred doubled-n issue; apostrophe behavior is intended.
 
 ## Measured outcome

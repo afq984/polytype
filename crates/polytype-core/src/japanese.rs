@@ -37,6 +37,16 @@ pub fn to_katakana(text: &str) -> String {
 }
 
 pub fn compose_japanese(roman: &str, final_input: bool) -> Option<Composition> {
+    compose_with_convention(roman, final_input, true)
+}
+
+// The prototype retains its historical n-onset convenience for migration parity.
+// Modern input follows Mozc's nn -> ん rule with no pending second n.
+pub(crate) fn compose_with_convention(
+    roman: &str,
+    final_input: bool,
+    modern: bool,
+) -> Option<Composition> {
     // All recognized romaji is ASCII. Reject other input without slicing UTF-8.
     if !roman.is_ascii() {
         return None;
@@ -65,7 +75,7 @@ pub fn compose_japanese(roman: &str, final_input: bool) -> Option<Composition> {
             }
             if bytes[1] == b'n' {
                 kana.push('ん');
-                offset += if bytes.len() > 2 && b"aiueoy".contains(&bytes[2]) {
+                offset += if !modern && bytes.len() > 2 && b"aiueoy".contains(&bytes[2]) {
                     1
                 } else {
                     2
@@ -114,4 +124,23 @@ pub fn compose_japanese(roman: &str, final_input: bool) -> Option<Composition> {
         kana,
         pending,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn public_composer_consumes_nn_but_prototype_preserves_its_old_convention() {
+        for (input, modern, legacy) in [
+            ("shinnyou", "しんよう", "しんにょう"),
+            ("konna", "こんあ", "こんな"),
+            ("nnya", "んや", "んにゃ"),
+        ] {
+            assert_eq!(compose_japanese(input, true).unwrap().text, modern);
+            assert_eq!(
+                compose_with_convention(input, true, false).unwrap().text,
+                legacy
+            );
+        }
+    }
 }

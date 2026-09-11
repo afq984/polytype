@@ -10,7 +10,7 @@
         "custom": 0,
         "imported": 0
       },
-      "instanceCreationMs": 0.22021499999999605,
+      "instanceCreationMs": 0.2073910000000012,
       "groups": {
         "real-text": {
           "cases": 20,
@@ -64,9 +64,9 @@
       },
       "prefixLatency": {
         "count": 2515,
-        "p50Ms": 0.15573399999999538,
-        "p95Ms": 0.9427160000000185,
-        "maxMs": 1.5095939999999928
+        "p50Ms": 0.1314869999999928,
+        "p95Ms": 0.9186420000000339,
+        "maxMs": 1.328883999999988
       },
       "rows": [
         {
@@ -1445,7 +1445,7 @@
         "englishImported": 101191,
         "imported": 28184
       },
-      "instanceCreationMs": 20.151021000000014,
+      "instanceCreationMs": 19.095867999999996,
       "groups": {
         "real-text": {
           "cases": 20,
@@ -1499,9 +1499,9 @@
       },
       "prefixLatency": {
         "count": 2515,
-        "p50Ms": 0.4844830000001821,
-        "p95Ms": 3.048583000000008,
-        "maxMs": 6.865713999999798
+        "p50Ms": 0.4730819999999767,
+        "p95Ms": 2.970487999999932,
+        "maxMs": 6.653399000000036
       },
       "rows": [
         {

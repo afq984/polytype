@@ -219,6 +219,17 @@ try {
     await evaluate("document.getElementById('raw').value='kan.'; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
     await evaluate("document.getElementById('keyboard-layout').value='colemak'; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
     assert.equal(await evaluate("document.getElementById('raw').value"),'kan.');
+    await evaluate("document.getElementById('raw').value=''; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
+    await typeRoman('sinn');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'しん');
+    await typeRoman('you');
+    assert.equal(await evaluate("document.getElementById('raw').value"),'dljjo;i');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'しんよう');
+    await key('Backspace','Backspace',8);
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'しんよ');
+    await typeRoman('u');
+    await evaluate("[...document.querySelectorAll('#candidates button')].find(b=>b.textContent.slice(1)==='シンヨウ').click(); document.getElementById('commit').click()");
+    assert.ok(await evaluate("document.getElementById('committed').textContent.endsWith('シンヨウ')"));
     await evaluate(`document.getElementById('raw').value=${JSON.stringify(captureA)}; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
     assert.equal(await evaluate("document.getElementById('preedit').textContent"),'量到的 p95 latency 曾加了 11.6% 還在範圍之內');
     const islandTarget='量到的 p95 latency 增加了 11.6% 還在範圍之內';
@@ -227,7 +238,7 @@ try {
     await evaluate(`document.getElementById('raw').value=${JSON.stringify(captureB.replace('ep cuaigk','ep  cuaigk'))}; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
     assert.ok((await evaluate("document.getElementById('preedit').textContent")).includes('跟 claude 討論'));
     const islandReport=await evaluate("(async()=>{await document.getElementById('copy-debug').onclick();return JSON.parse(document.getElementById('debug-report').value)})()");
-    assert.equal(islandReport.ranking,'scowl-context-v4+family-v1+island-v1');
+    assert.equal(islandReport.ranking,'scowl-context-v4+family-v1+island-v1+nn-v1');
     await evaluate("document.getElementById('raw').value='kan.'; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
     // Capturing does not save until the expected output is reviewed. Later
     // typing must not silently change the captured input or options.

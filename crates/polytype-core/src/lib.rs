@@ -157,9 +157,10 @@ impl Engine {
                     .as_str()
                     .ok_or("請輸入注音讀音（最多 180 字元）。")?
             )?),
-            "composeJapanese" => json!(compose_japanese(
+            "composeJapanese" => json!(japanese::compose_with_convention(
                 input()?,
-                value["final"].as_bool().unwrap_or(false)
+                value["final"].as_bool().unwrap_or(false),
+                self.dictionary.expanded
             )),
             "toKatakana" => json!(to_katakana(input()?)),
             "dictionarySize" => self.dictionary_size(),

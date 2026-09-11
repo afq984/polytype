@@ -26,8 +26,8 @@ User-supplied input, one sentence per case. Targets are provisional developer an
 Top-1 regressions: none.
 Top-5 regressions: none.
 
-prototype: engine instance 0.2 ms; prefix decode p50 0.16 ms, p95 0.94 ms (this run; module already loaded).
-expanded: engine instance 20.2 ms; prefix decode p50 0.48 ms, p95 3.05 ms (this run; module already loaded).
+prototype: engine instance 0.2 ms; prefix decode p50 0.13 ms, p95 0.92 ms (this run; module already loaded).
+expanded: engine instance 19.1 ms; prefix decode p50 0.47 ms, p95 2.97 ms (this run; module already loaded).
 
 ## Remaining expanded-profile errors
 
