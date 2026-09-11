@@ -26,7 +26,8 @@ test('layout and language options constrain the core before ranking',()=>{
   assert.equal(engine.decode('us3lc3',{layout:'qwerty',english:false,japanese:false})[0].text,'你好');
   assert.equal(engine.decode('gakkou us3lc3 hello',{layout:'qwerty'})[0].text,'がっこう 你好 hello');
   assert.deepEqual(engine.decode('hello',{layout:'qwerty',english:false,japanese:false,zhuyin:false}),[]);
-  assert.deepEqual(engine.decode('hello',{layout:'qwerty',english:false,zhuyin:false}),[]);
+  // Mozc's ll rule makes this valid kana, even though English usually wins.
+  assert.equal(engine.decode('hello',{layout:'qwerty',english:false,zhuyin:false})[0].text,'へっぉ');
   assert.equal(engine.decode('flldal')[0].text,'小さい'); // options do not leak
   for(const options of [{layout:'dvorak'},{english:'false'},{typo:true},null]) {
    assert.throws(()=>engine.decode('hello',options));

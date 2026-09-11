@@ -31,6 +31,7 @@ await mkdir(new URL('../web/pkg/', import.meta.url), {recursive: true});
 run(bindgen, ['target/wasm32-unknown-unknown/release/polytype_wasm.wasm', '--target', 'web', '--out-dir', 'web/pkg', '--out-name', 'polytype']);
 const licenses = await Promise.all(['LICENSE.txt','LIBTABE-NOTICE.txt'].map(name=>readFile(new URL('../data/sources/mcbopomofo/'+name,import.meta.url),'utf8')));
 const englishLicense=await readFile(new URL('../data/sources/scowl/Copyright',import.meta.url),'utf8');
+const mozcLicense=await readFile(new URL('../data/sources/mozc/LICENSE',import.meta.url),'utf8');
 const projectLicense=await readFile(new URL('../LICENSE',import.meta.url),'utf8');
 const metadata=JSON.parse(execFileSync('cargo',['metadata','--locked','--format-version','1'],{cwd:root,encoding:'utf8',env}));
 const dependencyNotices=[];
@@ -43,4 +44,4 @@ for(const pkg of metadata.packages.filter(pkg=>!metadata.workspace_members.inclu
   dependencyNotices.push(`${pkg.name} ${pkg.version} — MIT${names.length>1?' AND Unicode-3.0':''}\n\n${texts.join('\n\n')}`);
 }
 await writeFile(new URL('../web/dictionary-notices.txt',import.meta.url),
-  'Polytype — original code\n\n'+projectLicense+'\n\nPolytype Chinese dictionary subset derived from McBopomofo\nhttps://github.com/openvanilla/McBopomofo\nPinned source and transformations: data/chinese-source.json and scripts/import-chinese.mjs\n\n'+licenses.join('\n\n')+'\n\nPolytype modified SCOWL 2020.12.07 subset: lowercase ASCII English/American words and contractions through level 60.\nhttps://wordlist.aspell.net/\nSee data/english-source.json and scripts/import-english.mjs for pinned source and transformations.\n\n'+englishLicense+'\n\nCargo dependency notices (including build dependencies)\n\n'+dependencyNotices.join('\n\n'));
+  'Polytype — original code\n\n'+projectLicense+'\n\nPolytype Chinese dictionary subset derived from McBopomofo\nhttps://github.com/openvanilla/McBopomofo\nPinned source and transformations: data/chinese-source.json and scripts/import-chinese.mjs\n\n'+licenses.join('\n\n')+'\n\nPolytype modified SCOWL 2020.12.07 subset: lowercase ASCII English/American words and contractions through level 60.\nhttps://wordlist.aspell.net/\nSee data/english-source.json and scripts/import-english.mjs for pinned source and transformations.\n\n'+englishLicense+'\n\nMozc default romaji table\nhttps://github.com/google/mozc\nPinned source: data/japanese-source.json. Only the romaji table is imported, not the dictionaries covered by additional notices below.\n\n'+mozcLicense+'\n\nCargo dependency notices (including build dependencies)\n\n'+dependencyNotices.join('\n\n'));

@@ -2,6 +2,28 @@
 
 ## Current state
 
+Expanded Japanese now uses the pinned, unmodified Mozc romaji table (including
+pending fields), with reading-keyed lookup over the existing small kanji map.
+tokyo no longer aliases 東京; toukyou does. Equivalent nihongo/nihonngo spellings
+share 日本語. Bare n preserves distinct n/ん/ン commit outcomes and the UI labels
+ambiguous preedit choices. Ranking ID: scowl-context-v4+family-v1+island-v1+mozc-v1.
+The prototype and historical diagnostic ablations are unchanged. Mozc notices are
+bundled. See docs/ROMAJI.md for scope: no full Mozc converter/dictionary import;
+Polytype's Space, suffix-punctuation and mixed-ranking policies remain in place.
+Known new ranking limitation: valid Mozc ll makes hellosakura -> へっぉさくら top
+one, with Latin still selectable. Frozen probe expectations explicitly record this
+compatibility-induced change, without calling it an intended user target.
+Verification: 11 native tests; 43 passing Node tests and the two existing ranking
+TODOs; full prototype differential parity; format/clippy; browser smoke on local
+Pages subpath and standalone; asset hashes and artifact privacy checks. Existing
+real-text Chinese remains 12/20 top one and 17/20 top five; all 22 guards and five
+feedback cases pass. Mixed text remains 4/6 top one in each configuration and
+5/6 top five except Colemak/all at 4/6. One frozen Chinese prefix (QWERTY wu) now
+ranks Japanese う; completed targets are unchanged. This milestone is local only,
+not yet pushed or deployed.
+
+The following sections describe previous milestones.
+
 Expanded Japanese now uses Mozc-style nn consumption: both n keys become ん,
 never retaining the second as an onset. shinnyou -> しんよう, konna -> こんあ,
 konnna -> こんな. Public Rust compose_japanese and expanded JSON/search agree;

@@ -156,6 +156,7 @@ struct Lattice {
     width: usize,
     families: Option<HashMap<FamilyKey, usize>>,
     floor: u8,
+    commit_identity: bool,
 }
 
 // A soft family cap: keep spare script variants when capacity permits, but
@@ -214,7 +215,13 @@ fn push(
     // Stable ordering matches JavaScript's stable sort, including tied scores.
     beam.sort_by(|a, b| b.score.total_cmp(&a.score));
     let mut seen = HashSet::new();
-    beam.retain(|candidate| seen.insert((candidate.text.clone(), candidate.lang.clone())));
+    beam.retain(|candidate| {
+        seen.insert((
+            candidate.text.clone(),
+            candidate.lang.clone(),
+            beams.commit_identity.then(|| candidate.commit_text()),
+        ))
+    });
     if beams.floor != 0 {
         protect_continuations(beam, beams.floor);
     }
@@ -368,6 +375,7 @@ fn decode_lattice(
     let mut beams = Lattice {
         states: vec![Vec::new(); raw.len() + 1],
         width,
+        commit_identity: modern_romaji,
         families: (policy.diversity && dictionary.expanded && options.japanese).then(HashMap::new),
         floor: if policy.floor && dictionary.expanded {
             u8::from(options.english)
@@ -805,7 +813,7 @@ fn decode_lattice(
     }
     result.sort_by(|a, b| b.score.total_cmp(&a.score));
     let mut seen = HashSet::new();
-    result.retain(|c| seen.insert(c.text.clone()));
+    result.retain(|c| seen.insert((c.text.clone(), modern_romaji.then(|| c.commit_text()))));
     if beams.families.is_some() {
         trim_families(&mut result, limit, 1);
     } else {

@@ -1,0 +1,17 @@
+{
+  "name": "Mozc default romaji table",
+  "revision": "60af02ff797275f2ba1b7fddccdec916798d112e",
+  "selection": "Unmodified upstream table. Expanded composer only; prototype retains data/kana.json.",
+  "sources": [
+    {
+      "path": "src/data/preedit/romanji-hiragana.tsv",
+      "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/preedit/romanji-hiragana.tsv",
+      "sha256": "fcb900e311d32ced05499c86e236d1084fb0c0937398deb6311fc6c7287a7821"
+    },
+    {
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/LICENSE",
+      "sha256": "44cdd923b91ea9199293abecc2762c70c87dbf1e581c027a94c416368d1a648c"
+    }
+  ]
+}

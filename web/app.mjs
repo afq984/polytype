@@ -23,7 +23,7 @@ function render(reset=true){if(reset)selected=0;candidates=decode($('raw').value
  if(p.slots){const slots=el('div','phonetic-slots');p.slots.forEach((symbol,i)=>{const slot=el('span','phonetic-slot');slot.append(el('span','slot-label',['聲母','介音','韻母'][i]),el('strong','',symbol||'—'));slots.append(slot)});middle.append(slots);if(p.changes.length)middle.append(el('small','replacements',p.changes.join(' · ')))}
  row.append(middle,el('span','result',p.lang==='space'?'␣':p.text));$('segments').append(row)}}
  if($('raw').value&&!best){const enabled=options();$('preedit').append(el('span','placeholder',enabled.english||enabled.japanese||enabled.zhuyin?'No interpretation with the enabled languages.':'Enable at least one language.'))}
- candidates.forEach((c,i)=>{if(!$('raw').value)return;const b=el('button');b.setAttribute('aria-pressed',String(i===selected));b.append(el('span','candidate-index',String(i+1)),document.createTextNode(c.text));b.onclick=()=>{selected=i;render(false)};$('candidates').append(b)});
+ candidates.forEach((c,i)=>{if(!$('raw').value)return;const b=el('button');b.setAttribute('aria-pressed',String(i===selected));const commit=commitCandidate(c),label=commit!==c.text&&candidates.some((other,j)=>j!==i&&other.text===c.text)?`${c.text} → ${commit}`:c.text;b.append(el('span','candidate-index',String(i+1)),document.createTextNode(label));b.onclick=()=>{selected=i;render(false)};$('candidates').append(b)});
  document.querySelectorAll('#examples button').forEach((b,i)=>b.classList.toggle('active',$('raw').value===examples[i].raw));}
 function setRaw(raw){stop();$('raw').value=raw.slice(0,400);render()}
 function commit(){if(!$('raw').value||!candidates[selected])return;stop();committed+=(committed?'\n':'')+commitCandidate(candidates[selected]);$('committed').textContent=committed;$('copy').disabled=false;$('raw').value='';render();$('raw').focus()}
@@ -52,7 +52,7 @@ $('copy-debug').onclick=async()=>{
  const visibleCandidates=$('raw').value?candidates:[];
  const report={
   format:'polytype-debug-v1',capturedAt:new Date().toISOString(),
-  engine:'Rust/WASM',profile:'expanded',ranking:'scowl-context-v4+family-v1+island-v1+nn-v1',
+  engine:'Rust/WASM',profile:'expanded',ranking:'scowl-context-v4+family-v1+island-v1+mozc-v1',
   options:options(),
   browser:navigator.userAgent,mode:location.protocol==='file:'?'standalone':'web',
   raw:$('raw').value,rawEncoding:'QWERTY physical positions; roman interpretation uses options.layout',
@@ -82,7 +82,7 @@ try{const rows=JSON.parse(localStorage.getItem(casesKey)||'[]');if(!Array.isArra
 updateCaseCount();
 $('capture-case').onclick=()=>{
  stop();if(!$('raw').value)return;
- caseSnapshot={raw:$('raw').value,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),ranking:'scowl-context-v4+family-v1+island-v1+nn-v1'};
+ caseSnapshot={raw:$('raw').value,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),ranking:'scowl-context-v4+family-v1+island-v1+mozc-v1'};
  $('case-raw').value=caseSnapshot.raw;$('case-expected').value=candidates[selected]?commitCandidate(candidates[selected]):'';
  $('case-editor').hidden=false;$('case-editor').open=true;$('case-expected').focus();
  $('case-status').textContent='Review or correct the expected output, then save. This is a snapshot; later typing does not change it.';

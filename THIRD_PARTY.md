@@ -5,6 +5,10 @@ in LICENSE. This does not replace the following third-party terms:
 
 - The McBopomofo dictionary subset retains its MIT license and historical libtabe
   notices in data/sources/mcbopomofo/. See data/chinese-source.json for provenance.
+- The unmodified Mozc romaji table retains Google's BSD-3-Clause terms in
+  data/sources/mozc/LICENSE. See data/japanese-source.json for pinned source hashes.
+  The upstream license file also contains dictionary notices; no Mozc dictionary
+  is imported by this change. These notices are bundled with both demo formats.
 - The modified SCOWL subset retains the licenses and notices in
   data/sources/scowl/Copyright. See data/english-source.json for its sources and
   transformations. These include permissive licenses and public-domain material;

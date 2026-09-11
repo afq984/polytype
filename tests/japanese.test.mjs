@@ -34,7 +34,8 @@ test('pending consonants survive edits; n resolves only when disambiguated', () 
     assert.equal(result.pending, pending, roman);
   }
   assert.equal(composeJapanese('kan', {final: true}).text, 'かん');
-  for (const raw of ['hello', "ka'", 'abc123', '猫']) assert.equal(composeJapanese(raw), null);
+  assert.equal(composeJapanese('hello').text, 'へっぉ'); // Mozc ll -> っ + l.
+  for (const raw of ["ka'", 'abc123', '猫']) assert.equal(composeJapanese(raw), null);
 });
 
 test('kana candidates integrate with dictionary, English and exact spaces', () => {

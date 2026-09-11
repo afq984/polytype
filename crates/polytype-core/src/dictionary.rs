@@ -15,6 +15,32 @@ pub(crate) static LEXICON: LazyLock<Lexicon> = LazyLock::new(|| {
     serde_json::from_str(include_str!("../../../data/lexicon.json")).expect("valid bundled lexicon")
 });
 
+// The prototype bundled each word with its kana reading. Index that reading,
+// not its demo romaji alias: all equivalent standard spellings share conversion.
+static JAPANESE_READINGS: LazyLock<HashMap<String, Vec<String>>> = LazyLock::new(|| {
+    let mut readings: HashMap<String, Vec<String>> = HashMap::new();
+    let mut rows: Vec<_> = LEXICON.japanese.iter().collect();
+    rows.sort_by_key(|(key, _)| *key);
+    for (_, outputs) in rows {
+        let reading = outputs
+            .iter()
+            .find(|text| {
+                !text.is_empty()
+                    && text
+                        .chars()
+                        .all(|c| ('ぁ'..='ゖ').contains(&c) || c == 'ー')
+            })
+            .expect("bundled Japanese word has a kana reading");
+        let values = readings.entry(reading.clone()).or_default();
+        for output in outputs {
+            if !values.contains(output) {
+                values.push(output.clone());
+            }
+        }
+    }
+    readings
+});
+
 // SCOWL coverage tiers, not probabilities; pinned source and notices accompany
 // data/english.tsv. The frozen prototype does not consult this table.
 static ENGLISH: LazyLock<HashMap<&'static str, u8>> = LazyLock::new(|| {
@@ -78,18 +104,14 @@ pub(crate) struct Dictionary {
 
 impl Dictionary {
     pub(crate) fn japanese(&self, spelling: &str, modern: bool) -> Option<&Vec<String>> {
-        // Keep the bundled prototype lexicon untouched. Migrate this existing
-        // reading to standard nn / n' spellings, not an alias for the old rule.
-        let key = if modern {
-            match spelling {
-                "konnichiha" => return None,
-                "konnnichiha" | "kon'nichiha" => "konnichiha",
-                _ => spelling,
-            }
-        } else {
-            spelling
-        };
-        LEXICON.japanese.get(key)
+        if modern {
+            let composed = crate::japanese::compose_japanese(spelling, true)?;
+            return composed
+                .complete
+                .then(|| JAPANESE_READINGS.get(&composed.kana))
+                .flatten();
+        }
+        LEXICON.japanese.get(spelling)
     }
 
     pub fn new(custom: Vec<Entry>, expanded: bool) -> Self {

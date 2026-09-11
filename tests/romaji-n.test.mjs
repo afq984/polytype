@@ -40,9 +40,7 @@ test('standard kana candidates, punctuation and greeting lookup agree in both la
         const options={layout,english:false,japanese:true,zhuyin:false};
         const c=e.decode(input,options),commits=c.map(c=>e.commitCandidate(c));
         assert.ok(commits.includes(text+suffix),`${layout} ${roman+suffix}: hira`);
-        // A lone pending n has identical display in both scripts and is already
-        // deduplicated by the existing search; nn and all resolved forms differ.
-        if(roman!=='n'||suffix)assert.ok(commits.includes(e.toKatakana(text)+suffix),`${layout} ${roman+suffix}: kata`);
+        assert.ok(commits.includes(e.toKatakana(text)+suffix),`${layout} ${roman+suffix}: kata`);
         if(roman==='konnichiha')assert.ok(!commits.includes('こんにちは'+suffix),'no legacy lookup shortcut');
       }
     }

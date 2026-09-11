@@ -238,7 +238,19 @@ try {
     await evaluate(`document.getElementById('raw').value=${JSON.stringify(captureB.replace('ep cuaigk','ep  cuaigk'))}; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
     assert.ok((await evaluate("document.getElementById('preedit').textContent")).includes('跟 claude 討論'));
     const islandReport=await evaluate("(async()=>{await document.getElementById('copy-debug').onclick();return JSON.parse(document.getElementById('debug-report').value)})()");
-    assert.equal(islandReport.ranking,'scowl-context-v4+family-v1+island-v1+nn-v1');
+    assert.equal(islandReport.ranking,'scowl-context-v4+family-v1+island-v1+mozc-v1');
+    // Reading-based conversion and identical-preedit commit recovery.
+    await evaluate("document.getElementById('keyboard-layout').value='qwerty'; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
+    for(const [raw,target] of [['toukyou','東京'],['nihonngo','日本語']]){
+      await evaluate(`document.getElementById('raw').value=${JSON.stringify(raw)}; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
+      assert.ok(await evaluate(`[...document.querySelectorAll('#candidates button')].some(b=>b.textContent.slice(1)===${JSON.stringify(target)})`));
+    }
+    await evaluate("document.getElementById('raw').value='tokyo'; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
+    assert.ok(!(await evaluate("document.getElementById('candidates').textContent")).includes('東京'));
+    await evaluate("document.getElementById('raw').value='n'; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
+    await evaluate("[...document.querySelectorAll('#candidates button')].find(b=>b.textContent.slice(1)==='n → ン').click(); document.getElementById('commit').click()");
+    assert.ok(await evaluate("document.getElementById('committed').textContent.endsWith('ン')"));
+    await evaluate("document.getElementById('keyboard-layout').value='colemak'; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
     await evaluate("document.getElementById('raw').value='kan.'; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
     // Capturing does not save until the expected output is reviewed. Later
     // typing must not silently change the captured input or options.

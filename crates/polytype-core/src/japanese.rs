@@ -14,6 +14,70 @@ static PREFIXES: LazyLock<HashSet<String>> = LazyLock::new(|| {
         .collect()
 });
 
+// Unmodified, pinned upstream data; see data/japanese-source.json and notices.
+static MOZC: LazyLock<HashMap<&'static str, (&'static str, &'static str)>> = LazyLock::new(|| {
+    include_str!("../../../data/sources/mozc/romanji-hiragana.tsv")
+        .lines()
+        .map(|line| {
+            let mut fields = line.split('\t');
+            let key = fields.next().unwrap();
+            (key, (fields.next().unwrap(), fields.next().unwrap_or("")))
+        })
+        .collect()
+});
+static MOZC_PREFIXES: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
+    MOZC.keys()
+        .flat_map(|key| (1..key.len()).map(|end| &key[..end]))
+        .collect()
+});
+
+fn compose_mozc(roman: &str, final_input: bool) -> Option<Composition> {
+    if !roman.is_ascii() {
+        return None;
+    }
+    let mut rest = roman.to_ascii_lowercase();
+    let mut kana = String::new();
+    let mut pending = String::new();
+    let mut explicit_small_kana = 0;
+    let mut consumed = false;
+    while !rest.is_empty() {
+        // A prefix such as ny must not fall back to n until disambiguated.
+        if (rest == "n" && !final_input)
+            || (MOZC_PREFIXES.contains(rest.as_str()) && !MOZC.contains_key(rest.as_str()))
+        {
+            pending = rest;
+            break;
+        }
+        let (length, &(output, carry)) = (1..=rest.len().min(4))
+            .rev()
+            .find_map(|length| MOZC.get(&rest[..length]).map(|rule| (length, rule)))?;
+        if consumed
+            && rest.starts_with(['x', 'l'])
+            && output
+                .chars()
+                .any(|c| "ぁぃぅぇぉゃゅょっゎヵヶ".contains(c))
+        {
+            explicit_small_kana += 1;
+        }
+        kana.push_str(output);
+        consumed = true;
+        if length == rest.len() {
+            // A rule's pending field is continuation, not fresh input. In
+            // particular www -> w + pending ww must not recursively consume ww.
+            pending = carry.to_owned();
+            break;
+        }
+        rest = format!("{carry}{}", &rest[length..]);
+    }
+    Some(Composition {
+        explicit_small_kana,
+        text: format!("{kana}{pending}"),
+        complete: pending.is_empty(),
+        kana,
+        pending,
+    })
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Composition {
     #[serde(skip)]
@@ -47,6 +111,9 @@ pub(crate) fn compose_with_convention(
     final_input: bool,
     modern: bool,
 ) -> Option<Composition> {
+    if modern {
+        return compose_mozc(roman, final_input);
+    }
     // All recognized romaji is ASCII. Reject other input without slicing UTF-8.
     if !roman.is_ascii() {
         return None;
