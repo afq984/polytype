@@ -5,38 +5,34 @@ create and deploy the demo on GitHub-hosted Actions runners.
 
 ## Build and test
 
-Use Node.js 22+ and Rust 1.95.0 (the CI-pinned compiler), with the WASM target and
-matching CLI. No npm install is needed; dictionaries and Cargo.lock are checked in.
-First-time Cargo/toolchain installation needs network access.
+Use Bazelisk on Linux x86_64 and the host C/C++ toolchain described in
+[BUILD.md](BUILD.md). Rust, Node.js, wasm-bindgen and dependencies are pinned.
+The first build needs network access for Bazel's repository downloads.
 
 ```sh
-rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
-rustup override set 1.95.0
-cargo install wasm-bindgen-cli --version 0.2.128 --locked
-npm test
-npm run build:pages
-npm run build:standalone
-npm run audit:public
-npm run preview:pages
+bazelisk test //...
+bazelisk build //:pages //:standalone //:evaluation
+bazelisk test //:browser_test --test_env=CHROME_BIN=/path/to/chrome
+bazelisk run //:preview
 ```
 
-Open http://127.0.0.1:4174/polytype/ to test the project-site path. In another
-terminal, run `DEMO_URL=http://127.0.0.1:4174/polytype/ npm run test:browser`.
-Set CHROME_BIN if Chrome is not on PATH. The browser check also exercises the
-standalone HTML and missing-WASM handling. Stop the preview with Ctrl-C.
+Open http://127.0.0.1:4174/polytype/ to test the project-site path. The optional
+browser test starts its own server and also exercises the standalone HTML and
+missing-WASM handling. Chrome and its system libraries are outside the pinned
+boundary. Stop the interactive preview with Ctrl-C.
 
-`dist/` is the only Pages upload directory: HTML, CSS, local ES modules, WASM,
-dictionary license notices, and `.nojekyll`. All URLs are relative, so the demo
+`bazel-bin/demo.pages/` is the only Pages upload directory: HTML, CSS, local
+ES modules, WASM, dictionary license notices, and `.nojekyll`. All URLs are relative, so the demo
 also works at a repository subpath. Source files, evaluation reports, user test
 exports, build caches, VCS metadata, and standalone HTML are not copied into it.
-Unexpected files or links in dist cause the build to fail; inspect and move them
-out before rebuilding. Do not upload the checkout or target directory.
+The bundle action audits the allowlisted files and rejects links. Do not upload
+the checkout, demo.runtime directory or other build outputs.
 
 ## Artifact hygiene
 
 Builds include only allowlisted assets, exclude local captures and repository
 metadata, and check for accidental private paths or credential markers.
-`npm run audit:public` checks both demo formats, including the standalone's nested
+`bazelisk test //:audit_test` checks both demo formats, including the standalone's nested
 embedded payloads. Rust path remapping keeps builder paths out of compiled output.
 For Pages these checks run on GitHub-hosted runners, not the developer's machine;
 the same safeguards also apply to locally built artifacts.

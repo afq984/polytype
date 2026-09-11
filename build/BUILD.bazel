@@ -1,0 +1,42 @@
+load(":defs.bzl", "prebuilt_binary")
+load("@rules_rust_wasm_bindgen//:defs.bzl", "rust_wasm_bindgen_toolchain")
+package(default_visibility = ["//visibility:public"])
+
+rust_wasm_bindgen_toolchain(
+    name = "wasm_bindgen_impl",
+    wasm_bindgen_cli = ":wasm_bindgen",
+)
+toolchain(
+    name = "wasm_bindgen_toolchain",
+    toolchain = ":wasm_bindgen_impl",
+    toolchain_type = "@rules_rust_wasm_bindgen//:toolchain_type",
+    exec_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+)
+
+filegroup(
+    name = "dependency_notices",
+    srcs = [
+        "@crates__bumpalo-3.20.3//:notices",
+        "@crates__cfg-if-1.0.4//:notices",
+        "@crates__itoa-1.0.18//:notices",
+        "@crates__memchr-2.8.3//:notices",
+        "@crates__once_cell-1.21.4//:notices",
+        "@crates__proc-macro2-1.0.107//:notices",
+        "@crates__quote-1.0.47//:notices",
+        "@crates__rustversion-1.0.23//:notices",
+        "@crates__serde-1.0.229//:notices",
+        "@crates__serde_core-1.0.229//:notices",
+        "@crates__serde_derive-1.0.229//:notices",
+        "@crates__serde_json-1.0.151//:notices",
+        "@crates__syn-3.0.5//:notices",
+        "@crates__unicode-ident-1.0.24//:notices",
+        "@crates__wasm-bindgen-0.2.128//:notices",
+        "@crates__wasm-bindgen-macro-0.2.128//:notices",
+        "@crates__wasm-bindgen-macro-support-0.2.128//:notices",
+        "@crates__wasm-bindgen-shared-0.2.128//:notices",
+        "@crates__zmij-1.0.23//:notices",
+    ],
+)
+
+prebuilt_binary(name = "wasm_bindgen", src = "@wasm_bindgen_cli//:wasm-bindgen")
+exports_files(["stage.mjs", "run.mjs", "reproduce.mjs"])

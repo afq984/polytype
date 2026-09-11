@@ -1,0 +1,9 @@
+common --enable_bzlmod
+build --incompatible_strict_action_env
+build --compilation_mode=opt
+build --stamp=no
+test --test_output=errors
+test --test_env=TZ=UTC
+test --test_env=LANG=C.UTF-8
+build --@rules_rust//rust/settings:lto=fat
+build --@rules_rust//rust/settings:codegen_units=1

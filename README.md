@@ -16,14 +16,20 @@ Chinese syllable; press Space again for a separator before another language.
 
 ## Build and run
 
-Requires Rust (validated with 1.95.0), Node.js 22+, and the matching wasm-bindgen CLI.
-There are no npm dependencies. Cargo dependencies are pinned in Cargo.lock.
+Bazel is the single supported build workflow on Linux x86_64, targeting native
+Linux and WebAssembly. Install Bazelisk; Bazel downloads the pinned Rust 1.95.0,
+Node.js 26.8.1 and wasm-bindgen 0.2.128 tools and locked dependencies. There are
+no npm dependencies or TypeScript compilation steps.
+
+The agreed boundary leaves the host linker, libc/sysroot and browser unpinned.
+A working host C/C++ toolchain is still required (for example `build-essential`
+on Debian/Ubuntu); optional browser checks also need Chrome and its system libraries.
+No system Rust, Cargo, rustup, Node.js or npm installation is needed. See
+[the build contract and reproducibility checks](docs/BUILD.md).
 
 ```sh
-rustup target add wasm32-unknown-unknown
-cargo install wasm-bindgen-cli --version 0.2.128 --locked
-npm run build:wasm
-npm start
+bazelisk test //...
+bazelisk run //:serve
 ```
 
 Open http://127.0.0.1:4173. Choose QWERTY (default) or Colemak for English/Japanese,
@@ -44,7 +50,7 @@ before clearing browser data. Custom dictionary contents are not exported.
 The current ranking build includes 101,191 SCOWL English spellings, context-gated
 Japanese particles, and case/small-kana cues. Import provenance and all upstream
 notices live in `data/english-source.json` and `data/sources/scowl/Copyright` and
-are bundled in both demos. `npm run dictionary:import-english` explicitly fetches
+are bundled in both demos. `bazelisk run //:import_english` explicitly fetches
 the pinned archive; builds and tests use checked-in data offline.
 
 Candidate lists now favor distinct interpretations over near-duplicate kana-script
@@ -53,26 +59,26 @@ no scores or dictionary entries changed. The [candidate-diversity report](eval/D
 records improvements, remaining ambiguities, and the latency tradeoff.
 
 ```sh
-npm test
-npm run build:standalone
-CHROME_BIN=/path/to/chrome npm run test:browser
+bazelisk test //...
+bazelisk run //:refresh_demo
+bazelisk test //:browser_test --test_env=CHROME_BIN=/path/to/chrome
 ```
 
 Tests compile the native core and WASM, run shared acceptance fixtures, and compare
-full candidates against the frozen JavaScript reference. The browser check needs
-the localhost server running; it also checks the standalone file and missing-WASM
-error handling. Cargo-only tests: `cargo test --workspace --locked`.
+full candidates against the frozen JavaScript reference. The optional browser check starts its own
+server and also checks the standalone file and missing-WASM error handling.
+Native-only tests: `bazelisk test //crates/polytype-core:all`.
 
 `Polytype-Demo.html` embeds the same WASM engine and can be opened offline without
 a build toolchain. Browser storage and clipboard permissions can differ for file
-URLs. Generated `web/pkg/` and Cargo `target/` are ignored; rebuild them after a
-fresh checkout. The standalone HTML is checked in and must be regenerated after
-core, data or web edits.
+URLs. Bazel writes generated outputs under `bazel-bin/`; ordinary builds never
+update the checkout. Run `bazelisk run //:refresh_demo` after source changes to
+update the checked-in standalone HTML and notices.
 
 ## Pages demo
 
-For a deployable static build, run `npm run build:pages`; preview it with
-`npm run preview:pages` at http://127.0.0.1:4174/polytype/. See
+For a deployable static build, run `bazelisk build //:pages`; preview it with
+`bazelisk run //:preview` at http://127.0.0.1:4174/polytype/. See
 [Pages build and deployment](docs/PUBLISHING.md) for setup and artifact hygiene.
 Successful push builds on `main` deploy to GitHub Pages once Pages is enabled
 with GitHub Actions as its source. Pull requests only build/test. Manual runs
@@ -100,9 +106,9 @@ and ambiguous input can prefer another language. This is still a playground.
 ## Dictionary and real-text evaluation
 
 ```sh
-npm run dictionary:import  # explicit network step, verifies pinned checksums
-npm run evaluate          # builds WASM; evaluates locally and writes eval reports
-npm run corpus:verify     # explicit network check against pinned source sentences
+bazelisk run //:import_chinese  # explicit network step, verifies pinned checksums
+bazelisk build //:evaluation          # builds WASM; evaluates locally and writes eval reports
+bazelisk run //:verify_corpus     # explicit network check against pinned source sentences
 ```
 
 The [evaluation report](eval/REPORT.md) compares the prototype and expanded

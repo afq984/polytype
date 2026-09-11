@@ -77,9 +77,8 @@ against the preceding sprint, not its older pre-diversity baseline.
 ## Reproduce
 
 ```
-cargo build --release --locked -p polytype-core --features diagnostics --bin polytype-search
-node scripts/experiment-islands.mjs
-npm test
+bazelisk run //:experiment_islands
+bazelisk test //...
 ```
 
 The native CLI accepts `--experiment=baseline`, `floor`, `discards`, `identifiers`,
@@ -93,5 +92,5 @@ pass its engine path as `BASELINE_ENGINE` below. The script validates every froz
 baseline result before timing and fails if the 15% median p95 budget is exceeded.
 
 ```
-node scripts/benchmark-search.mjs BASELINE_ENGINE eval/island-latency.json eval/island-baseline.json
+bazelisk run //:benchmark -- BASELINE_ENGINE eval/island-latency.json eval/island-baseline.json
 ```

@@ -10,9 +10,12 @@ native-only wider-beam diagnostics, explicit baseline comparisons, and same-mach
 latency measurements. Its finite search results are not a dictionary-reachability
 oracle; see diversity-report.md for remaining cases and methodological limits.
 
-Run `npm run evaluate` to rebuild WASM and regenerate REPORT.md and report.json.
+Default reports omit host-dependent timings. Use `bazelisk run //:measure_evaluation`
+for fresh latency measurements on stdout. Historical reports retain their original timing data.
+
+Run `bazelisk build //:evaluation` to build WASM and generate REPORT.md and report.json under bazel-bin/evaluation/.
 Evaluation is entirely local. For your own cases, run
-`node scripts/evaluate.mjs /path/to/cases.jsonl` after building WASM. Each line is
+`bazelisk run //:evaluate_local -- /path/to/cases.jsonl` after building WASM. Each line is
 `{"id":"optional","raw":"QWERTY-encoded keys","text":"expected output"}`.
 Local-file results go to stdout; the bundled report is not overwritten.
 Optional `options` fields select layout and enabled languages. The demo's
@@ -120,9 +123,9 @@ Metrics:
   module. It excludes fetching/compiling WASM and browser rendering. It is a
   diagnostic run, not a controlled performance benchmark.
 
-`npm run corpus:verify` is a separate, explicit network action. It checks each
+`bazelisk run //:verify_corpus` is a separate, explicit network action. It checks each
 excerpt against the pinned upstream sentence and records the source checksum.
-`npm run dictionary:import` never reads eval/.
+`bazelisk run //:import_chinese` never reads eval/.
 
 ## First experiment
 

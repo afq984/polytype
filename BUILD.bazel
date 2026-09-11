@@ -1,0 +1,62 @@
+load("@rules_rust//rust:defs.bzl", "rust_clippy_test", "rustfmt_test")
+load("//build:defs.bzl", "evaluation", "node_command", "node_test", "polytype_bundle")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["Cargo.toml", "Cargo.lock"])
+
+filegroup(
+    name = "dictionary",
+    srcs = glob(["data/**"]),
+)
+
+filegroup(
+    name = "fixtures",
+    srcs = glob(["tests/fixtures/**"]),
+)
+
+polytype_bundle(
+    name = "demo",
+    srcs = glob(["web/*", "scripts/*.mjs", "tests/**", "eval/**", "data/**"], exclude = ["web/dictionary-notices.txt"]) + ["LICENSE", "Cargo.lock", "package.json", "//build:reproduce.mjs"],
+    bindings = "//crates/polytype-wasm:bindings",
+    notices = "//build:dependency_notices",
+    native = "//crates/polytype-core:polytype-json",
+    search = "//crates/polytype-core:polytype-search",
+)
+
+filegroup(name = "pages", srcs = [":demo"], output_group = "pages")
+filegroup(name = "standalone", srcs = [":demo"], output_group = "standalone")
+alias(name = "polytype-json", actual = "//crates/polytype-core:polytype-json")
+alias(name = "polytype-search", actual = "//crates/polytype-core:polytype-search")
+alias(name = "wasm", actual = "//crates/polytype-wasm:bindings")
+
+node_test(name = "js_test", runtime = ":demo", mode = "test", size = "large")
+node_test(name = "audit_test", runtime = ":demo", mode = "audit")
+# Browser executable and system libraries are intentionally outside the boundary.
+node_test(name = "browser_test", runtime = ":demo", mode = "browser", size = "large", tags = ["manual", "local", "requires-network"])
+node_command(name = "serve", runtime = ":demo", mode = "serve")
+node_command(name = "preview", runtime = ":demo", mode = "preview")
+node_command(name = "refresh_demo", runtime = ":demo", mode = "refresh")
+node_command(name = "reproducibility_check", runtime = ":demo", mode = "reproduce")
+node_command(name = "measure_evaluation", runtime = ":demo", mode = "measure-evaluation")
+node_command(name = "evaluate_local", runtime = ":demo", mode = "evaluate-local")
+node_command(name = "benchmark", runtime = ":demo", mode = "benchmark")
+node_command(name = "diagnose", runtime = ":demo", mode = "diagnose")
+node_command(name = "import_chinese", runtime = ":demo", mode = "import-chinese")
+node_command(name = "import_english", runtime = ":demo", mode = "import-english")
+node_command(name = "verify_corpus", runtime = ":demo", mode = "verify-corpus")
+node_command(name = "experiment_islands", runtime = ":demo", mode = "experiment-islands")
+node_command(name = "compare_search", runtime = ":demo", mode = "compare-search")
+evaluation(name = "evaluation", runtime = ":demo")
+
+_RUST_TARGETS = [
+    "//crates/polytype-core:polytype_core",
+    "//crates/polytype-core:diagnostic_core",
+    "//crates/polytype-core:polytype-json",
+    "//crates/polytype-core:polytype-search",
+    "//crates/polytype-core:unit_tests",
+    "//crates/polytype-core:behavior_test",
+    "//crates/polytype-wasm:polytype_wasm",
+]
+rustfmt_test(name = "format_test", targets = _RUST_TARGETS)
+rust_clippy_test(name = "clippy_test", targets = _RUST_TARGETS)

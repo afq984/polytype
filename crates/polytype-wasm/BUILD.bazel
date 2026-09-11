@@ -1,0 +1,20 @@
+load("@crates//:defs.bzl", "all_crate_deps")
+load("@rules_rust//rust:defs.bzl", "rust_shared_library")
+load("@rules_rust_wasm_bindgen//:defs.bzl", "rust_wasm_bindgen")
+
+package(default_visibility = ["//visibility:public"])
+exports_files(["Cargo.toml"])
+
+rust_shared_library(
+    name = "polytype_wasm",
+    srcs = ["src/lib.rs"],
+    deps = ["//crates/polytype-core:polytype_core"] + all_crate_deps(normal = True),
+    proc_macro_deps = all_crate_deps(proc_macro = True),
+)
+
+rust_wasm_bindgen(
+    name = "bindings",
+    wasm_file = ":polytype_wasm",
+    target = "web",
+    out_name = "polytype",
+)

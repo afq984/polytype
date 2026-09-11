@@ -1,5 +1,36 @@
 # Polytype handoff
 
+## Bazel build migration
+
+Bazel is now the single build/development workflow for Linux x86_64 hosts,
+targeting Linux and WASM. See docs/BUILD.md for commands, pins and the agreed
+boundary. Rust/Cargo/rustfmt/clippy 1.95.0, Node 26.8.1, wasm-bindgen 0.2.128,
+Bazel 8.6.0 and dependency archives are pinned. Host linker/sysroot, shell and
+browser libraries remain outside the boundary; a host C/C++ toolchain is still
+required. Cargo manifests/lock remain metadata, and package.json only declares
+ES modules and the Node version. npm scripts and the old Cargo build wrapper
+have been removed. CI now invokes Bazel; nothing was pushed or deployed.
+
+Use `bazelisk test //...`, `bazelisk run //:serve`, and
+`bazelisk run //:refresh_demo`. Normal actions write only Bazel outputs; refresh
+explicitly updates the checked-in standalone and notices. Browser checks start
+their own server: `bazelisk test //:browser_test --test_env=CHROME_BIN=/path/to/chrome`.
+Default evaluation reports under bazel-bin/evaluation omit timing measurements
+for reproducibility. `bazelisk run //:measure_evaluation` prints fresh timings.
+Historical checked-in reports retain their original measurement data.
+
+Validation: all 11 native tests, 43 JavaScript tests plus two existing ranking
+TODOs, formatting/clippy, privacy audit and browser smoke pass. Chinese metrics
+remain 12/20 top one and 17/20 top five, with all 22 guards and five feedback cases
+passing. Deterministic and timed evaluation modes produce identical candidate
+rows and metrics. Two independent builds with ambient Rust/Node commands blocked
+produced identical bytes for Pages, standalone, evaluation and native binaries;
+uncached native/WASM tests passed with repository fetching disabled. Native byte
+identity is measured on this host, not promised across different host linkers.
+No decoder, dictionary or frozen reference implementation changed.
+
+The following sections describe the decoder milestones before the build migration.
+
 ## Current state
 
 Expanded Japanese now uses the pinned, unmodified Mozc romaji table (including

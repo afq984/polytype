@@ -11,10 +11,11 @@ Read HANDOFF.md before making changes. This is a prototype, not a finished nativ
 - Generate data/chinese.tsv with scripts/import-chinese.mjs. Retain pinned source
   hashes and notices. Never use eval/ text to populate the dictionary. Report
   corpus selection limits and language regressions alongside improvements.
-- Regenerate Polytype-Demo.html with npm run build:standalone after source edits.
+- Regenerate Polytype-Demo.html with bazelisk run //:refresh_demo after source edits.
   Do not edit generated HTML or web/pkg/ directly.
-- Use npm test for native/WASM behavior and differential parity. Use cargo fmt
-  and cargo clippy for Rust changes. Add focused regressions for real bugs.
+- Use bazelisk test //... for native/WASM behavior, differential parity,
+  formatting and clippy. Bazel is the sole supported build workflow.
+  Add focused regressions for real bugs.
 - Preserve exact spaces: Space can finalize first-tone Zhuyin or be a separator.
   Keep literal-space language boundaries unless the user requests a change.
 - The user's OS keyboard is already Colemak. Normalize physical positions once.

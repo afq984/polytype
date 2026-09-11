@@ -47,10 +47,10 @@ script permutations can disappear from a full list; explicit single-token
 katakana alternatives and selected-script commit remain tested.
 
 ```sh
-npm run diagnose:search -- eval/diversity-baseline.json --baseline
-npm run diagnose:search -- eval/diversity-after.json
-node scripts/compare-search.mjs
-npm run evaluate
+bazelisk run //:diagnose -- eval/diversity-baseline.json --baseline
+bazelisk run //:diagnose -- eval/diversity-after.json
+bazelisk run //:compare_search
+bazelisk build //:evaluation
 ```
 
 The native diagnostic binary requires the opt-in diagnostics feature and accepts
@@ -68,7 +68,7 @@ For latency, preserve a pre-sprint built web/ snapshot (engine.mjs, keyboard.mjs
 pkg glue/WASM, and a parent package.json with type:module), then run:
 
 ```sh
-node scripts/benchmark-search.mjs /path/to/baseline/web/engine.mjs eval/diversity-latency.json
+bazelisk run //:benchmark -- /path/to/baseline/web/engine.mjs eval/diversity-latency.json
 ```
 
 The report records five alternating-order measurements after warmup, without

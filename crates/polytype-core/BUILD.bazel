@@ -1,0 +1,45 @@
+load("@crates//:defs.bzl", "all_crate_deps")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+exports_files(["Cargo.toml"])
+
+rust_library(
+    name = "polytype_core",
+    srcs = glob(["src/*.rs"]),
+    compile_data = ["//:dictionary"],
+    deps = all_crate_deps(normal = True),
+    proc_macro_deps = all_crate_deps(proc_macro = True),
+)
+
+rust_library(
+    name = "diagnostic_core",
+    crate_name = "polytype_core",
+    srcs = glob(["src/*.rs"]),
+    crate_features = ["diagnostics"],
+    compile_data = ["//:dictionary"],
+    deps = all_crate_deps(normal = True),
+    proc_macro_deps = all_crate_deps(proc_macro = True),
+)
+
+rust_binary(
+    name = "polytype-json",
+    srcs = ["src/bin/polytype-json.rs"],
+    deps = [":polytype_core"] + all_crate_deps(normal = True),
+)
+
+rust_binary(
+    name = "polytype-search",
+    srcs = ["src/bin/polytype-search.rs"],
+    crate_features = ["diagnostics"],
+    deps = [":diagnostic_core"] + all_crate_deps(normal = True),
+)
+
+rust_test(name = "unit_tests", crate = ":diagnostic_core", crate_features = ["diagnostics"])
+
+rust_test(
+    name = "behavior_test",
+    srcs = ["tests/behavior.rs"],
+    compile_data = ["//:fixtures"],
+    deps = [":diagnostic_core"] + all_crate_deps(normal = True),
+)

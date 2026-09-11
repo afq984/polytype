@@ -16,4 +16,4 @@ const server=http.createServer(async(req,res)=>{
  try{const data=await readFile(new URL('../'+(pages?'dist/':'web/')+name,import.meta.url));res.writeHead(200,{'Content-Type':types[name.split('.').at(-1)],'Cache-Control':'no-store'});res.end(req.method==='HEAD'?undefined:data)}catch{res.writeHead(500);res.end('Unable to read asset')}
 });
 server.on('error',error=>{console.error(error.message);process.exitCode=1});
-server.listen(port,'127.0.0.1',()=>console.log(`Polytype: http://127.0.0.1:${port}${prefix}/`));
+server.listen(port,'127.0.0.1',()=>console.log(`Polytype: http://127.0.0.1:${server.address().port}${prefix}/`));
