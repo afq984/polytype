@@ -60,6 +60,13 @@ if (mode === 'test') {
 } else if (mode === 'evaluate-local') {
   if (args.length !== 1) throw new Error('Use bazelisk run //:evaluate_local -- PATH.jsonl');
   run('scripts/evaluate.mjs', [resolve(caller, args[0])]);
+} else if (mode === 'corpus') {
+  // Resolve user paths against the invoking directory, never the runfiles tree.
+  const argv = [...args];
+  if (argv[1]) argv[1] = resolve(caller, argv[1]);
+  if (argv[0] === 'import' && argv[2]) argv[2] = resolve(caller, argv[2]);
+  try {run('scripts/corpus.mjs', argv);}
+  catch (error) {process.exitCode = error.status || 1;} // The tool already prints a text-free diagnostic.
 } else if (mode === 'benchmark') {
   run('scripts/benchmark-search.mjs', args.map(arg => resolve(caller, arg)));
 } else if (mode === 'diagnose') {

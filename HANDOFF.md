@@ -1,5 +1,35 @@
 # Polytype handoff
 
+## External benchmark preparation
+
+The next typing benchmark has a collection protocol in eval/COLLECTION.md and a
+`bazelisk run //:corpus -- ...` command for init/import/check/freeze/evaluate.
+Keep all new corpus text, annotations, provenance records, snapshots and detailed
+reports outside every jj/Git workspace. Ignore rules alone do not exclude files
+from Bazel globs. No new third-party text was downloaded or added to this tree;
+existing development corpora/notices and the decoder are unchanged.
+
+Browser imports remain pending/unassigned and exposed to development. Active
+snapshots require explicit source-use evidence, reviewed input/targets, paired
+layouts and no unresolved custom dictionary dependency. Related source groups,
+layout variants and duplicate targets cannot cross development/held-out splits.
+Challenge/unassigned queues are excluded. Frozen files have hashes; evaluation
+records engine identity and writes text-bearing reports only to the external run
+directory. Held-out evaluation requires --open-heldout and records its opening.
+These are procedural safeguards, not licensing decisions or access control.
+
+Plan: a 10–15-unit annotation pilot, then 50–100 independent everyday text units,
+with no specific domain preference. User confirmation and new collection remain
+outstanding. A user-suggested mixed-script phrase family is tracked externally as
+pending challenge coverage; no reading was guessed or Space policy changed.
+Preparation is complete only as tooling/protocol, not as a collected benchmark.
+
+Validation covers external-path/link refusal, capture fidelity and review state,
+split leakage, paired layouts, provenance/custom-entry blockers, snapshot hashes,
+private report output and the Bazel runfiles entry point. Use the existing
+regression suite separately; the historical reports are not held-out evidence.
+
+
 ## Japanese dictionary import (jpdict-v1)
 
 Expanded Japanese conversion now uses data/japanese.tsv: 69,097 reading/surface
