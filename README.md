@@ -64,7 +64,7 @@ records improvements, remaining ambiguities, and the latency tradeoff.
 
 ```sh
 bazelisk test //...
-bazelisk run //:refresh_demo
+bazelisk build //:standalone
 bazelisk test //:browser_test --test_env=CHROME_BIN=/path/to/chrome
 ```
 
@@ -73,11 +73,11 @@ full candidates against the frozen JavaScript reference. The optional browser ch
 server and also checks the standalone file and missing-WASM error handling.
 Native-only tests: `bazelisk test //crates/polytype-core:all`.
 
-`Polytype-Demo.html` embeds the same WASM engine and can be opened offline without
-a build toolchain. Browser storage and clipboard permissions can differ for file
-URLs. Bazel writes generated outputs under `bazel-bin/`; ordinary builds never
-update the checkout. Run `bazelisk run //:refresh_demo` after source changes to
-update the checked-in standalone HTML and notices.
+`bazel-bin/Polytype-Demo.html` embeds the same WASM engine and can be opened
+offline without a build toolchain. Browser storage and clipboard permissions can
+differ for file URLs. Built artifacts are never committed: Bazel writes every
+output under `bazel-bin/`, and the standalone HTML and generated notices are
+ignored in the checkout.
 
 ## Pages demo
 

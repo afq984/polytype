@@ -13,8 +13,9 @@ Read HANDOFF.md before making changes. This is a prototype, not a finished nativ
   use eval/ text to populate a dictionary. Report corpus selection limits and
   language regressions alongside improvements. Kana-annotated targets are compared
   at the reading level (eval/cases.mjs kanaLevel); kanji order follows the data.
-- Regenerate Polytype-Demo.html with bazelisk run //:refresh_demo after source edits.
-  Do not edit generated HTML or web/pkg/ directly.
+- Never commit built artifacts. Polytype-Demo.html and web/dictionary-notices.txt
+  are build outputs under bazel-bin/ (bazelisk build //:standalone //:pages) and
+  are ignored in the checkout; do not edit generated HTML or web/pkg/ directly.
 - Use bazelisk test //... for native/WASM behavior, differential parity,
   formatting and clippy. Bazel is the sole supported build workflow.
   Add focused regressions for real bugs.

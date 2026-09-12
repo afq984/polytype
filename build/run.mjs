@@ -55,11 +55,6 @@ if (mode === 'test') {
     server.kill();
     if (server.exitCode === null) await stopped;
   }
-} else if (mode === 'refresh') {
-  if (!workspace) throw new Error('Use bazelisk run //:refresh_demo');
-  await publish(join(root, 'Polytype-Demo.html'), join(workspace, 'Polytype-Demo.html'));
-  await publish(join(root, 'web/dictionary-notices.txt'), join(workspace, 'web/dictionary-notices.txt'));
-  console.log('Updated checked-in standalone demo and notices.');
 } else if (mode === 'measure-evaluation') {
   run('scripts/evaluate.mjs', ['--timing', ...args.map(arg => resolve(caller, arg))]);
 } else if (mode === 'evaluate-local') {

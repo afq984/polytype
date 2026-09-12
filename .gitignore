@@ -8,3 +8,5 @@ node_modules/
 .env.*
 !.env.example
 polytype-local-cases*.jsonl
+/Polytype-Demo.html
+/web/dictionary-notices.txt

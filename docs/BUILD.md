@@ -58,7 +58,6 @@ from the checkout:
 | //:evaluation | bazel-bin/evaluation/report.json and REPORT.md |
 | //:serve | Local demo at http://127.0.0.1:4173/ |
 | //:preview | Pages preview at http://127.0.0.1:4174/polytype/ |
-| //:refresh_demo | Explicitly updates checked-in Polytype-Demo.html and notices |
 | //:measure_evaluation | Explicit host-dependent latency measurements, JSON on stdout |
 | //:evaluate_local | `bazelisk run //:evaluate_local -- /path/to/cases.jsonl` |
 | //:diagnose | `bazelisk run //:diagnose -- /path/to/report.json` |
@@ -68,6 +67,8 @@ from the checkout:
 native tools. Never publish it. Node build actions copy declared inputs and
 generate all notices and assets in the sandbox. Reports and maintenance tools
 use disposable writable copies; normal builds/tests never modify source files.
+Built artifacts are not committed: the standalone HTML and generated notices
+exist only under `bazel-bin/` and are ignored in the checkout.
 The frozen JavaScript reference is unchanged and remains test-only.
 
 The browser test is deliberately manual and outside `//...`:
@@ -126,7 +127,7 @@ outputs back into the workspace. The SCOWL importer additionally uses host `tar`
 The Japanese importer downloads about 92 MB of pinned Mozc dictionary and
 connection-matrix files; `-- --from-dir=DIR` reproduces the import from
 previously downloaded copies with the same checksum verification.
-Review changes, run tests and refresh the checked-in demo afterward. Evaluation
+Review changes and run tests afterward. Evaluation
 text never populates a dictionary. Personal evaluation files are passed explicitly
 to `evaluate_local` and are not added to build inputs or uploaded.
 

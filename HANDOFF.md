@@ -40,8 +40,15 @@ particle tokens are not split; homophone order has no context (講義 before 抗
 above tier 35 that are also readings stay English standalone by a small margin.
 Verification: 6 Bazel test targets, 43 passing Node tests plus three visible
 TODOs, format/clippy, privacy audit, browser smoke on the Pages subpath and
-standalone, and a byte-identical network reproduction of the import. This
-milestone is local until pushed.
+standalone, and a byte-identical network reproduction of the import. Pushed
+and deployed; browser smoke also passed against the live site.
+
+Built artifacts are no longer committed. Polytype-Demo.html and
+web/dictionary-notices.txt were removed from every commit in main's history
+(messages, trees and author timestamps otherwise unchanged) and are ignored;
+`bazelisk build //:standalone` produces the offline file under bazel-bin/ and
+the refresh_demo command is gone. Work based on the pre-rewrite commits must be
+rebased onto the new main.
 
 The sections below describe the milestones before the Japanese dictionary import.
 
@@ -57,8 +64,7 @@ ES modules and the Node version. npm scripts and the old Cargo build wrapper
 have been removed. CI now invokes Bazel; nothing was pushed or deployed.
 
 Use `bazelisk test //...`, `bazelisk run //:serve`, and
-`bazelisk run //:refresh_demo`. Normal actions write only Bazel outputs; refresh
-explicitly updates the checked-in standalone and notices. Browser checks start
+`bazelisk build //:standalone`. Normal actions write only Bazel outputs. Browser checks start
 their own server: `bazelisk test //:browser_test --test_env=CHROME_BIN=/path/to/chrome`.
 Default evaluation reports under bazel-bin/evaluation omit timing measurements
 for reproducibility. `bazelisk run //:measure_evaluation` prints fresh timings.
