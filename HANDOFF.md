@@ -1,5 +1,50 @@
 # Polytype handoff
 
+## Japanese dictionary import (jpdict-v1)
+
+Expanded Japanese conversion now uses data/japanese.tsv: 69,097 reading/surface
+pairs for 53,410 readings from Mozc's open-source dictionary at the pinned
+revision, selected and ordered by Mozc's standalone word cost (sentence-start
+connection + word cost + sentence-end connection from the pinned connection
+matrix), 70,000-pair limit, at most eight surfaces per reading, symbols,
+numerals and fillers excluded. scripts/import-japanese.mjs pins all inputs by
+hash; `bazelisk run //:import_japanese` reproduces the data over the network
+and `-- --from-dir=DIR` from local copies. Ranking ID:
+scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1.
+
+Search changes (expanded only; prototype and frozen ablations unchanged):
+imported evidence scores 1.45 per character (below SCOWL tier-35 English at 1.8,
+above rule kana at 1.2); conversion waits for a complete reading, so a pending
+trailing n stays kana until a boundary; capitalized tokens get only the
+rule-kana rate plus the existing case penalty (Tanaka stays Latin); imported
+parts carry a `reading` field; each token is composed once and beam dedup caches
+commit text. Kana-annotated fixtures, frozen baselines and mixed targets are
+compared at the reading level (eval/cases.mjs kanaLevel); non-Japanese paths
+must keep byte-identical scores and do.
+
+Measured: Chinese real text unchanged at 12/20 top one, 17/20 top five; guards
+22/22 and feedback 5/5 at the reading level (guards 12/22 exact because seven
+kana targets now convert); six mixed lines 4/6 top one at the reading level in
+all four configurations (1/6 exact); new sourced Japanese words 75/100 top one,
+86/100 top five, 86/100 in the subset, in both Japanese-only and all-language
+QWERTY runs. Five alternating rounds over 6,321 prefixes against the pre-import
+WASM give a median p95 ratio of 0.856 (eval/japanese-latency.json); the p50 is
+about 13% higher. WASM 4.36 MB, standalone 10.45 MB (decimal bytes).
+
+Known changes and limitations: lowercase `tanaka` converts to 田中, so the
+provisional Latin alternative in mixed line six is no longer in the top five
+(kept as a visible TODO; PT-004). Katakana rule variants can fall outside the
+five shown when a reading has many imported alternatives (`kan.`). Word-plus-
+particle tokens are not split; homophone order has no context (講義 before 抗議);
+14 of the 100 sourced words are compounds outside the subset. SCOWL spellings
+above tier 35 that are also readings stay English standalone by a small margin.
+Verification: 6 Bazel test targets, 43 passing Node tests plus three visible
+TODOs, format/clippy, privacy audit, browser smoke on the Pages subpath and
+standalone, and a byte-identical network reproduction of the import. This
+milestone is local until pushed.
+
+The sections below describe the milestones before the Japanese dictionary import.
+
 ## Bazel build migration
 
 Bazel is now the single build/development workflow for Linux x86_64 hosts,

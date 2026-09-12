@@ -8,11 +8,45 @@ columns. `data/sources/mozc/` retains the upstream table and license; normal bui
 are offline. Tests check asset hashes and every table row, plus incremental
 prefixes and native/WASM parity. Prototype and historical ablations remain frozen.
 
-Japanese kanji lookup now uses composed kana readings, not exact roman aliases.
+Japanese conversion uses composed kana readings, not exact roman aliases.
 `nihongo`, `nihonngo`, and `nihon'go` share 日本語. `toukyou` offers 東京;
-`tokyo` composes ときょ and no longer offers 東京 via a demo shortcut. Vocabulary
-is still the same small local dictionary, not Mozc's dictionary or prediction
-engine. We do not claim complete Mozc application/session compatibility.
+`tokyo` composes ときょ and no longer offers 東京 via a demo shortcut.
+
+## Imported dictionary
+
+Expanded conversion looks up complete readings in `data/japanese.tsv`, a
+69,097-entry subset of Mozc's open-source (IPAdic-derived) dictionary pinned in
+`data/japanese-source.json`; see `data/sources/mozc/README.md` for the
+selection. Each pair is scored the way Mozc scores a word converted on its own
+(sentence-start connection cost, word cost, sentence-end connection cost), and
+that standalone cost both selects the subset and orders alternatives: `sakura`
+offers 桜, さくら, サクラ; `arigatou` offers ありがとう before 有難う; `kan `
+offers 感, 間, 館. The prototype's demo words remain as a fallback after
+imported alternatives.
+
+Conversion is per space-delimited token and waits for a complete reading. A
+trailing pending `n` (`kan`) still shows かn and commits かん, as in Mozc before
+conversion; a following boundary (`kan `, `kan.`) converts it. Word-plus-particle
+spellings such as `kyouha` are not split, so they stay kana unless the compound
+itself is an entry. Homophone order has no sentence context, so `kougi` offers
+講義 before 抗議. Mozc's segmentation, suffix dictionary and context transitions
+are not imported, and we do not claim Mozc application/session compatibility.
+
+Imported evidence scores 1.45 per spelling character in the expanded profile,
+below common English spelling evidence (1.8 through SCOWL tier 35) and above
+rule kana (1.2). Common English words that are also readings stay English on
+their own (`to`, `sake`, `hone`); rarer SCOWL spellings such as `sushi` or
+`demo` stay English standalone by a small margin that Japanese context outweighs
+(`kore ha sushi desu` → これ は 寿司 です). A capitalized token keeps only the
+rule-kana rate on top of the existing case penalty, so `Tanaka` stays Latin
+while `tanaka` converts to 田中. The frozen prototype keeps its demo-word rate.
+
+Kana-annotated tests and evaluation targets accept an imported conversion of
+the same reading (the `reading` field on converted parts); kanji choice follows
+the data and is evaluated separately on 100 sourced Japanese words. Katakana of
+an imported reading is offered where Mozc lists it (コーヒー, サクラ) or when the
+candidate list has spare capacity; for readings with many imported alternatives
+the rule-katakana variant may fall outside the five shown.
 
 The table supplies previously missing aliases, doubled m/l, small ヵ/ヶ and the
 www continuation rule. Newly valid Japanese paths can change mixed-language

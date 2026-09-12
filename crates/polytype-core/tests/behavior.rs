@@ -1,5 +1,23 @@
-use polytype_core::{Engine, Entry, compose_japanese, encode, read_zhuyin, reading_keys};
+use polytype_core::{
+    Candidate, DecodeOptions, Engine, Entry, Layout, compose_japanese, encode, read_zhuyin,
+    reading_keys,
+};
 use serde_json::Value;
+
+// Kana-annotated fixtures accept an imported conversion of the same reading;
+// kanji choice follows dictionary order and is evaluated separately.
+fn reading_level(candidate: &Candidate) -> String {
+    candidate
+        .parts
+        .iter()
+        .map(|p| {
+            p.reading
+                .as_deref()
+                .or(p.commit_text.as_deref())
+                .unwrap_or(&p.text)
+        })
+        .collect()
+}
 
 #[test]
 fn shared_acceptance_fixtures() {
@@ -11,12 +29,62 @@ fn shared_acceptance_fixtures() {
             .as_str()
             .map(str::to_owned)
             .unwrap_or_else(|| encode(fixture["roman"].as_str().unwrap()));
-        assert_eq!(
-            engine.decode(&raw)[0].text,
-            fixture["text"].as_str().unwrap(),
-            "{raw:?}"
+        let expected = fixture["text"].as_str().unwrap();
+        let best = &engine.decode(&raw)[0];
+        assert!(
+            best.text == expected || reading_level(best) == expected,
+            "{raw:?}: {} vs {expected}",
+            best.text
         );
     }
+}
+
+#[test]
+fn imported_japanese_conversion_waits_for_complete_readings_and_keeps_latin_case() {
+    let engine = Engine::default();
+    assert_eq!(engine.decode(&encode("gakkou"))[0].text, "学校");
+    // Alternatives follow Mozc's standalone cost: 桜 precedes さくら.
+    assert_eq!(engine.decode(&encode("sakura"))[0].text, "桜");
+    assert!(
+        engine
+            .decode(&encode("sakura"))
+            .iter()
+            .any(|c| c.text == "さくら")
+    );
+    assert_eq!(engine.decode(&encode("kan"))[0].text, "かn");
+    assert_eq!(engine.decode(&encode("kan "))[0].commit_text(), "感 ");
+    let qwerty = DecodeOptions {
+        layout: Layout::Qwerty,
+        ..DecodeOptions::default()
+    };
+    assert_eq!(
+        engine.decode_with_options("Tanaka", &qwerty)[0].text,
+        "Tanaka"
+    );
+    assert_eq!(
+        engine.decode_with_options("tanaka", &qwerty)[0].text,
+        "田中"
+    );
+    assert_eq!(
+        reading_level(&engine.decode(&encode("gakkou"))[0]),
+        "がっこう"
+    );
+    assert!(
+        engine.decode(&encode("gakkou"))[0].parts[0]
+            .reading
+            .is_some()
+    );
+    assert!(
+        engine.decode(&encode("sakura"))[0].parts[0]
+            .reading
+            .is_some()
+    );
+    assert!(
+        Engine::prototype().decode(&encode("gakkou"))[0].parts[0]
+            .reading
+            .is_none()
+    );
+    assert_eq!(engine.dictionary_size()["japaneseImported"], 69097);
 }
 
 #[test]

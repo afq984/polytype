@@ -1,7 +1,7 @@
 {
-  "name": "Mozc default romaji table",
+  "name": "Mozc default romaji table and open-source dictionary subset",
   "revision": "60af02ff797275f2ba1b7fddccdec916798d112e",
-  "selection": "Unmodified upstream table. Expanded composer only; prototype retains data/kana.json.",
+  "selection": "Unmodified upstream romaji table for the expanded composer (prototype retains data/kana.json), plus the dictionary subset described below.",
   "sources": [
     {
       "path": "src/data/preedit/romanji-hiragana.tsv",
@@ -12,6 +12,110 @@
       "path": "LICENSE",
       "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/LICENSE",
       "sha256": "44cdd923b91ea9199293abecc2762c70c87dbf1e581c027a94c416368d1a648c"
+    },
+    {
+      "path": "src/data/dictionary_oss/README.txt",
+      "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/README.txt",
+      "sha256": "6b1de66bc6fa30e0b45dc45b8c8f6c57bd78aff923c261a3efffac8eb86f7bac"
     }
-  ]
+  ],
+  "dictionary": {
+    "name": "Mozc open-source dictionary subset (IPAdic-derived, with Okinawa dictionary entries)",
+    "selection": "Rows with hiragana readings, keyed by reading and surface at their lowest standalone cost (BOS connection + word cost + EOS connection from the pinned connection matrix). The 70000 lowest-cost pairs, at most 8 surfaces per reading; symbols, sentence boundaries, fillers and numerals excluded. The stored cost orders alternatives only. No evaluation input.",
+    "inputs": [
+      {
+        "path": "src/data/dictionary_oss/dictionary00.txt",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/dictionary00.txt",
+        "sha256": "df065bd2cc2146de6d33e38f40151fde3d0d641f226f0d82d34f2c4184672f52"
+      },
+      {
+        "path": "src/data/dictionary_oss/dictionary01.txt",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/dictionary01.txt",
+        "sha256": "e2d3f5ce29dd8b8981fff9683261e835df2361e5c74a620195e5d6500d66cac7"
+      },
+      {
+        "path": "src/data/dictionary_oss/dictionary02.txt",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/dictionary02.txt",
+        "sha256": "7f80d5bb5185daa7936160bfc8fc99c727da44491db01b0a4da526dfe3fa08bd"
+      },
+      {
+        "path": "src/data/dictionary_oss/dictionary03.txt",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/dictionary03.txt",
+        "sha256": "34db0728987fd89c42eb721d095547ed23ca0e98fef802da9a363c304021dfde"
+      },
+      {
+        "path": "src/data/dictionary_oss/dictionary04.txt",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/dictionary04.txt",
+        "sha256": "791853d863faed93e620c661c51ee1e811db31642ff689fe3ddaa80d0e8c742a"
+      },
+      {
+        "path": "src/data/dictionary_oss/dictionary05.txt",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/dictionary05.txt",
+        "sha256": "e495baae2ff38cd42ea3aa196a4f84e386fa610776005a0ed487d66199216ed1"
+      },
+      {
+        "path": "src/data/dictionary_oss/dictionary06.txt",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/dictionary06.txt",
+        "sha256": "539f7a941992f8474837462a22ee3d2264ae1cdf53b10f1d0b9aaa25668b83a2"
+      },
+      {
+        "path": "src/data/dictionary_oss/dictionary07.txt",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/dictionary07.txt",
+        "sha256": "19987d51a652fc1f2c2af16eb73810ebfed1c19ac06721e95a7fc92fcf608260"
+      },
+      {
+        "path": "src/data/dictionary_oss/dictionary08.txt",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/dictionary08.txt",
+        "sha256": "eb361b8c7f79a594588e13753396f23ff52505673ca6e41d77ca07022aa98325"
+      },
+      {
+        "path": "src/data/dictionary_oss/dictionary09.txt",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/dictionary09.txt",
+        "sha256": "5d1457d4ee513e34f978afd1ad80961d7e9084f611bfbe39dc04de0bf46188c7"
+      },
+      {
+        "path": "src/data/dictionary_oss/id.def",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/id.def",
+        "sha256": "9071e259a9226bf83e4e6a132080fa15b3fc428d108834fa621619f02bd33c9c"
+      },
+      {
+        "path": "src/data/dictionary_oss/connection_single_column.txt",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/connection_single_column.txt",
+        "sha256": "ca4b3a39ed2018e4d93a39824ad1553c108522df8a768d85c69a38492c391613"
+      },
+      {
+        "path": "src/data/dictionary_oss/README.txt",
+        "url": "https://raw.githubusercontent.com/google/mozc/60af02ff797275f2ba1b7fddccdec916798d112e/src/data/dictionary_oss/README.txt",
+        "sha256": "6b1de66bc6fa30e0b45dc45b8c8f6c57bd78aff923c261a3efffac8eb86f7bac"
+      }
+    ],
+    "limit": 70000,
+    "perReading": 8,
+    "maxStandaloneCost": 7567,
+    "classes": {
+      "助詞": 484,
+      "感動詞": 195,
+      "名詞": 51599,
+      "動詞": 10832,
+      "接頭詞": 941,
+      "形容詞": 2733,
+      "副詞": 1696,
+      "連体詞": 282,
+      "助動詞": 201,
+      "接続詞": 134
+    },
+    "entries": 69097,
+    "readings": 53410,
+    "uniqueSurfaces": 66097,
+    "hiraganaIdentical": 6644,
+    "skipped": {
+      "rows": 1220550,
+      "invalidReading": 3792,
+      "excludedPos": 7712,
+      "duplicate": 108670,
+      "overLimit": 1030376,
+      "overReadingCap": 903
+    },
+    "sha256": "0f8195d4f89a73df26660fc04f40e13cc0eb0af13c5e59f33c71938837112969"
+  }
 }

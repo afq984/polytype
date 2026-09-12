@@ -70,6 +70,39 @@ pub(crate) fn english_size() -> usize {
     ENGLISH.len()
 }
 
+// Generated from pinned upstream inputs; see data/japanese-source.json. Rows
+// are grouped by reading in ascending Mozc cost order; that order is the only
+// ranking evidence taken from the upstream costs.
+static JAPANESE_EXPANDED: LazyLock<HashMap<String, Vec<String>>> = LazyLock::new(|| {
+    let mut readings: HashMap<String, Vec<String>> = HashMap::new();
+    for line in include_str!("../../../data/japanese.tsv").lines() {
+        let mut fields = line.split('\t');
+        let reading = fields.next().expect("reading");
+        let text = fields.next().expect("surface");
+        readings
+            .entry(reading.to_owned())
+            .or_default()
+            .push(text.to_owned());
+    }
+    // The prototype's hand-written words remain a fallback after imported
+    // alternatives, so equivalent spellings keep sharing conversion.
+    let mut fallback: Vec<_> = JAPANESE_READINGS.iter().collect();
+    fallback.sort_by_key(|(reading, _)| (*reading).clone());
+    for (reading, outputs) in fallback {
+        let values = readings.entry(reading.clone()).or_default();
+        for output in outputs {
+            if !values.contains(output) {
+                values.push(output.clone());
+            }
+        }
+    }
+    readings
+});
+
+pub(crate) fn japanese_size() -> usize {
+    include_str!("../../../data/japanese.tsv").lines().count()
+}
+
 // Generated from pinned upstream inputs; see data/chinese-source.json.
 static EXPANDED: LazyLock<Vec<(String, String)>> = LazyLock::new(|| {
     include_str!("../../../data/chinese.tsv")
@@ -103,13 +136,18 @@ pub(crate) struct Dictionary {
 }
 
 impl Dictionary {
-    pub(crate) fn japanese(&self, spelling: &str, modern: bool) -> Option<&Vec<String>> {
+    /// Modern lookup is keyed by a complete composed kana reading, so a
+    /// trailing pending `n` still commits as kana until a boundary follows, as
+    /// in Mozc before conversion. The frozen prototype keys demo words by spelling.
+    pub(crate) fn japanese(
+        &self,
+        spelling: &str,
+        composition: Option<&crate::japanese::Composition>,
+        modern: bool,
+    ) -> Option<&Vec<String>> {
         if modern {
-            let composed = crate::japanese::compose_japanese(spelling, true)?;
-            return composed
-                .complete
-                .then(|| JAPANESE_READINGS.get(&composed.kana))
-                .flatten();
+            let composed = composition.filter(|c| c.complete)?;
+            return JAPANESE_EXPANDED.get(&composed.kana);
         }
         LEXICON.japanese.get(spelling)
     }

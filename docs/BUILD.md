@@ -117,11 +117,15 @@ Dictionary/corpus refreshes remain explicit network maintenance commands:
 ```sh
 bazelisk run //:import_chinese
 bazelisk run //:import_english
+bazelisk run //:import_japanese
 bazelisk run //:verify_corpus
 ```
 
 These commands verify the existing pinned provenance and copy only their known
 outputs back into the workspace. The SCOWL importer additionally uses host `tar`.
+The Japanese importer downloads about 92 MB of pinned Mozc dictionary and
+connection-matrix files; `-- --from-dir=DIR` reproduces the import from
+previously downloaded copies with the same checksum verification.
 Review changes, run tests and refresh the checked-in demo afterward. Evaluation
 text never populates a dictionary. Personal evaluation files are passed explicitly
 to `evaluate_local` and are not added to build inputs or uploaded.

@@ -5,9 +5,13 @@ One Rust decoder for Traditional Chinese (Zhuyin), Japanese (romaji) and English
 handles physical keyboard events, UI and browser storage. Native OS adapters are
 not implemented yet.
 
-Japanese `nn` now consumes both letters as `ん`, following Mozc's table:
-`shinnyou` → `しんよう`, `konna` → `こんあ`, `konnna` → `こんな`.
-See [the n convention and compatibility notes](docs/ROMAJI.md).
+Japanese conversion now uses a 69,097-entry subset of Mozc's open-source
+dictionary, keyed by kana reading and ordered by Mozc's standalone word cost:
+`gakkou` → 学校, `sakura` → 桜 (さくら next), `ko-hi-` → コーヒー. Conversion is
+per space-delimited token and waits for a complete reading, so a trailing
+pending `n` still commits as kana. Japanese `nn` consumes both letters as `ん`,
+following Mozc's table: `shinnyou` → `しんよう`, `konna` → `こんあ`,
+`konnna` → `こんな`. See [the conversion and n-convention notes](docs/ROMAJI.md).
 
 The [English-island sprint](eval/ISLANDS.md) preserves alternative language paths
 within the existing search budget. It recovers `p95 latency` inside Chinese
@@ -86,43 +90,55 @@ deploy only when the deploy checkbox is checked on `main`.
 
 ## Try it
 
-- `sakura` → さくら; `gakkou` → がっこう; `ryokou` → りょこう.
-- `ko-hi-` → こーひー; select コーヒー for katakana.
-- `shinyou` → しにょう versus `shin'you` → しんよう.
+- `sakura` → 桜 (さくら and サクラ next); `gakkou` → 学校; `ryokou` → 旅行.
+- `ko-hi-` → コーヒー, with 珈琲 and こーひー as alternatives.
+- `shinyou` → しにょう versus `shin'you` → 信用, with しんよう one click away.
 - `kan` shows かn; Space or Enter resolves n to ん. Selecting カn commits カン.
-- **Kana + Chinese + English** demonstrates がっこう 你好 hello.
+  Once a boundary follows, `kan ` converts to 感 with かん still selectable.
+- **Kana + Chinese + English** demonstrates 学校 你好 hello.
 - QWERTY-encoded `us3lc3` → 你好; `/j5 ` (with trailing Space) → 中.
 
 Literal spaces permit language changes. A Zhuyin first-tone space completes a
 syllable instead of inserting a separator. Candidate selection and commit operate
 on the whole composition. Other unfinished consonants can still commit literally.
 
-Chinese now includes 28,184 imported reading/output pairs (26,236 unique outputs)
+Chinese includes 28,184 imported reading/output pairs (26,236 unique outputs)
 from a pinned McBopomofo subset, plus prototype fallback and custom entries.
 Occurrence counts order imported alternatives; custom entries take precedence.
-English vocabulary and Japanese kanji coverage remain small. Ranking is heuristic,
-and ambiguous input can prefer another language. This is still a playground.
+Japanese includes 69,097 reading/surface pairs for 53,410 readings from a pinned
+Mozc open-source dictionary subset, ordered by Mozc's standalone cost; the
+prototype's demo words remain as fallback. Whole-token conversion cannot split
+word-plus-particle spellings such as `kyouha`, and homophone choice has no
+sentence context. Ranking is heuristic, and ambiguous input can prefer another
+language. This is still a playground. The WASM is 4.36 MB and the standalone HTML
+10.45 MB (decimal bytes).
 
 ## Dictionary and real-text evaluation
 
 ```sh
-bazelisk run //:import_chinese  # explicit network step, verifies pinned checksums
-bazelisk build //:evaluation          # builds WASM; evaluates locally and writes eval reports
-bazelisk run //:verify_corpus     # explicit network check against pinned source sentences
+bazelisk run //:import_chinese   # explicit network step, verifies pinned checksums
+bazelisk run //:import_japanese  # explicit network step; --from-dir=DIR reproduces offline
+bazelisk build //:evaluation     # builds WASM; evaluates locally and writes eval reports
+bazelisk run //:verify_corpus    # explicit network check against pinned source sentences
 ```
 
 The [evaluation report](eval/REPORT.md) compares the prototype and expanded
-profiles on 20 independently annotated sourced Chinese excerpts and 22 separate
-regression/synthetic language controls. Chinese top-1 exact matches rise from
-0/20 to 12/20, with 17/20 in the top five. This small development set is not a
-representative accuracy estimate. All 20 targets are dictionary-reachable; the
-remaining misses expose ranking/segmentation weaknesses. One already-failing
-English control loses its correct top-five alternative; the report retains it.
+profiles on 20 independently annotated sourced Chinese excerpts, 100 sourced
+Japanese words with UniDic readings, 22 regression/synthetic language controls
+and six user-supplied mixed lines. Chinese top-1 exact matches are 12/20 with
+17/20 in the top five, unchanged by the Japanese import. Japanese word conversion
+is 75/100 top one and 86/100 top five; 86 targets are in the imported subset, so
+the rest are coverage or compound-segmentation gaps, not ranking. Kana-annotated
+targets are additionally reported at the reading level, where an imported
+conversion of the same reading counts as correct. These small development sets
+are not representative accuracy estimates.
 
-See [evaluation methodology and local JSONL inputs](eval/README.md) and
-[dictionary provenance](data/sources/mcbopomofo/README.md). No evaluation text is
-added to the dictionary. Dictionary import sources, filters and hashes are in
-data/chinese-source.json. Imported data notices are included in both web builds.
+See [evaluation methodology and local JSONL inputs](eval/README.md),
+[Chinese dictionary provenance](data/sources/mcbopomofo/README.md) and
+[Japanese dictionary provenance](data/sources/mozc/README.md). No evaluation text
+is added to a dictionary. Import sources, filters and hashes are in
+data/chinese-source.json and data/japanese-source.json. Imported data notices are
+included in both web builds.
 
 ## Source layout
 
@@ -130,7 +146,8 @@ data/chinese-source.json. Imported data notices are included in both web builds.
   scores and selected-candidate commit. Ordinary Rust API, independent of the web.
 - `crates/polytype-wasm/`: thin wasm-bindgen wrapper with one engine per instance.
 - `data/lexicon.json`, `data/kana.json`: original prototype data, embedded at build
-  time. `data/chinese.tsv` is the generated frequency-ordered Chinese subset.
+  time. `data/chinese.tsv` is the generated frequency-ordered Chinese subset and
+  `data/japanese.tsv` the generated cost-ordered Japanese subset.
 - `web/engine.mjs`: WASM initialization and protocol adapter; no decoder fallback.
 - `web/keyboard.mjs`: browser event normalization.
 - `web/app.mjs`, `web/index.html`, `web/style.css`: UI and browser-local persistence.

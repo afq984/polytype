@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {composeJapanese, toKatakana, decode, encode, commitCandidate} from '../web/engine.mjs';
+import {kanaLevel} from '../eval/cases.mjs';
 
 test('romaji composes kana beyond the word dictionary', () => {
   for (const [roman, kana] of [
@@ -40,15 +41,23 @@ test('pending consonants survive edits; n resolves only when disambiguated', () 
 
 test('kana candidates integrate with dictionary, English and exact spaces', () => {
   const candidates = roman => decode(encode(roman)).map(candidate => candidate.text);
-  assert.equal(candidates('sakura')[0], 'さくら');
+  // Imported alternatives follow Mozc's standalone cost order: 桜 precedes さくら.
+  assert.equal(candidates('sakura')[0], '桜');
+  assert.ok(candidates('sakura').includes('さくら'));
   assert.ok(candidates('sakura').includes('サクラ'));
   assert.equal(candidates('hello')[0], 'hello');
   assert.equal(candidates('neko')[0], '猫');
   assert.ok(candidates('neko').includes('ねこ'));
   assert.ok(candidates('neko').includes('ネコ'));
-  assert.equal(candidates('kan  hello!')[0], 'かん  hello!');
+  assert.equal(candidates('gakkou')[0], '学校');
+  assert.equal(candidates('ryokou')[0], '旅行');
+  assert.equal(candidates('ko-hi-')[0], 'コーヒー');
+  // Whole-token conversion applies once a boundary completes the reading.
+  assert.equal(candidates('kan  hello!')[0], '感  hello!');
+  assert.equal(kanaLevel(decode(encode('kan  hello!'))[0]), 'かん  hello!');
+  assert.ok(candidates('kan  hello!').includes('かん  hello!'));
   const mixed = encode('gakkou') + ' us3lc3 ' + encode('hello');
-  assert.equal(decode(mixed)[0].text, 'がっこう 你好 hello');
+  assert.equal(decode(mixed)[0].text, '学校 你好 hello');
   for (let length = 0; length <= mixed.length; length++) {
     assert.ok(decode(mixed.slice(0, length)).length, `prefix ${length}`);
   }

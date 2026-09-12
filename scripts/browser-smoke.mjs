@@ -103,10 +103,12 @@ try {
     await evaluate("document.getElementById('enable-english').click(); document.getElementById('enable-zhuyin').click()");
     await evaluate("document.getElementById('clear').click()");
     await typeRoman('gakkou');
-    assert.equal(await evaluate("document.getElementById('preedit').textContent"), 'がっこう');
+    // A complete reading converts through the imported dictionary; kana scripts stay selectable.
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"), '学校');
     await key('Backspace', 'Backspace', 8);
     assert.equal(await evaluate("document.getElementById('preedit').textContent"), 'がっこ');
     await typeRoman('u');
+    assert.ok(await evaluate("[...document.querySelectorAll('#candidates button')].some(b=>b.textContent.endsWith('がっこう'))"));
     await evaluate("[...document.querySelectorAll('#candidates button')].find(b=>b.textContent.endsWith('ガッコウ')).click(); document.getElementById('raw').focus()");
     await key('Enter', 'Enter', 13);
     assert.equal(await evaluate("document.getElementById('committed').textContent"), 'ガッコウ');
@@ -115,7 +117,8 @@ try {
     await key('Enter', 'Enter', 13);
     assert.equal(await evaluate("document.getElementById('committed').textContent"), 'ガッコウ\nかん');
     await typeRoman("shin'you");
-    assert.equal(await evaluate("document.getElementById('preedit').textContent"), 'しんよう');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"), '信用');
+    assert.ok(await evaluate("[...document.querySelectorAll('#candidates button')].some(b=>b.textContent.endsWith('しんよう'))"));
     await key('Escape', 'Escape', 27);
     assert.equal(await evaluate("document.getElementById('raw').value"), '');
     await typeRoman('conclusion');
@@ -128,10 +131,11 @@ try {
       assert.equal(await evaluate("document.getElementById('preedit').textContent"), row.text, row.id);
     }
     await evaluate("[...document.querySelectorAll('#examples button')].find(b=>b.textContent==='Kana + Chinese + English').click()");
-    assert.equal(await evaluate("document.getElementById('preedit').textContent"), 'がっこう 你好 hello');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"), '学校 你好 hello');
     await evaluate("[...document.querySelectorAll('#examples button')].find(b=>b.textContent==='Expanded Chinese dictionary').click()");
     assert.equal(await evaluate("document.getElementById('preedit').textContent"), '資料庫 hello');
     assert.ok(await evaluate("document.getElementById('dictionary-count').textContent.includes('28184')"));
+    assert.ok(await evaluate("document.getElementById('dictionary-count').textContent.includes('69097')"));
     // Browser storage remains outside the core; rehydrate it into a fresh WASM instance.
     await evaluate("document.getElementById('entry-reading').value='ㄎㄜ ㄐㄧˋ'; document.getElementById('entry-text').value='科技'; document.getElementById('dictionary-form').requestSubmit()");
     await evaluate("document.getElementById('raw').value='kd ur4'; document.getElementById('raw').dispatchEvent(new Event('input', {bubbles:true}))");
@@ -192,7 +196,7 @@ try {
     assert.equal(await evaluate("document.getElementById('commit').disabled"),true);
     await evaluate("document.getElementById('enable-japanese').click(); document.getElementById('enable-zhuyin').click(); document.getElementById('enable-english').click(); [...document.querySelectorAll('#examples button')].find(b=>b.textContent==='Kana + Chinese + English').click()");
     assert.equal(await evaluate("document.getElementById('raw').value"),'gakkou us3lc3 hello');
-    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'がっこう 你好 hello');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'学校 你好 hello');
     await evaluate("document.getElementById('clear').click()");
     const loop='for (int i = 0; i < 100; i++)';
     for(const char of loop) {
@@ -205,31 +209,38 @@ try {
     await evaluate("document.getElementById('clear').click()");
     for(const char of 'kan')await key(char,'Key'+char.toUpperCase());
     await key('.','Period');
-    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'かん.');
+    // Punctuation completes the reading, so the imported conversion appears; kana stays selectable.
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'感.');
+    assert.ok(await evaluate("[...document.querySelectorAll('#candidates button')].some(b=>b.textContent.slice(1)==='かん.')"));
     await key('Backspace','Backspace',8);
     assert.equal(await evaluate("document.getElementById('preedit').textContent"),'かn');
     await key('.','Period');
     const settingsReport=await evaluate("(async()=>{await document.getElementById('copy-debug').onclick();return JSON.parse(document.getElementById('debug-report').value)})()");
     assert.deepEqual(settingsReport.options,{layout:'qwerty',english:true,japanese:true,zhuyin:true});
     const recovered=mixedCases.find(row=>row.id==='mixed-06-qwerty-all');
+    // The imported dictionary converts lowercase tanaka to 田中; the kana reading
+    // remains selectable, while the provisional Latin alternative is a TODO (PT-004).
+    const recoveredKana=recovered.text.replace('/ tanaka で','/ たなか で');
     await evaluate(`document.getElementById('raw').value=${JSON.stringify(recovered.raw)}; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
     assert.notEqual(await evaluate("document.getElementById('preedit').textContent"),recovered.input);
-    await evaluate(`[...document.querySelectorAll('#candidates button')].find(b=>b.textContent.slice(1)===${JSON.stringify(recovered.text)}).click(); document.getElementById('commit').click()`);
-    assert.ok(await evaluate(`document.getElementById('committed').textContent.endsWith(${JSON.stringify(recovered.text)})`));
+    await evaluate(`[...document.querySelectorAll('#candidates button')].find(b=>b.textContent.slice(1)===${JSON.stringify(recoveredKana)}).click(); document.getElementById('commit').click()`);
+    assert.ok(await evaluate(`document.getElementById('committed').textContent.endsWith(${JSON.stringify(recoveredKana)})`));
     await evaluate("document.getElementById('raw').value='kan.'; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
     await evaluate("document.getElementById('keyboard-layout').value='colemak'; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
     assert.equal(await evaluate("document.getElementById('raw').value"),'kan.');
     await evaluate("document.getElementById('raw').value=''; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
     await typeRoman('sinn');
-    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'しん');
+    assert.ok(await evaluate("[...document.querySelectorAll('#candidates button')].some(b=>b.textContent.slice(1)==='しん')"));
     await typeRoman('you');
     assert.equal(await evaluate("document.getElementById('raw').value"),'dljjo;i');
-    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'しんよう');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'信用');
     await key('Backspace','Backspace',8);
-    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'しんよ');
+    // Backspace replays the remaining keys: しんよ is complete, so it converts too (神輿) while the kana stays listed.
+    assert.ok(await evaluate("[...document.querySelectorAll('#candidates button')].some(b=>b.textContent.slice(1)==='しんよ')"));
     await typeRoman('u');
-    await evaluate("[...document.querySelectorAll('#candidates button')].find(b=>b.textContent.slice(1)==='シンヨウ').click(); document.getElementById('commit').click()");
-    assert.ok(await evaluate("document.getElementById('committed').textContent.endsWith('シンヨウ')"));
+    // The kana reading stays one click away when the dictionary converts it.
+    await evaluate("[...document.querySelectorAll('#candidates button')].find(b=>b.textContent.slice(1)==='しんよう').click(); document.getElementById('commit').click()");
+    assert.ok(await evaluate("document.getElementById('committed').textContent.endsWith('しんよう')"));
     await evaluate(`document.getElementById('raw').value=${JSON.stringify(captureA)}; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
     assert.equal(await evaluate("document.getElementById('preedit').textContent"),'量到的 p95 latency 曾加了 11.6% 還在範圍之內');
     const islandTarget='量到的 p95 latency 增加了 11.6% 還在範圍之內';
@@ -238,7 +249,7 @@ try {
     await evaluate(`document.getElementById('raw').value=${JSON.stringify(captureB.replace('ep cuaigk','ep  cuaigk'))}; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
     assert.ok((await evaluate("document.getElementById('preedit').textContent")).includes('跟 claude 討論'));
     const islandReport=await evaluate("(async()=>{await document.getElementById('copy-debug').onclick();return JSON.parse(document.getElementById('debug-report').value)})()");
-    assert.equal(islandReport.ranking,'scowl-context-v4+family-v1+island-v1+mozc-v1');
+    assert.equal(islandReport.ranking,'scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1');
     // Reading-based conversion and identical-preedit commit recovery.
     await evaluate("document.getElementById('keyboard-layout').value='qwerty'; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
     for(const [raw,target] of [['toukyou','東京'],['nihonngo','日本語']]){

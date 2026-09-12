@@ -13,7 +13,8 @@ oracle; see diversity-report.md for remaining cases and methodological limits.
 Default reports omit host-dependent timings. Use `bazelisk run //:measure_evaluation`
 for fresh latency measurements on stdout. Historical reports retain their original timing data.
 
-Run `bazelisk build //:evaluation` to build WASM and generate REPORT.md and report.json under bazel-bin/evaluation/.
+Run `bazelisk build //:evaluation` to build WASM and generate REPORT.md and report.json under bazel-bin/evaluation/;
+the checked-in copies were refreshed from that deterministic output after the Japanese dictionary import.
 Evaluation is entirely local. For your own cases, run
 `bazelisk run //:evaluate_local -- /path/to/cases.jsonl` after building WASM. Each line is
 `{"id":"optional","raw":"QWERTY-encoded keys","text":"expected output"}`.
@@ -24,6 +25,25 @@ reviews or corrects the expected output. Exports do not contain custom dictionar
 entries; restore those separately when reproducing custom-dependent cases.
 
 ## What this measures
+
+japanese-words.json contains the first 100 long-unit words tagged NOUN, PROPN,
+VERB, ADJ or ADV from the test file of
+[UD Japanese GSD](https://github.com/UniversalDependencies/UD_Japanese-GSD/tree/7bc20119f476b552635e0640644e577b6fd3606b)
+(32 sentences) whose surface equals their lemma and contains kanji or katakana.
+Readings are the treebank's UniDic long-unit lemma readings, converted to a
+single conventional romaji spelling by eval/japanese-cases.mjs and validated by
+composing them back. UniDic readings are independent of the IPAdic-derived Mozc
+subset being evaluated; overlap between the dictionary's sources and the
+treebank text is unknown. Each word runs in QWERTY with Japanese only and with
+all languages, measuring whole-token conversion of isolated words, not sentence
+conversion. `bazelisk run //:verify_corpus` checks every case against the pinned
+file and retains the treebank license (CC BY-SA 4.0).
+
+Kana-annotated targets (guards, mixed lines) are reported both exactly and at
+the reading level, where an imported conversion whose kana reading equals the
+target span counts as correct. The exact columns record that kanji is now
+offered; the reading columns record whether segmentation and language choice
+are right. Kanji choice itself is measured by the Japanese word group.
 
 corpus.json contains 20 contiguous excerpts from the first 35 test sentences in
 [UD Chinese GSD](https://github.com/UniversalDependencies/UD_Chinese-GSD/tree/22f73e87f7ddc530bb131a6b7587971a03e1a712).

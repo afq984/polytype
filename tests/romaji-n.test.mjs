@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {createEngine} from '../web/engine.mjs';
 import {composeJapanese as referenceCompose} from './reference/japanese.mjs';
+import {kanaLevel} from '../eval/cases.mjs';
 
 const readings=[
   ['n','ん'],['nn','ん'],['nnn','んん'],['nnnn','んん'],
@@ -38,13 +39,15 @@ test('standard kana candidates, punctuation and greeting lookup agree in both la
       for(const suffix of ['','.',',',';',' ']){
         const input=raw+(layout==='colemak'?e.encode(suffix):suffix);
         const options={layout,english:false,japanese:true,zhuyin:false};
-        const c=e.decode(input,options),commits=c.map(c=>e.commitCandidate(c));
+        const c=e.decode(input,options),commits=c.map(c=>e.commitCandidate(c)),readings=c.map(kanaLevel);
         assert.ok(commits.includes(text+suffix),`${layout} ${roman+suffix}: hira`);
-        assert.ok(commits.includes(e.toKatakana(text)+suffix),`${layout} ${roman+suffix}: kata`);
+        // Katakana stays selectable unless imported alternatives for the same
+        // reading fill the list; the reading itself must still be present.
+        assert.ok(commits.includes(e.toKatakana(text)+suffix)||readings.filter(r=>r===text+suffix).length>1,`${layout} ${roman+suffix}: kata`);
         if(roman==='konnichiha')assert.ok(!commits.includes('こんにちは'+suffix),'no legacy lookup shortcut');
       }
     }
-    assert.equal(e.commitCandidate(e.decode('dljjo;i',{layout:'colemak'})[0]),'しんよう');
+    assert.equal(kanaLevel(e.decode('dljjo;i',{layout:'colemak'})[0]),'しんよう');
     for(const spelling of ['konnnichiha',"kon'nichiha"]){
       const candidates=e.decode(spelling,{layout:'qwerty'});
       assert.equal(e.commitCandidate(candidates[0]),'こんにちは');

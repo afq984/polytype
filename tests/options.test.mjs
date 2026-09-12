@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {createEngine,examplesForLayout,physicalKey,encode} from '../web/engine.mjs';
+import {kanaLevel} from '../eval/cases.mjs';
 
 test('code punctuation cannot erase the literal-English path',()=>{
  const engine=createEngine();
@@ -22,9 +23,10 @@ test('layout and language options constrain the core before ranking',()=>{
  const engine=createEngine();
  try {
   assert.equal(engine.decode('hello',{layout:'qwerty',japanese:false,zhuyin:false})[0].text,'hello');
-  assert.equal(engine.decode('gakkou',{layout:'qwerty',english:false,zhuyin:false})[0].text,'がっこう');
+  assert.equal(engine.decode('gakkou',{layout:'qwerty',english:false,zhuyin:false})[0].text,'学校');
+  assert.equal(kanaLevel(engine.decode('gakkou',{layout:'qwerty',english:false,zhuyin:false})[0]),'がっこう');
   assert.equal(engine.decode('us3lc3',{layout:'qwerty',english:false,japanese:false})[0].text,'你好');
-  assert.equal(engine.decode('gakkou us3lc3 hello',{layout:'qwerty'})[0].text,'がっこう 你好 hello');
+  assert.equal(engine.decode('gakkou us3lc3 hello',{layout:'qwerty'})[0].text,'学校 你好 hello');
   assert.deepEqual(engine.decode('hello',{layout:'qwerty',english:false,japanese:false,zhuyin:false}),[]);
   // Mozc's ll rule makes this valid kana, even though English usually wins.
   assert.equal(engine.decode('hello',{layout:'qwerty',english:false,zhuyin:false})[0].text,'へっぉ');
@@ -61,6 +63,7 @@ test('examples and shifted physical keys respect the selected roman layout',()=>
    const examples=examplesForLayout(layout);
    assert.equal(examples.length,13);
    assert.equal(engine.decode(examples[0].raw,{layout})[0].text,'小さい 的英文是 small');
+   assert.equal(engine.decode(examples.find(e=>e.name==='Kana + Chinese + English').raw,{layout})[0].text,'学校 你好 hello');
    assert.equal(engine.decode(examples.at(-1).raw,{layout})[0].text,'資料庫 hello');
   }
   assert.equal(physicalKey({code:'KeyP',shiftKey:true},'qwerty'),'P');

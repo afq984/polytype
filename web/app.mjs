@@ -52,7 +52,7 @@ $('copy-debug').onclick=async()=>{
  const visibleCandidates=$('raw').value?candidates:[];
  const report={
   format:'polytype-debug-v1',capturedAt:new Date().toISOString(),
-  engine:'Rust/WASM',profile:'expanded',ranking:'scowl-context-v4+family-v1+island-v1+mozc-v1',
+  engine:'Rust/WASM',profile:'expanded',ranking:'scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1',
   options:options(),
   browser:navigator.userAgent,mode:location.protocol==='file:'?'standalone':'web',
   raw:$('raw').value,rawEncoding:'QWERTY physical positions; roman interpretation uses options.layout',
@@ -82,7 +82,7 @@ try{const rows=JSON.parse(localStorage.getItem(casesKey)||'[]');if(!Array.isArra
 updateCaseCount();
 $('capture-case').onclick=()=>{
  stop();if(!$('raw').value)return;
- caseSnapshot={raw:$('raw').value,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),ranking:'scowl-context-v4+family-v1+island-v1+mozc-v1'};
+ caseSnapshot={raw:$('raw').value,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),ranking:'scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1'};
  $('case-raw').value=caseSnapshot.raw;$('case-expected').value=candidates[selected]?commitCandidate(candidates[selected]):'';
  $('case-editor').hidden=false;$('case-editor').open=true;$('case-expected').focus();
  $('case-status').textContent='Review or correct the expected output, then save. This is a snapshot; later typing does not change it.';
@@ -104,7 +104,7 @@ $('export-cases').onclick=()=>{
 $('replay').onclick=()=>{if(timer){stop();return}const target=$('raw').value||examples[0].raw;$('raw').value='';render();let i=0;$('replay').textContent='Pause replay';timer=setInterval(()=>{$('raw').value=target.slice(0,++i);render();if(i>=target.length)stop()},145)};
 const storageKey='polytype-custom-tw-v1';let userEntries=[];
 function drawDictionary(){
- const size=dictionarySize();$('dictionary-count').textContent=size.builtIn+' 筆基礎 · '+size.imported+' 筆擴充 · '+size.custom+' 筆自訂 · '+size.englishImported+' English';
+ const size=dictionarySize();$('dictionary-count').textContent=size.builtIn+' 筆基礎 · '+size.imported+' 筆擴充 · '+size.custom+' 筆自訂 · '+size.englishImported+' English · '+size.japaneseImported+' 日本語';
  $('custom-entries').replaceChildren();
  userEntries.forEach((entry,index)=>{const row=el('div','custom-entry');row.append(el('span','',entry.reading+' → '+entry.text));const remove=el('button','quiet','移除');remove.type='button';remove.setAttribute('aria-label','移除 '+entry.text);remove.onclick=()=>{userEntries=setCustomEntries(userEntries.filter((_,i)=>i!==index));persistDictionary();drawDictionary();render()};row.append(remove);$('custom-entries').append(row)});
 }

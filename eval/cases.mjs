@@ -1,5 +1,11 @@
 import {readFileSync} from 'node:fs';
 import {readingKeys, encode, colemak} from '../web/engine.mjs';
+import {japaneseCases} from './japanese-cases.mjs';
+export {japaneseCases, japaneseCorpus} from './japanese-cases.mjs';
+// Reading-level view of a committed candidate: imported Japanese conversions
+// are replaced by their kana reading, so language choice and segmentation can
+// be judged without freezing a kanji choice that follows dictionary order.
+export const kanaLevel = candidate => candidate.parts.map(part => part.reading ?? part.commitText ?? part.text).join('');
 export const corpus = JSON.parse(readFileSync(new URL('./corpus.json',import.meta.url)));
 export const readingSequence = reading => reading.trim().split(/\s+/).flatMap(syllable=>readingKeys(syllable));
 export const realCases = corpus.cases.map(entry=>{
@@ -38,4 +44,4 @@ export const mixedCases=mixedCorpus.cases.flatMap(entry=>['colemak','qwerty'].fl
   raw:layout==='colemak'?encodeMixedInput(entry.input):entry.input,
   options:{layout,english:true,japanese:true,zhuyin},
 }))));
-export const cases = [...realCases,...guardCases,...feedbackCases,...mixedCases];
+export const cases = [...realCases,...guardCases,...feedbackCases,...mixedCases,...japaneseCases];

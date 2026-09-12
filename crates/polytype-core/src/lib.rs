@@ -5,7 +5,9 @@ mod phonetic;
 mod search;
 
 pub use dictionary::Entry;
-use dictionary::{Dictionary, LEXICON, english_size, expanded_size, validate_entries};
+use dictionary::{
+    Dictionary, LEXICON, english_size, expanded_size, japanese_size, validate_entries,
+};
 pub use japanese::{Composition, compose_japanese, to_katakana};
 pub use phonetic::{Syllable, colemak, encode, read_zhuyin, reading_keys, zhuyin};
 pub use search::{Candidate, Part};
@@ -119,6 +121,7 @@ impl Engine {
         let mut size = json!({"builtIn": LEXICON.chinese.len(), "imported": if self.dictionary.expanded { expanded_size() } else { 0 }, "custom": self.dictionary.custom.len()});
         if self.dictionary.expanded {
             size["englishImported"] = json!(english_size());
+            size["japaneseImported"] = json!(japanese_size());
         }
         size
     }

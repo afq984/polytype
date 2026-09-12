@@ -86,6 +86,7 @@ if (mode === 'test') {
       const commands = {
         'import-chinese': ['import-chinese.mjs', ['data/chinese.tsv', 'data/chinese-source.json', 'data/sources/mcbopomofo/LICENSE.txt']],
         'import-english': ['import-english.mjs', ['data/english.tsv', 'data/english-source.json', 'data/sources/scowl/Copyright']],
+        'import-japanese': ['import-japanese.mjs', ['data/japanese.tsv', 'data/japanese-source.json', 'data/sources/mozc/README.txt']],
         'verify-corpus': ['verify-corpus.mjs', ['eval/sources']],
         'experiment-islands': ['experiment-islands.mjs', ['eval/island-experiments.json']],
         'compare-search': ['compare-search.mjs', ['eval/diversity-report.md']],

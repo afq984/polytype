@@ -8,9 +8,11 @@ Read HANDOFF.md before making changes. This is a prototype, not a finished nativ
   Do not add features there or add a JavaScript decoder fallback.
 - Baseline parity uses the prototype dictionary profile; default engines use the
   expanded lexicon. Keep native/WASM parity tests for expanded input too.
-- Generate data/chinese.tsv with scripts/import-chinese.mjs. Retain pinned source
-  hashes and notices. Never use eval/ text to populate the dictionary. Report
-  corpus selection limits and language regressions alongside improvements.
+- Generate data/chinese.tsv with scripts/import-chinese.mjs and data/japanese.tsv
+  with scripts/import-japanese.mjs. Retain pinned source hashes and notices. Never
+  use eval/ text to populate a dictionary. Report corpus selection limits and
+  language regressions alongside improvements. Kana-annotated targets are compared
+  at the reading level (eval/cases.mjs kanaLevel); kanji order follows the data.
 - Regenerate Polytype-Demo.html with bazelisk run //:refresh_demo after source edits.
   Do not edit generated HTML or web/pkg/ directly.
 - Use bazelisk test //... for native/WASM behavior, differential parity,

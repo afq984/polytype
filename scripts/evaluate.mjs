@@ -2,7 +2,7 @@
 import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {createEngine, readingKeys} from '../web/engine.mjs';
-import {cases as bundled, corpus, mixedCorpus, readingSequence} from '../eval/cases.mjs';
+import {cases as bundled, corpus, mixedCorpus, japaneseCorpus, readingSequence, kanaLevel} from '../eval/cases.mjs';
 
 const timing = process.argv.includes('--timing');
 const external = process.argv.slice(2).find(arg => arg !== '--timing');
@@ -22,10 +22,15 @@ function distance(a,b) {
 }
 const lexicon = JSON.parse(await readFile(new URL('../data/lexicon.json',import.meta.url),'utf8'));
 const imported=(await readFile(new URL('../data/chinese.tsv',import.meta.url),'utf8')).trim().split('\n').map(line=>line.split('\t'));
+const japanese=(await readFile(new URL('../data/japanese.tsv',import.meta.url),'utf8')).trim().split('\n').map(line=>line.split('\t'));
 function dictionaryOracle(expanded) {
   const rows=[...lexicon.chinese,...(expanded?imported:[])];
   const pairs=new Set(rows.map(([reading,text])=>readingKeys(reading).join('|')+'\t'+text));
+  // Japanese conversion is whole-token: the pair must exist for the composed reading.
+  const japanesePairs=new Set([...(expanded?japanese:[]).map(([reading,text])=>reading+'\t'+text),
+    ...Object.values(lexicon.japanese).map(outputs=>outputs.find(t=>/^[ぁ-ゖー]+$/u.test(t))+'\t'+outputs[0])]);
   return entry=>{
+    if(entry.kana)return japanesePairs.has(entry.kana+'\t'+entry.text);
     if(!entry.reading)return null;
     const keys=readingSequence(entry.reading),chars=[...entry.text],reachable=new Set([0]);
     for(let i=0;i<chars.length;i++)if(reachable.has(i))for(let length=1;length<=12&&i+length<=chars.length;length++){
@@ -36,7 +41,8 @@ function dictionaryOracle(expanded) {
 }
 const report={method:external?'User-supplied local raw/text pairs':corpus.selection,
   ...(external?{}:{mixedTextNotes:mixedCorpus.notes}),
-  notes:'Exact output matching, including variants and spaces. Readings are supplied, not inferred by the tested dictionary. Corpus overlap with upstream frequency training is unknown. CER includes insertions and can exceed 100%. '+(timing?'Timing uses an already-loaded WASM module; prefix latency excludes engine construction and UI rendering.':'Timing is omitted for reproducibility; use bazelisk run //:measure_evaluation for host-dependent latency measurements.')+'',
+  ...(external?{}:{japaneseWordNotes:japaneseCorpus.selection}),
+  notes:'Exact output matching, including variants and spaces. Reading-level matching additionally accepts imported Japanese conversions whose kana reading equals the target span, so kana-annotated targets are not counted as errors when a kanji conversion is offered instead. Readings are supplied, not inferred by the tested dictionary. Corpus overlap with upstream frequency training is unknown. CER includes insertions and can exceed 100%. '+(timing?'Timing uses an already-loaded WASM module; prefix latency excludes engine construction and UI rendering.':'Timing is omitted for reproducibility; use bazelisk run //:measure_evaluation for host-dependent latency measurements.')+'',
   corpusSha256:createHash('sha256').update(JSON.stringify(cases)).digest('hex'),profiles:{}};
 for(const profile of ['prototype','expanded']) {
   const started=timing?performance.now():0;const engine=createEngine({dictionary:profile});
@@ -48,15 +54,17 @@ for(const profile of ['prototype','expanded']) {
       const candidates=engine.decode(entry.raw,entry.options);
       const outputs=candidates.map(candidate=>engine.commitCandidate(candidate));
       const rank=outputs.indexOf(entry.text)+1;
+      const readingRank=candidates.findIndex((candidate,i)=>outputs[i]===entry.text||kanaLevel(candidate)===entry.text)+1;
       if(timing)for(let i=1;i<=entry.raw.length;i++){
         const start=performance.now();engine.decode(entry.raw.slice(0,i),entry.options);prefixTimes.push(performance.now()-start);
       }
-      rows.push({id:entry.id,group:entry.group,raw:entry.raw,...(entry.options?{options:entry.options}:{}),expected:entry.text,actual:outputs[0]??'',rank,
+      rows.push({id:entry.id,group:entry.group,raw:entry.raw,...(entry.options?{options:entry.options}:{}),expected:entry.text,actual:outputs[0]??'',rank,readingRank,
         edits:distance(entry.text,outputs[0]??''),characters:[...entry.text].length,reachable:oracle(entry),candidates:outputs});
     }
     const groups=Object.fromEntries([...new Set(rows.map(row=>row.group))].map(group=>{
       const selected=rows.filter(row=>row.group===group),annotated=selected.filter(row=>row.reachable!==null);
       return [group,{cases:selected.length,top1:selected.filter(row=>row.rank===1).length,top5:selected.filter(row=>row.rank>0).length,
+        readingTop1:selected.filter(row=>row.readingRank===1).length,readingTop5:selected.filter(row=>row.readingRank>0).length,
         characterErrorRate:selected.reduce((n,row)=>n+row.edits,0)/Math.max(1,selected.reduce((n,row)=>n+row.characters,0)),
         reachable:annotated.length?annotated.filter(row=>row.reachable).length:null}];
     }));
@@ -67,14 +75,16 @@ for(const profile of ['prototype','expanded']) {
 const before=report.profiles.prototype.rows,after=report.profiles.expanded.rows;
 report.regressions=after.filter((row,i)=>before[i].rank===1&&row.rank!==1).map(row=>row.id);
 report.top5Regressions=after.filter((row,i)=>before[i].rank>0&&row.rank===0).map(row=>row.id);
-const lines=['# Chinese dictionary and mixed-text evaluation','',report.method,'',report.notes,'',...(report.mixedTextNotes?[report.mixedTextNotes,'']:[]),
-  '| Profile / group | Top 1 | Top 5 | Character error rate | Dictionary-reachable |',
-  '| --- | --- | --- | --- | --- |'];
-for(const [profile,result] of Object.entries(report.profiles))for(const [group,metrics] of Object.entries(result.groups))lines.push(`| ${profile} / ${group} | ${metrics.top1}/${metrics.cases} | ${metrics.top5}/${metrics.cases} | ${(metrics.characterErrorRate*100).toFixed(1)}% | ${metrics.reachable??'n/a'} |`);
-lines.push('',`Top-1 regressions: ${report.regressions.join(', ')||'none'}.`, `Top-5 regressions: ${report.top5Regressions.join(', ')||'none'}.`,'');
+report.readingRegressions=after.filter((row,i)=>before[i].readingRank===1&&row.readingRank!==1).map(row=>row.id);
+report.readingTop5Regressions=after.filter((row,i)=>before[i].readingRank>0&&row.readingRank===0).map(row=>row.id);
+const lines=['# Chinese, Japanese and mixed-text evaluation','',report.method,'',report.notes,'',...(report.mixedTextNotes?[report.mixedTextNotes,'']:[]),...(report.japaneseWordNotes?[report.japaneseWordNotes,'']:[]),
+  '| Profile / group | Top 1 | Top 5 | Reading top 1 | Reading top 5 | Character error rate | Dictionary-reachable |',
+  '| --- | --- | --- | --- | --- | --- | --- |'];
+for(const [profile,result] of Object.entries(report.profiles))for(const [group,metrics] of Object.entries(result.groups))lines.push(`| ${profile} / ${group} | ${metrics.top1}/${metrics.cases} | ${metrics.top5}/${metrics.cases} | ${metrics.readingTop1}/${metrics.cases} | ${metrics.readingTop5}/${metrics.cases} | ${(metrics.characterErrorRate*100).toFixed(1)}% | ${metrics.reachable??'n/a'} |`);
+lines.push('',`Top-1 regressions: ${report.regressions.join(', ')||'none'} (reading level: ${report.readingRegressions.join(', ')||'none'}).`, `Top-5 regressions: ${report.top5Regressions.join(', ')||'none'} (reading level: ${report.readingTop5Regressions.join(', ')||'none'}).`,'');
 if(timing)for(const [profile,result] of Object.entries(report.profiles))lines.push(`${profile}: engine instance ${result.instanceCreationMs.toFixed(1)} ms; prefix decode p50 ${result.prefixLatency.p50Ms.toFixed(2)} ms, p95 ${result.prefixLatency.p95Ms.toFixed(2)} ms (this run; module already loaded).`);
 lines.push('','## Remaining expanded-profile errors','');
-for(const row of after.filter(row=>row.rank!==1))lines.push(`- ${row.id}: ${row.expected} → ${row.actual} (target rank: ${row.rank||'outside top 5'}; dictionary reachable: ${row.reachable??'not measured'})`);
+for(const row of after.filter(row=>row.rank!==1))lines.push(`- ${row.id}: ${row.expected} → ${row.actual} (target rank: ${row.rank||'outside top 5'}; reading-level rank: ${row.readingRank||'outside top 5'}; dictionary reachable: ${row.reachable??'not measured'})`);
 if(external||timing){console.log(JSON.stringify(report,null,2));}
 else {
   await writeFile(new URL('../eval/report.json',import.meta.url),JSON.stringify(report,null,2)+'\n');

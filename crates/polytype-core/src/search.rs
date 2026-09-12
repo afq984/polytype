@@ -25,6 +25,10 @@ pub struct Part {
     pub complete: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pending: Option<String>,
+    /// Kana reading behind an imported Japanese conversion, so callers can
+    /// compare outputs at the reading level without re-deriving it.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reading: Option<String>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -49,6 +53,9 @@ struct BeamEntry {
     candidate: Candidate,
     family: usize,
     protected: bool,
+    // Commit text is part of candidate identity when distinct outcomes share a
+    // display; it is computed once here instead of on every beam update.
+    commit: Option<String>,
 }
 
 #[derive(Clone, Copy)]
@@ -201,26 +208,36 @@ fn push(
     let mut parts = state.parts.clone();
     let text = format!("{}{}", state.text, part.text);
     parts.push(part);
+    let candidate = Candidate {
+        text,
+        score: state.score + score,
+        lang: lang.map(str::to_owned),
+        parts,
+    };
     let beam = &mut beams.states[at];
     beam.push(BeamEntry {
         family,
         protected: false,
-        candidate: Candidate {
-            text,
-            score: state.score + score,
-            lang: lang.map(str::to_owned),
-            parts,
-        },
+        commit: beams.commit_identity.then(|| candidate.commit_text()),
+        candidate,
     });
     // Stable ordering matches JavaScript's stable sort, including tied scores.
     beam.sort_by(|a, b| b.score.total_cmp(&a.score));
     let mut seen = HashSet::new();
-    beam.retain(|candidate| {
-        seen.insert((
-            candidate.text.clone(),
-            candidate.lang.clone(),
-            beams.commit_identity.then(|| candidate.commit_text()),
-        ))
+    let keep: Vec<bool> = beam
+        .iter()
+        .map(|entry| {
+            seen.insert((
+                entry.text.as_str(),
+                entry.lang.as_deref(),
+                entry.commit.as_deref(),
+            ))
+        })
+        .collect();
+    let mut index = 0;
+    beam.retain(|_| {
+        index += 1;
+        keep[index - 1]
     });
     if beams.floor != 0 {
         protect_continuations(beam, beams.floor);
@@ -646,8 +663,32 @@ fn decode_lattice(
                 && !token.is_empty()
                 && (state.lang.is_none() || state.lang.as_deref() == Some("JP"))
             {
-                if let Some(texts) = dictionary.japanese(spelling, modern_romaji) {
-                    for (n, text) in texts.iter().enumerate() {
+                let final_input = end < raw.len() || !suffix.is_empty();
+                // One composition serves both the dictionary lookup and the kana path.
+                let composition = compose_with_convention(spelling, final_input, modern_romaji);
+                if let Some(texts) =
+                    dictionary.japanese(spelling, composition.as_ref(), modern_romaji)
+                {
+                    let kana = composition
+                        .as_ref()
+                        .map(|c| c.kana.as_str())
+                        .unwrap_or_default();
+                    // Imported evidence stays below common English spelling
+                    // evidence (1.8 per character through SCOWL tier 35) and
+                    // above rule kana (1.2), so a large dictionary cannot claim
+                    // ordinary English words; context bonuses decide the rest.
+                    // Capitalization is Latin-script evidence: a capitalized
+                    // token keeps only the rule-kana rate on top of the
+                    // existing case penalty, so names such as Tanaka stay
+                    // Latin. The frozen prototype keeps its demo-word rate.
+                    let rate = if !modern_romaji {
+                        2.2
+                    } else if has_case {
+                        1.2
+                    } else {
+                        1.45
+                    };
+                    for (n, text) in texts.iter().take(width).enumerate() {
                         push(
                             &mut beams,
                             end,
@@ -656,20 +697,21 @@ fn decode_lattice(
                                 raw: token.clone(),
                                 text: format!("{text}{suffix}"),
                                 lang: "JP".into(),
-                                note: format!("{roman} → Japanese"),
+                                note: if modern_romaji {
+                                    format!("{roman} · {kana} → Japanese")
+                                } else {
+                                    format!("{roman} → Japanese")
+                                },
+                                reading: modern_romaji.then(|| format!("{kana}{suffix}")),
                                 ..Part::default()
                             },
-                            spelling_len * 2.2 - n as f64 * 0.7 + transition("JP")
+                            spelling_len * rate - n as f64 * 0.7 + transition("JP")
                                 - if has_case { 2.0 } else { 0.0 },
                             Some("JP"),
                         );
                     }
                 }
-                if let Some(composition) = compose_with_convention(
-                    spelling,
-                    end < raw.len() || !suffix.is_empty(),
-                    modern_romaji,
-                ) {
+                if let Some(composition) = composition {
                     let resolved = if composition.pending == "n" {
                         format!("{}ん", composition.kana)
                     } else {
