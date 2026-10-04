@@ -59,6 +59,9 @@ Blind exports retain `blind: true` for the external review workflow.
 New captures carry `rawEncodingVersion: 2` and ranking marker `+physical-keys-v2`.
 Older saved captures remain unchanged; review their Colemak Roman colon spans
 before evaluating with this build. See [encoding migration](eval/COLLECTION.md).
+Chinese context now prefers full-width parentheses, with ASCII still selectable.
+Space-completed bare Zhuyin chat initials omit their implicit first-tone mark;
+see [chat input and spacing](docs/ZHUYIN-CHAT.md).
 
 The current ranking build includes 101,191 SCOWL English spellings, context-gated
 Japanese particles, and case/small-kana cues. Import provenance and all upstream

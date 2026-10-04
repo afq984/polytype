@@ -1,6 +1,6 @@
 # Contextual Chinese punctuation
 
-Expanded ranking `scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1+zh-punct-v1+freq-v1+physical-keys-v2+zh-parens-v1`
+Expanded ranking `scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1+zh-punct-v1+freq-v1+physical-keys-v2+zh-parens-v1+bare-zhuyin-v1`
 uses the following subset of McBopomofo's standard-layout punctuation. Prototype
 engines and the frozen reference retain their previous behavior.
 
@@ -82,7 +82,9 @@ No setting or diagnostic flag is added to the web UI/protocol.
 `eval/punctuation-cases.mjs` records seven desired numeric probes in both layouts.
 No digit/tone rule changes ship. At this baseline, `下午 3 點`, `11.6%` and
 `下午 11.6%` work; `下午3點`, `2026 年`, `第 2 版` and `v2` fail. A standalone
-`2` followed by Space is also a valid first-tone ㄉ syllable, while `2026`
+`2` followed by Space finalizes ㄉ, rendered as a bare chat fallback without
+`ˉ` (the edition probe changes `的 ㄉˉ版` to `的 ㄉ版` but still fails its numeric
+target; see [chat initials](ZHUYIN-CHAT.md)). Meanwhile, `2026`
 normalizes as Zhuyin with replacement and a second tone. Local punctuation
 context cannot reliably disambiguate these without affecting ordinary tone
 input. Exact candidate rows and raw keys are in the stream report.

@@ -69,6 +69,7 @@ struct Policy {
     chinese_punctuation: bool,
     frequency: bool,
     chinese_parentheses: bool,
+    bare_zhuyin: bool,
     physical_keys: bool,
 }
 
@@ -84,6 +85,7 @@ impl Default for Policy {
             chinese_punctuation: true,
             frequency: true,
             chinese_parentheses: true,
+            bare_zhuyin: true,
             physical_keys: true,
         }
     }
@@ -452,6 +454,7 @@ pub(crate) fn diagnose(
         chinese_punctuation: diversity,
         frequency: diversity,
         chinese_parentheses: diversity,
+        bare_zhuyin: diversity,
         physical_keys: diversity,
         ..Policy::default()
     };
@@ -490,6 +493,7 @@ pub(crate) fn experiment(
             chinese_punctuation: false,
             frequency: false,
             chinese_parentheses: false,
+            bare_zhuyin: false,
             physical_keys: false,
             ..Policy::default()
         }
@@ -500,8 +504,10 @@ pub(crate) fn experiment(
             "floor" => policy.floor = true,
             "punctuation" => policy.chinese_punctuation = true,
             "parentheses" => policy.chinese_parentheses = true,
+            "bare-zhuyin" => policy.bare_zhuyin = true,
             "no-punctuation" => policy.chinese_punctuation = false,
             "no-parentheses" => policy.chinese_parentheses = false,
+            "no-bare-zhuyin" => policy.bare_zhuyin = false,
             "no-physical-keys" => policy.physical_keys = false,
             "discards" => policy.discards = true,
             "identifiers" => policy.identifiers = true,
@@ -781,8 +787,24 @@ fn decode_lattice(
                     if syllable.complete && values.is_none() {
                         note.push_str(" · outside demo dictionary");
                     }
+                    // Space finalizes an unsupported bare initial as chat text.
+                    // Keep slot replacement, completion and the existing weak
+                    // fallback score; dictionary readings always take precedence.
+                    let bare_initial = dictionary.expanded
+                        && policy.bare_zhuyin
+                        && values.is_none()
+                        && syllable.key.ends_with(' ')
+                        && !syllable.slots[0].is_empty()
+                        && syllable.slots[1].is_empty()
+                        && syllable.slots[2].is_empty();
+                    let fallback_text = if bare_initial {
+                        note.push_str(" · bare Zhuyin chat initial");
+                        zhuyin(&syllable.slots[0])
+                    } else {
+                        zhuyin(&syllable.key)
+                    };
                     let fallback = vec![ChineseWord {
-                        text: zhuyin(&syllable.key),
+                        text: fallback_text,
                         log_frequency: Some(0.0),
                     }];
                     for (n, word) in values.unwrap_or(&fallback).iter().take(width).enumerate() {

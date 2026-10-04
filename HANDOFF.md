@@ -1,5 +1,26 @@
 # Polytype handoff
 
+## Bare Zhuyin chat initials (bare-zhuyin-v1)
+
+Space-completed unsupported lone initials now omit the implicit first-tone
+mark in fallback text: `1 ` -> ㄅ, `1  ` -> `ㄅ `. Scores remain unchanged,
+dictionary/custom conversions retain precedence, and literal spaces still
+establish language boundaries. Explicit non-first-tone marks and unsupported
+multi-slot readings remain phonetic. `c c ` gives ㄏㄏ; `cc ` retains one
+initial slot. See docs/ZHUYIN-CHAT.md for scope and rationale. The prototype and
+historical ablations remain unchanged; `current+no-bare-zhuyin` restores the
+previous display. Ranking suffix: `+bare-zhuyin-v1`.
+Verification: all six Bazel targets pass (81 Node passes, three existing TODOs).
+Chinese 20-excerpt metrics, English guards (192/200 each layout) and the
+regenerated zh-en summary are unchanged. Fourteen mixed configurations drop
+only unsupported initial `ˉ` from their top output, with unchanged scores;
+these remain known language-boundary errors, not accuracy improvements. The
+reviewed main corpus summary also remains identical under before/after engines.
+Against a built main f0a0c243 snapshot, five alternating WASM rounds over 6,321
+prefixes measured median p95 ratios 0.9852 for parentheses and 1.0014 for the
+combined stack (budget 1.15). These commits sit on PT-006 pending the
+coordinator's requested rebase after frequency scoring lands.
+
 ## Chinese full-width parentheses (zh-parens-v1)
 
 Physical Shift+9/Shift+0 prefer `（`/`）` after converted Chinese while keeping

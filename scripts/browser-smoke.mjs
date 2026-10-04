@@ -154,6 +154,11 @@ try {
     assert.equal(await evaluate("document.getElementById('preedit').textContent"),'你好，（？');
     await key(')', 'Digit0', undefined, 8);
     assert.equal(await evaluate("document.getElementById('preedit').textContent"),'你好，（？）');
+    await evaluate("document.getElementById('raw').value='c96dk3u3';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('raw').focus();document.getElementById('raw').setSelectionRange(8,8)");
+    await key('1','Digit1');await key(' ','Space');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'還可以ㄅ');
+    await key(' ','Space');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'還可以ㄅ ');
     // Browser storage remains outside the core; rehydrate it into a fresh WASM instance.
     await evaluate("document.getElementById('entry-reading').value='ㄎㄜ ㄐㄧˋ'; document.getElementById('entry-text').value='科技'; document.getElementById('dictionary-form').requestSubmit()");
     await evaluate("document.getElementById('raw').value='kd ur4'; document.getElementById('raw').dispatchEvent(new Event('input', {bubbles:true}))");
