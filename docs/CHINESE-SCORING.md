@@ -1,10 +1,10 @@
 # Chinese unigram scoring
 
-Expanded ranking `scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1+zh-punct-v1+freq-v1`
+Expanded ranking includes `+freq-v1+physical-keys-v2+zh-parens-v1+bare-zhuyin-v1+tone-switch-v1+heterophony-v1` and
 uses the occurrence column in `data/chinese.tsv` for both single characters and
 phrases. For an imported edge before custom-priority offsets, with key length
 `L`, `n` syllables and
-surface count `c`, its score is:
+reading-conditioned count `c`, its score is:
 
 ```
 2L + 5.2n + 0.7 ln(c / 40,000,000) - discarded-key cost
@@ -37,10 +37,51 @@ Zhuyin stays on the existing phonetic fallback score; the model applies only to
 dictionary entries. [Converted first-tone switching](TONE-SWITCH.md) now uses
 that same Space for a language change; another Space prints a separator.
 
-The source counts belong to surfaces, not pronunciation-conditioned readings.
-Every imported reading of a surface shares its count. There is no contextual
-model, and a frequent homophone can still beat the intended character. The
-prototype profile and frozen reference retain their historical structural scores.
+Single-character counts now apply upstream heterophony rules; phrases keep their
+surface counts. These are curated pronunciation discounts, not observed reading
+frequencies or a contextual model. A frequent homophone can still beat the intended
+character. The prototype profile and frozen reference retain their historical scores.
+
+## Reading-conditioned singles
+
+The importer pins McBopomofo's three `heterophony?.list` files at the existing
+revision, and mirrors [main_compiler.py](https://github.com/openvanilla/McBopomofo/blob/f5ba010ce8795d283ee336ca7d16380f200bd2ec/Source/Data/curation/compilers/main_compiler.py#L157-L195).
+Characters absent from the primary list retain their counts for every reading.
+A listed primary reading retains its count, without flooring. Secondary and
+tertiary readings subtract `0.69314718055994` and twice that constant from the
+upstream log frequency, floored at `H_DEFLT_FREQ = -6.8`. Other readings of a
+character in the primary list use the floor; a missing secondary list entry
+prevents a tertiary match. Repeated character keys use the last upstream row
+(including 著 in the tertiary list).
+
+The upstream [frequency builder](https://github.com/openvanilla/McBopomofo/blob/f5ba010ce8795d283ee336ca7d16380f200bd2ec/Source/Data/curation/builders/frequency_builder.py)
+uses **base-10** logs despite comments describing halving/quartering and the
+subtraction constant being `ln(2)`. We mirror the actual arithmetic: secondary
+counts multiply by `10^-0.69314718055994 = 0.2026995663`, tertiary by
+`0.04108711417`, both floored at `N * 10^-6.8 ≈ 6.351308577` counts. `N ≈
+40,074,047.9366` is its weighted occurrence normalization, derived from all pinned
+`phrase.occ` rows with `exclusion.txt` subtractions and `2.7^(surface length-1)`.
+The exclusion file is additionally pinned solely to calculate this upstream floor.
+Existing positive-frequency eligibility, primary counts, phrase counts, 40k cut,
+Big5 filter and notices remain unchanged. We do not import upstream phrase length
+scaling or exclusion-adjusted character counts into ordinary rows. Equivalent
+counts retain fractional precision instead of the upstream intermediate/output
+log text rounding (eight/six decimals), preserving original primary counts.
+
+For example, 會 ㄎㄨㄞˋ goes from 96,739 to the floor, while 快 remains 8,963;
+有 ㄧㄡˋ is floored, 為 ㄨㄟˋ becomes 18,400.46, and 率 ㄕㄨㄞˋ becomes
+1,413.42. This fixes `u/ e9 dj94xk7187` -> 應該快了吧 in either layout.
+The inherited primary list also demotes 亞 ㄧㄚˋ in the supplied 亞熱帶 reading;
+GSD 04 loses its correct top-one and top-five. Its target remains unchanged and
+is a visible failing TODO, not a new accepted output. Lists do not resolve
+phrase segmentation or conversational homophone context.
+
+TSV row order stays on original surface counts for historical diagnostics. Current
+dictionary construction stably sorts imported single-reading alternatives by
+conditioned log count before beam truncation, retaining custom insertion priority.
+The manifest includes original counts for affected characters; native historical
+20k ablations restore those counts and the original row order, including the
+frequency-enabled experiments. No search-policy or boundary change is needed.
 
 ## Native ablations
 
@@ -66,11 +107,14 @@ protocol exposes none of them.
 ## Coverage and development evidence
 
 The importer selects all 8,184 positive-frequency Big5 single-character readings
-and the top 40,000 positive-frequency phrase/readings. With this scoring, the
-20k, 40k and all-positive (104,221 phrases) cuts respectively achieve 14/20,
+and the top 40,000 positive-frequency phrase/readings. Before reading conditioning,
+the 20k, 40k and all-positive (104,221 phrases) cuts respectively achieved 14/20,
 17/20 and 17/20 top-one Chinese excerpts; top-five counts are 18, 19 and 19.
 The 40k cut adds useful compounds at a smaller size than the all-positive cut.
 It is a browser-size decision, not a claim that the excluded words are invalid.
+The current reading-conditioned 40k profile reaches 16/20 top one and 18/20
+top five, including the 亞熱帶 regression described above. The other cut sizes
+have not been remeasured with conditioned counts.
 
 Reproduce a coverage cut with `bazelisk run //:import_chinese -- --phrase-limit=40000`
 or `--phrase-limit=all`. `--from-dir=DIR` reads cached upstream files under their

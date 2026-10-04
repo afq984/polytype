@@ -4,7 +4,7 @@
   "mixedTextNotes": "User-supplied input, one sentence per case. Targets are provisional developer annotations, not user-confirmed gold. Convert Japanese romaji to hiragana, preserve spaces/punctuation and Latin technical terms/names (including Tanaka / tanaka). No kanji conversion or grammatical respelling is required.",
   "japaneseWordNotes": "The first 100 long-unit words (LUWBILabel=B) tagged NOUN, PROPN, VERB, ADJ or ADV in the test file, taken in sentence order (32 sentences), whose surface form equals the long-unit lemma, whose UniDic lemma reading is katakana, and whose lemma contains kanji or katakana. Pure-hiragana lemmas need no conversion and are skipped. Duplicate reading/lemma pairs are skipped. Selection is mechanical and was fixed before evaluating the imported dictionary; this is a word-conversion diagnostic, not sentence conversion or a representative accuracy estimate.",
   "notes": "Exact output matching, including variants and spaces. Reading-level matching additionally accepts imported Japanese conversions whose kana reading equals the target span, so kana-annotated targets are not counted as errors when a kanji conversion is offered instead. Readings are supplied, not inferred by the tested dictionary. Corpus overlap with upstream frequency training is unknown. CER includes insertions and can exceed 100%. Timing is omitted for reproducibility; use bazelisk run //:measure_evaluation for host-dependent latency measurements.",
-  "corpusSha256": "ad35566c00fa778f52f962250b23d2b1496b043378a6bfa4cd68ce129527384f",
+  "corpusSha256": "d2fbfbc175efd6dd3e902655bd0e12aee34d93ba4e484e337f683726d7ff1bce",
   "profiles": {
     "prototype": {
       "dictionary": {
@@ -54,24 +54,24 @@
           "singleLanguageCases": 11
         },
         "user-feedback": {
-          "cases": 5,
+          "cases": 6,
           "top1": 0,
           "top5": 3,
           "readingTop1": 0,
           "readingTop5": 3,
-          "characterErrorRate": 0.656934306569343,
+          "characterErrorRate": 0.6830985915492958,
           "reachable": null,
           "spaceNormalizedTop1": 0,
           "spaceNormalizedTop5": 3,
           "englishExact": 0.4,
           "englishMatches": 12,
           "englishTokens": 30,
-          "hanCER": 1,
-          "hanEdits": 2,
-          "hanCharacters": 2,
+          "hanCER": 0.7142857142857143,
+          "hanEdits": 5,
+          "hanCharacters": 7,
           "wrongLanguage": 1,
-          "wrongLanguageCases": 4,
-          "singleLanguageCases": 4
+          "wrongLanguageCases": 5,
+          "singleLanguageCases": 5
         },
         "mixed-colemak-all": {
           "cases": 6,
@@ -257,24 +257,24 @@
             "japanese": true,
             "zhuyin": true
           },
-          "cases": 5,
+          "cases": 6,
           "top1": 0,
           "top5": 3,
           "readingTop1": 0,
           "readingTop5": 3,
-          "characterErrorRate": 0.656934306569343,
+          "characterErrorRate": 0.6830985915492958,
           "reachable": null,
           "spaceNormalizedTop1": 0,
           "spaceNormalizedTop5": 3,
           "englishExact": 0.4,
           "englishMatches": 12,
           "englishTokens": 30,
-          "hanCER": 1,
-          "hanEdits": 2,
-          "hanCharacters": 2,
+          "hanCER": 0.7142857142857143,
+          "hanEdits": 5,
+          "hanCharacters": 7,
           "wrongLanguage": 1,
-          "wrongLanguageCases": 4,
-          "singleLanguageCases": 4
+          "wrongLanguageCases": 5,
+          "singleLanguageCases": 5
         },
         "[\"mixed-colemak-all\",\"colemak\",true,true,true]": {
           "group": "mixed-colemak-all",
@@ -1496,6 +1496,31 @@
             "がっこう 妳好 hello",
             "ガッコウ 妳好 hello",
             "ㄙㄛˉ你好 hello"
+          ]
+        },
+        {
+          "id": "feedback-kuai",
+          "group": "user-feedback",
+          "raw": "u/ e9 dj94xk7187",
+          "expected": "應該快了吧",
+          "actual": "英ㄍㄞˉ快了ㄅㄚ˙",
+          "rank": 0,
+          "readingRank": 0,
+          "spaceNormalizedRank": 0,
+          "englishMatches": 0,
+          "englishTokens": 0,
+          "hanEdits": 3,
+          "hanCharacters": 5,
+          "singleLanguage": "chinese",
+          "wrongLanguage": true,
+          "edits": 7,
+          "characters": 5,
+          "reachable": null,
+          "candidates": [
+            "英ㄍㄞˉ快了ㄅㄚ˙",
+            "l/ ㄍㄞˉ快了ㄅㄚ˙",
+            "l/ f9 快了ㄅㄚ˙",
+            "l/ f9 sn94xe7187"
           ]
         },
         {
@@ -8388,19 +8413,19 @@
       "groups": {
         "real-text": {
           "cases": 20,
-          "top1": 17,
-          "top5": 19,
-          "readingTop1": 17,
-          "readingTop5": 19,
-          "characterErrorRate": 0.012875536480686695,
+          "top1": 16,
+          "top5": 18,
+          "readingTop1": 16,
+          "readingTop5": 18,
+          "characterErrorRate": 0.017167381974248927,
           "reachable": 20,
-          "spaceNormalizedTop1": 17,
-          "spaceNormalizedTop5": 19,
+          "spaceNormalizedTop1": 16,
+          "spaceNormalizedTop5": 18,
           "englishExact": null,
           "englishMatches": 0,
           "englishTokens": 0,
-          "hanCER": 0.012875536480686695,
-          "hanEdits": 3,
+          "hanCER": 0.017167381974248927,
+          "hanEdits": 4,
           "hanCharacters": 233,
           "wrongLanguage": 0,
           "wrongLanguageCases": 0,
@@ -8427,24 +8452,24 @@
           "singleLanguageCases": 11
         },
         "user-feedback": {
-          "cases": 5,
-          "top1": 5,
-          "top5": 5,
-          "readingTop1": 5,
-          "readingTop5": 5,
+          "cases": 6,
+          "top1": 6,
+          "top5": 6,
+          "readingTop1": 6,
+          "readingTop5": 6,
           "characterErrorRate": 0,
           "reachable": null,
-          "spaceNormalizedTop1": 5,
-          "spaceNormalizedTop5": 5,
+          "spaceNormalizedTop1": 6,
+          "spaceNormalizedTop5": 6,
           "englishExact": 1,
           "englishMatches": 30,
           "englishTokens": 30,
           "hanCER": 0,
           "hanEdits": 0,
-          "hanCharacters": 2,
+          "hanCharacters": 7,
           "wrongLanguage": 0,
           "wrongLanguageCases": 0,
-          "singleLanguageCases": 4
+          "singleLanguageCases": 5
         },
         "mixed-colemak-all": {
           "cases": 6,
@@ -8577,19 +8602,19 @@
             "zhuyin": true
           },
           "cases": 20,
-          "top1": 17,
-          "top5": 19,
-          "readingTop1": 17,
-          "readingTop5": 19,
-          "characterErrorRate": 0.012875536480686695,
+          "top1": 16,
+          "top5": 18,
+          "readingTop1": 16,
+          "readingTop5": 18,
+          "characterErrorRate": 0.017167381974248927,
           "reachable": 20,
-          "spaceNormalizedTop1": 17,
-          "spaceNormalizedTop5": 19,
+          "spaceNormalizedTop1": 16,
+          "spaceNormalizedTop5": 18,
           "englishExact": null,
           "englishMatches": 0,
           "englishTokens": 0,
-          "hanCER": 0.012875536480686695,
-          "hanEdits": 3,
+          "hanCER": 0.017167381974248927,
+          "hanEdits": 4,
           "hanCharacters": 233,
           "wrongLanguage": 0,
           "wrongLanguageCases": 0,
@@ -8630,24 +8655,24 @@
             "japanese": true,
             "zhuyin": true
           },
-          "cases": 5,
-          "top1": 5,
-          "top5": 5,
-          "readingTop1": 5,
-          "readingTop5": 5,
+          "cases": 6,
+          "top1": 6,
+          "top5": 6,
+          "readingTop1": 6,
+          "readingTop5": 6,
           "characterErrorRate": 0,
           "reachable": null,
-          "spaceNormalizedTop1": 5,
-          "spaceNormalizedTop5": 5,
+          "spaceNormalizedTop1": 6,
+          "spaceNormalizedTop5": 6,
           "englishExact": 1,
           "englishMatches": 30,
           "englishTokens": 30,
           "hanCER": 0,
           "hanEdits": 0,
-          "hanCharacters": 2,
+          "hanCharacters": 7,
           "wrongLanguage": 0,
           "wrongLanguageCases": 0,
-          "singleLanguageCases": 4
+          "singleLanguageCases": 5
         },
         "[\"mixed-colemak-all\",\"colemak\",true,true,true]": {
           "group": "mixed-colemak-all",
@@ -8860,8 +8885,8 @@
           "candidates": [
             "企業界陸續有人提供捐款",
             "企業界陸續友人提供捐款",
-            "企業界陸續有任提供捐款",
-            "企業界陸續有人提供身款",
+            "企業界路續有人提供捐款",
+            "企業界陸續有人提公捐款",
             "tl4l,4pl,4xn4vm4l.3b;6wl6fn/ pm0 sn03"
           ]
         },
@@ -8885,9 +8910,9 @@
           "reachable": true,
           "candidates": [
             "杜鵑花為溫帶植物",
-            "杜鵑花為溫大植物",
             "杜鵑花為溫帶職務",
-            "杜鵑花為溫大職務",
+            "杜鵑花為溫代植物",
+            "杜鵑花維溫帶植物",
             "2n4pm0 cn8 ny6n; 29456n4"
           ]
         },
@@ -8896,24 +8921,24 @@
           "group": "real-text",
           "raw": "w961o3njo b06y94u84bk4294",
           "expected": "台北雖然在亞熱帶",
-          "actual": "台北雖然在亞熱帶",
-          "rank": 1,
-          "readingRank": 1,
-          "spaceNormalizedRank": 1,
+          "actual": "台北雖然在訝熱帶",
+          "rank": 0,
+          "readingRank": 0,
+          "spaceNormalizedRank": 0,
           "englishMatches": 0,
           "englishTokens": 0,
-          "hanEdits": 0,
+          "hanEdits": 1,
           "hanCharacters": 8,
           "singleLanguage": "chinese",
           "wrongLanguage": false,
-          "edits": 0,
+          "edits": 1,
           "characters": 8,
           "reachable": true,
           "candidates": [
-            "台北雖然在亞熱帶",
-            "台北雖然在亞熱大",
             "台北雖然在訝熱帶",
-            "台北雖然再亞熱帶",
+            "台北雖然在軋熱帶",
+            "台北雖然再訝熱帶",
+            "台北雖然在揠熱帶",
             "w961y3kny b06j94l84be4294"
           ]
         },
@@ -8938,8 +8963,8 @@
           "candidates": [
             "一動兩層樓的建築",
             "一棟兩層樓的建築",
-            "一動兩層樓地建築",
-            "一動兩層樓得建築",
+            "醫動兩層樓的建築",
+            "一洞兩層樓的建築",
             "l 2n/4xlo3h/6x.62e7pl045n6"
           ]
         },
@@ -9041,9 +9066,9 @@
           "reachable": true,
           "candidates": [
             "這些電話經交換機處理",
-            "這些電話更交換機處理",
             "這些電話精交換機處理",
             "這些電話京交換機處理",
+            "這些電話驚交換機處理",
             "5e4vl, 2l04cn84pl/ pli cn04pl gn3xl3"
           ]
         },
@@ -9067,9 +9092,9 @@
           "reachable": true,
           "candidates": [
             "使用的媒介包括海底電纜",
-            "使用地媒介包括海底電纜",
-            "使用的沒解包括海底電纜",
-            "使用得媒介包括海底電纜",
+            "使用的沒界包括海底電纜",
+            "使用的媒介包括海底電覽",
+            "使用的沒介包括海底電纜",
             "d3m/42e7ay6pl,41i snu4c932l32l04x03"
           ]
         },
@@ -9095,7 +9120,7 @@
             "團購網站的產品原價和購買數量",
             "團購網站的產品員價和購買數量",
             "團購網站的產品原價漢購買數量",
-            "團購網站的產品員假和購買數量",
+            "團購網站的產品元價和購買數量",
             "wn06f.4no35042e7g03ql;3m06pl84c04f.4a93dn4xlo4"
           ]
         },
@@ -9119,9 +9144,9 @@
           "reachable": true,
           "candidates": [
             "團購網站的主要產品分為家居類",
-            "團購網站的主要產品分為家車類",
-            "團購網站的主要產品分為加車類",
             "團購網站的主要產品分為家居累",
+            "團購網站的主要產品氛圍家居類",
+            "團購網站的主要產品分為加居類",
             "wn06f.4no35042e75n3li4g03ql;3z; ny6pl8 pm xy4"
           ]
         },
@@ -9171,9 +9196,9 @@
           "reachable": true,
           "candidates": [
             "自然界的土是由岩石經風化",
-            "自然界的土是由岩石更風化",
             "自然界的土是遊岩石經風化",
             "自然界的土事由岩石經風化",
+            "自然界的土是由研時經風化",
             "j4b06pl,42e7wn3d4l.6l06d6pl/ z/ cn84"
           ]
         },
@@ -9197,9 +9222,9 @@
           "reachable": true,
           "candidates": [
             "深受耕作施肥等人為因素的影響而及不穩定",
-            "深受更作施肥等人為因素的影響而及不穩定",
             "深受耕作施肥等人為因素的影響而即不穩定",
-            "深受耕作施肥等人為因素的影響而吃不穩定",
+            "身受耕作施肥等人為因素的影響而及不穩定",
+            "深受耕作施肥等人為因素的影響而集不穩定",
             "d; d.4f/ jnu4d zy62/3b;6ny6l; kn42e7l/3vlo3-6pl61n4n;32l/4"
           ]
         },
@@ -9225,7 +9250,7 @@
             "土壤是重要的自然資源和生產資料",
             "土壤事重要的自然資源和生產資料",
             "土壤市重要的自然資源和生產資料",
-            "土壤使重要的自然資源和生產資料",
+            "土壤式重要的自然資源和生產資料",
             "wn3bo3d45n/4li42e7j4b06j m06c04d/ g03j xli4"
           ]
         },
@@ -9275,9 +9300,9 @@
           "reachable": true,
           "candidates": [
             "這個計算機控制了火箭",
-            "這個計算機控制了火間",
             "這個計算機控制了火建",
             "這個計算機控制了火見",
+            "這個計算機控制了火件",
             "5e4fe7pl4kn04pl sn/454xe7cnu3pl04"
           ]
         },
@@ -9302,8 +9327,8 @@
           "candidates": [
             "教堂完成了主體大修工程",
             "教堂完成了主體大休工程",
-            "教堂完成了著體大修工程",
             "教堂完成了主體大羞工程",
+            "教堂完成了主體大修公成",
             "pli4wo6n06g/6xe75n3wl3284vl. fn/ g/6"
           ]
         },
@@ -9327,9 +9352,9 @@
           "reachable": true,
           "candidates": [
             "工程包括內部結構的調整",
-            "工程包括那不結構的調整",
             "工程包括內不結構的調整",
-            "工程包括內部結構地調整",
+            "公成包括內部結構的調整",
+            "工成包括內部結構的調整",
             "fn/ g/61i snu4ry41n4pl,6f.42e7wli65/3"
           ]
         },
@@ -9743,7 +9768,7 @@
             "ごおd morning",
             "商morning",
             "傷morning",
-            "湯morning"
+            "裳morning"
           ]
         },
         {
@@ -9900,6 +9925,32 @@
             "がっこう 你好 hello",
             "学校 擬好 hello",
             "gakkou lr3ic3 hello"
+          ]
+        },
+        {
+          "id": "feedback-kuai",
+          "group": "user-feedback",
+          "raw": "u/ e9 dj94xk7187",
+          "expected": "應該快了吧",
+          "actual": "應該快了吧",
+          "rank": 1,
+          "readingRank": 1,
+          "spaceNormalizedRank": 1,
+          "englishMatches": 0,
+          "englishTokens": 0,
+          "hanEdits": 0,
+          "hanCharacters": 5,
+          "singleLanguage": "chinese",
+          "wrongLanguage": false,
+          "edits": 0,
+          "characters": 5,
+          "reachable": null,
+          "candidates": [
+            "應該快了吧",
+            "應該快了巴",
+            "應該快了爸",
+            "應該塊了吧",
+            "l/ f9 sn94xe7187"
           ]
         },
         {
@@ -10311,9 +10362,9 @@
           "reachable": null,
           "candidates": [
             "この PR の ればせ してから npm test 通る か mite.",
+            "此の PR の ればせ してから npm test 通る か mite.",
             "この PR の ればせ してから npm test 透 か mite.",
             "この PR の ればせ してから npm test とおる か mite.",
-            "この PR の ればせ してから npm test 太 か mite.",
             "kono PR no rebase shitekara npm test tooru ka mite."
           ]
         },

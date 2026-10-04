@@ -26,6 +26,7 @@ export const guardCases = [
   {id:'trilingual',group:'guards',text:'がっこう 你好 hello',raw:encode('gakkou')+' us3lc3 '+encode('hello')},
 ];
 export const feedbackCases = [
+  {id:'feedback-kuai',group:'user-feedback',raw:'u/ e9 dj94xk7187',text:'應該快了吧'},
   {id:'feedback-code-loop',group:'user-feedback',raw:encode('for (int i = 0; i < 100; i++)'),text:'for (int i = 0; i < 100; i++)'},
   {id:'feedback-bug-raw',group:'user-feedback',raw:'Fhld ld a bit.',text:'This is a bug.'},
   {id:'feedback-short-word-period',group:'user-feedback',raw:'F'+encode('his is a bit.'),text:'This is a bit.'},

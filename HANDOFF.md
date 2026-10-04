@@ -1,5 +1,28 @@
 # Polytype handoff
 
+## Reading-conditioned Chinese singles (heterophony-v1)
+
+Single-character counts now follow McBopomofo's pinned primary, secondary and
+tertiary reading lists. Phrases, the 40k cut, reading/output membership and
+first-tone switch eligibility remain unchanged. The upstream compiler subtracts
+`ln(2)` from base-10 logs, so the actual secondary multiplier is about 0.2027;
+unlisted readings of listed characters use about 6.3513 equivalent counts.
+See [docs/CHINESE-SCORING.md](docs/CHINESE-SCORING.md) for the normalization,
+source pins and historical-count restoration. Ranking appends `+heterophony-v1`
+after `+tone-switch-v1`. This stack is rebased onto layout main `f93c4f94`.
+
+`u/ e9 dj94xk7187` now gives 應該快了吧, rank four to one in both layouts.
+Chinese development excerpts regress from 17/20 to 16/20 top one and 19/20 to
+18/20 top five: upstream primary 亞 ㄧㄚˇ demotes the supplied ㄧㄚˋ in
+亞熱帶, yielding 訝熱帶. The target is retained as a visible failing TODO.
+Zh-en has 92 top-one gains and 80 losses across repeated configurations;
+some supplied readings conflict with the upstream lists. English tokens,
+English guard top outputs and all 652 first-tone switch probes are unchanged.
+Prototype and all five historical 376-row ablations retain their candidates
+and scores. All six Bazel targets pass (92 Node passes, four TODOs).
+Five alternating WASM rounds over 6,337 prefixes give median p95 ratio 1.0519
+against main, within the 1.15 budget. Browser smoke needs coordinator Chrome.
+
 ## Converted first-tone language switching (tone-switch-v1)
 
 Expanded search now permits English, numbers/identifiers, ASCII punctuation and
@@ -629,8 +652,9 @@ checked-in standalone after source changes. npm start only serves local files.
 ## Remaining limitations and next work
 
 The prototype profile still has 181 Chinese rows including duplicates/alternatives.
-Expanded Chinese coverage is substantially larger; its unigram surface counts
-are not pronunciation-conditioned and do not provide a contextual language model.
+Expanded Chinese coverage is substantially larger; its single-character unigram
+counts use curated pronunciation discounts, while phrases keep surface counts.
+These are not observed reading frequencies or a contextual language model.
 English membership and the Japanese kanji map remain limited. No learning or typo
 model. Do not hardcode evaluation sentences into the lexicon.
 

@@ -146,6 +146,18 @@ pub(crate) struct ChineseWord {
 pub(crate) static HISTORICAL: LazyLock<Dictionary> =
     LazyLock::new(|| Dictionary::with_phrase_limit(Vec::new(), true, 20_000));
 
+#[cfg(feature = "diagnostics")]
+static HISTORICAL_SINGLE_LOGS: LazyLock<HashMap<String, f64>> = LazyLock::new(|| {
+    let source: serde_json::Value =
+        serde_json::from_str(include_str!("../../../data/chinese-source.json")).unwrap();
+    source["readingCounts"]["historicalSingleCounts"]
+        .as_object()
+        .expect("original single-character counts")
+        .iter()
+        .map(|(text, count)| (text.clone(), count.as_f64().unwrap().ln()))
+        .collect()
+});
+
 pub(crate) struct Dictionary {
     pub expanded: bool,
     pub custom: Vec<Entry>,
@@ -172,7 +184,21 @@ impl Dictionary {
     }
 
     pub fn new(custom: Vec<Entry>, expanded: bool) -> Self {
-        Self::with_phrase_limit(custom, expanded, usize::MAX)
+        let mut dict = Self::with_phrase_limit(custom, expanded, usize::MAX);
+        if expanded {
+            for words in dict.singles.values_mut() {
+                // Keep custom insertion priority; source row order stays frozen
+                // for historical diagnostics, while current beam truncation
+                // needs the strongest reading-conditioned alternatives first.
+                let custom = words.partition_point(|word| word.log_frequency.is_none());
+                words[custom..].sort_by(|a, b| {
+                    b.log_frequency
+                        .unwrap()
+                        .total_cmp(&a.log_frequency.unwrap())
+                });
+            }
+        }
+        dict
     }
 
     pub(crate) fn with_phrase_limit(custom: Vec<Entry>, expanded: bool, limit: usize) -> Self {
@@ -202,7 +228,17 @@ impl Dictionary {
                             true
                         }
                     })
-                    .map(|(r, t, f)| (r, t, Some(*f))),
+                    .map(|(r, t, f)| {
+                        #[cfg(feature = "diagnostics")]
+                        let f = if limit < usize::MAX {
+                            HISTORICAL_SINGLE_LOGS.get(t).copied().unwrap_or(*f)
+                        } else {
+                            *f
+                        };
+                        #[cfg(not(feature = "diagnostics"))]
+                        let f = *f;
+                        (r, t, Some(f))
+                    }),
             )
             .chain(LEXICON.chinese.iter().map(|(r, t)| (r, t, Some(0.0))));
         for (reading, text, log_frequency) in rows {

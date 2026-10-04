@@ -12,16 +12,16 @@ The first 100 long-unit words (LUWBILabel=B) tagged NOUN, PROPN, VERB, ADJ or AD
 | --- | --- | --- | --- | --- | --- | --- |
 | prototype / real-text | 0/20 | 0/20 | 0/20 | 0/20 | 217.6% | 0 |
 | prototype / guards | 20/22 | 21/22 | 20/22 | 21/22 | 9.5% | n/a |
-| prototype / user-feedback | 0/5 | 3/5 | 0/5 | 3/5 | 65.7% | n/a |
+| prototype / user-feedback | 0/6 | 3/6 | 0/6 | 3/6 | 68.3% | n/a |
 | prototype / mixed-colemak-all | 0/6 | 0/6 | 0/6 | 0/6 | 53.5% | n/a |
 | prototype / mixed-colemak-en-jp | 0/6 | 0/6 | 0/6 | 0/6 | 38.0% | n/a |
 | prototype / mixed-qwerty-all | 0/6 | 0/6 | 0/6 | 0/6 | 53.5% | n/a |
 | prototype / mixed-qwerty-en-jp | 0/6 | 0/6 | 0/6 | 0/6 | 38.0% | n/a |
 | prototype / japanese-words-jp | 0/100 | 1/100 | 0/100 | 1/100 | 165.1% | 0 |
 | prototype / japanese-words-all | 0/100 | 1/100 | 0/100 | 1/100 | 165.5% | 0 |
-| expanded / real-text | 17/20 | 19/20 | 17/20 | 19/20 | 1.3% | 20 |
+| expanded / real-text | 16/20 | 18/20 | 16/20 | 18/20 | 1.7% | 20 |
 | expanded / guards | 12/22 | 22/22 | 22/22 | 22/22 | 17.5% | n/a |
-| expanded / user-feedback | 5/5 | 5/5 | 5/5 | 5/5 | 0.0% | n/a |
+| expanded / user-feedback | 6/6 | 6/6 | 6/6 | 6/6 | 0.0% | n/a |
 | expanded / mixed-colemak-all | 1/6 | 3/6 | 4/6 | 4/6 | 12.5% | n/a |
 | expanded / mixed-colemak-en-jp | 1/6 | 3/6 | 4/6 | 4/6 | 12.5% | n/a |
 | expanded / mixed-qwerty-all | 1/6 | 3/6 | 4/6 | 4/6 | 12.5% | n/a |
@@ -37,16 +37,16 @@ Space normalization deletes only U+0020 runs directly between Han and Latin-scri
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | prototype / real-text / colemak / english+japanese+zhuyin | 0/20 | 0/20 | 0/20 | 0/20 | n/a (0/0) | 74.2% (173/233) | 100.0% (20/20) |
 | prototype / guards / colemak / english+japanese+zhuyin | 20/22 | 21/22 | 20/22 | 21/22 | 86.4% (19/22) | 0.0% (0/27) | 18.2% (2/11) |
-| prototype / user-feedback / colemak / english+japanese+zhuyin | 0/5 | 3/5 | 0/5 | 3/5 | 40.0% (12/30) | 100.0% (2/2) | 100.0% (4/4) |
+| prototype / user-feedback / colemak / english+japanese+zhuyin | 0/6 | 3/6 | 0/6 | 3/6 | 40.0% (12/30) | 71.4% (5/7) | 100.0% (5/5) |
 | prototype / mixed-colemak-all / colemak / english+japanese+zhuyin | 0/6 | 0/6 | 0/6 | 0/6 | 34.6% (9/26) | n/a (0/0) | n/a (0/0) |
 | prototype / mixed-colemak-en-jp / colemak / english+japanese | 0/6 | 0/6 | 0/6 | 0/6 | 57.7% (15/26) | n/a (0/0) | n/a (0/0) |
 | prototype / mixed-qwerty-all / qwerty / english+japanese+zhuyin | 0/6 | 0/6 | 0/6 | 0/6 | 34.6% (9/26) | n/a (1/0) | n/a (0/0) |
 | prototype / mixed-qwerty-en-jp / qwerty / english+japanese | 0/6 | 0/6 | 0/6 | 0/6 | 57.7% (15/26) | n/a (0/0) | n/a (0/0) |
 | prototype / japanese-words-jp / qwerty / japanese | 0/100 | 1/100 | 0/100 | 1/100 | n/a (0/0) | 100.0% (201/201) | 0.0% (0/78) |
 | prototype / japanese-words-all / qwerty / english+japanese+zhuyin | 0/100 | 1/100 | 0/100 | 1/100 | n/a (0/0) | 100.0% (201/201) | 1.3% (1/78) |
-| expanded / real-text / colemak / english+japanese+zhuyin | 17/20 | 19/20 | 17/20 | 19/20 | n/a (0/0) | 1.3% (3/233) | 0.0% (0/20) |
+| expanded / real-text / colemak / english+japanese+zhuyin | 16/20 | 18/20 | 16/20 | 18/20 | n/a (0/0) | 1.7% (4/233) | 0.0% (0/20) |
 | expanded / guards / colemak / english+japanese+zhuyin | 12/22 | 22/22 | 12/22 | 22/22 | 100.0% (22/22) | 51.9% (14/27) | 0.0% (0/11) |
-| expanded / user-feedback / colemak / english+japanese+zhuyin | 5/5 | 5/5 | 5/5 | 5/5 | 100.0% (30/30) | 0.0% (0/2) | 0.0% (0/4) |
+| expanded / user-feedback / colemak / english+japanese+zhuyin | 6/6 | 6/6 | 6/6 | 6/6 | 100.0% (30/30) | 0.0% (0/7) | 0.0% (0/5) |
 | expanded / mixed-colemak-all / colemak / english+japanese+zhuyin | 1/6 | 3/6 | 1/6 | 3/6 | 92.3% (24/26) | n/a (9/0) | n/a (0/0) |
 | expanded / mixed-colemak-en-jp / colemak / english+japanese | 1/6 | 3/6 | 1/6 | 3/6 | 92.3% (24/26) | n/a (9/0) | n/a (0/0) |
 | expanded / mixed-qwerty-all / qwerty / english+japanese+zhuyin | 1/6 | 3/6 | 1/6 | 3/6 | 92.3% (24/26) | n/a (9/0) | n/a (0/0) |
@@ -60,6 +60,7 @@ Top-5 regressions: none (reading level: none).
 
 ## Remaining expanded-profile errors
 
+- gsd-04: 台北雖然在亞熱帶 → 台北雖然在訝熱帶 (target rank: outside top 5; reading-level rank: outside top 5; dictionary reachable: true)
 - gsd-05: 一棟兩層樓的建築 → 一動兩層樓的建築 (target rank: 2; reading-level rank: 2; dictionary reachable: true)
 - gsd-13: 因此透過切割菌肉便能分辨二者 → 因此透過切割俊肉便能分辨二者 (target rank: 3; reading-level rank: 3; dictionary reachable: true)
 - gsd-15: 深受耕作施肥等人為因素的影響而極不穩定 → 深受耕作施肥等人為因素的影響而及不穩定 (target rank: outside top 5; reading-level rank: outside top 5; dictionary reachable: true)
