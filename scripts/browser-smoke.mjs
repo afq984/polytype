@@ -195,6 +195,14 @@ try {
       await type('release ');
       await key('1','Digit1');await key('.','Period');await key('0','Digit0');await key('3','Digit3');
       assert.equal(await evaluate("document.getElementById('preedit').textContent"),'release 1.03');
+      const chinese=await evaluate("[...document.querySelectorAll('#candidates button')].findIndex(b=>b.textContent.slice(1)==='release 版')");
+      assert.ok(chinese>0,'Chinese remains below the numeral in the whole candidate list');
+      await evaluate(`document.querySelectorAll('#candidates button')[${chinese}].click()`);
+      await key('Enter','Enter',13);
+      assert.ok(await evaluate("document.getElementById('committed').textContent.endsWith('release 版')"));
+      await evaluate("document.getElementById('clear').click();document.getElementById('raw').focus()");
+      await type('release ');
+      await key('1','Digit1');await key('.','Period');await key('0','Digit0');await key('3','Digit3');
       await key('Enter','Enter',13);
       assert.ok(await evaluate("document.getElementById('committed').textContent.endsWith('release 1.03')"));
       await evaluate("document.getElementById('clear').click();document.getElementById('raw').focus()");

@@ -72,4 +72,27 @@ export const ambiguityCases=generateZhEnCases(ambiguityEntries).map(row=>({...ro
   group:`roman-ambiguity-${row.contract}-${row.options.layout}-${row.options.japanese?'all':'en-zh'}`,
 }));
 export const guardCases=[...englishCases,...mixedCases];
-export const cases=[...guardCases,...ambiguityCases];
+
+// Opposite-reading controls: the number wins, but these Chinese readings must
+// remain in the five whole candidates, not only the segment menu.
+export const dottedChineseCases=[
+  {id:'roman-dotted-tiktok',text:'TikTok 2.3',chineseTarget:'TikTok 斗'},
+  {id:'roman-dotted-java',text:'Java 2.4',chineseTarget:'Java 鬥'},
+  {id:'roman-dotted-pc',text:'PC 5.3',chineseTarget:'PC 肘'},
+].flatMap(entry=>['qwerty','colemak'].flatMap(layout=>[false,true].map(japanese=>({
+  ...entry,id:`${entry.id}-${layout}-${japanese?'all':'en-zh'}`,sourceId:entry.id,
+  raw:layout==='colemak'?encodeMixedInput(entry.text):entry.text,
+  options:{layout,english:true,japanese,zhuyin:true},rawEncodingVersion:2,
+  scope:'candidate-control',category:'dotted-chinese',review:'synthetic',contract:'literal-roman',
+  provenance:'Public synthetic dotted-number opposite-reading control',
+  group:`roman-dotted-chinese-${layout}-${japanese?'all':'en-zh'}`,
+}))));
+export const firstToneCases=['qwerty','colemak'].flatMap(layout=>[false,true].map(japanese=>({
+  id:`roman-first-tone-${layout}-${japanese?'all':'en-zh'}`,sourceId:'roman-first-tone',
+  raw:(layout==='colemak'?encodeMixedInput('deadline'):'deadline')+' 5. u ',text:'deadline 週一',
+  options:{layout,english:true,japanese,zhuyin:true},rawEncodingVersion:2,
+  scope:'chinese-control',category:'first-tone',review:'synthetic',contract:'first-tone-chinese',
+  provenance:'Public synthetic first-tone Chinese control',
+  group:`roman-first-tone-${layout}-${japanese?'all':'en-zh'}`,
+})));
+export const cases=[...guardCases,...ambiguityCases,...dottedChineseCases,...firstToneCases];

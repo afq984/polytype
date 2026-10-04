@@ -203,6 +203,9 @@ guards below record the subsequent rejected fix and numeric tradeoff.
 
 ## Roman-context number guards (Phase 2b)
 
+This section records the historical Phase 2b measurement. The Phase 2c rule
+below supersedes its candidate exclusion and latency results.
+
 The separate [Roman-number probes](roman-number-cases.mjs) cover ordinary
 English numbers that are also clean digit-key Zhuyin readings. They contain
 43 synthetic English inputs (integers, decimals, dotted versions, model numbers
@@ -249,6 +252,56 @@ bazelisk run //:numbers_diagnostics -- MAIN_RUNTIME/web/engine.mjs OUT_DIR
 bazelisk run //:benchmark -- MAIN_RUNTIME/web/engine.mjs OUT_DIR/latency.json OUT_DIR/main-results.json
 bazelisk test //... //:browser_test --test_env=CHROME_BIN=CHROME
 ```
+
+## Roman dotted alternatives (Phase 2c)
+
+`+roman-dotted-numbers-v2` keeps Chinese whole candidates below the literal
+number at the Roman dotted boundary. A cumulative ceiling covers imported and
+custom singles/phrases across the token, with a quarter-point margin and later
+punctuation credit reserved. `Policy.dotted_alternatives` controls this change;
+`current+no-dotted-alternatives` reproduces Phase 2b, while
+`current+no-roman-dotted-numbers` reproduces main. Both ablations match complete
+candidate/part/score traces on 6,051 configurations. Explicit locks remain
+stronger than the cap. The prototype and historical policies retain their
+previous behavior; no dictionary or frozen target is changed.
+
+The Roman-number module now adds 12 opposite-reading controls (TikTok 2.3,
+Java 2.4, PC 5.3, both layouts and EN+ZH/all), requiring the number first and
+Chinese within five whole candidates, plus four first-tone controls requiring
+`deadline 5. u␣` → `deadline 週一` with 州一 selectable. Before the core edit,
+main retained Chinese on 12/12, Phase 2b on 0/12; Phase 2c restores 12/12 at
+rank two. First-tone candidate lists are unchanged on all four configurations.
+All 220 numeric guards still pass (52 gains, zero losses versus main); the 24
+digit-only Chinese ambiguities remain second, recoverable with one correction.
+Custom `PC 1.03` offers the number first and 自訂 second, including multi-syllable
+and punctuation continuations. A finite 0..99 × 0..99 decimal grid after
+`release`, both layouts/modes, has zero misses across 40,000 configurations.
+These are synthetic development measurements, not held-out coverage.
+
+All 5,624 existing paired configurations retain completed-input accuracy and
+candidate text arrays, including all 1,536 numbers/controls, ASCEND/EWT,
+Japanese, feedback and the frozen 376. Numeric score arrays change on 123 as
+in Phase 2b. The original ASUS results and homophone ordering are unchanged.
+All 4,124 GSD/control prefix outputs and revision counts hold.
+
+A broader sweep covers 189,195 prefixes from 5,424 case configurations
+(105,669 distinct prefix/options pairs). All 185,027 older development prefixes
+remain unchanged. Roman guards/controls have 204 changed top outputs,
+zero added and 162 removed revisions (554 → 392). First-tone control prefixes
+are unchanged. Counts include repeated contracts/modes, not independent text.
+
+Five quiet alternating built-WASM rounds over 6,337 prefixes have median p95
+ratio **1.0008** against main (budget 1.15). Individual ratios are
+0.9656–1.1374, all within budget. Initialization and browser rendering are
+excluded. This supersedes the noisy Phase 2b timing and is a local measurement,
+not a portable performance guarantee.
+
+All seven Bazel targets pass: 127 Node passes and ten existing TODOs,
+native/WASM parity, formatting, clippy, audit and Chrome hosted/standalone smoke.
+The browser physically types dotted numbers in both layouts, selects a restored
+Chinese whole candidate with its existing candidate button and commits it,
+then retypes and commits the numeric candidate. The demo's current digit-key
+selection applies to the open segment menu; whole candidates use buttons.
 
 ## What this measures
 

@@ -57,6 +57,13 @@ struct BeamEntry {
     // Commit text is part of candidate identity when distinct outcomes share a
     // display; it is computed once here instead of on every beam update.
     commit: Option<String>,
+    dotted_ceiling: Option<DottedCeiling>,
+}
+
+#[derive(Clone, Copy)]
+struct DottedCeiling {
+    end: usize,
+    score: f64,
 }
 
 #[derive(Clone, Copy)]
@@ -76,6 +83,7 @@ struct Policy {
     numbers: bool,
     numeric_prefix: bool,
     roman_dotted_numbers: bool,
+    dotted_alternatives: bool,
     english_frequency: bool,
     english_offset: f64,
     english_weight: f64,
@@ -99,6 +107,7 @@ impl Default for Policy {
             numbers: true,
             numeric_prefix: true,
             roman_dotted_numbers: true,
+            dotted_alternatives: true,
             english_frequency: true,
             english_offset: 1.8,
             english_weight: 0.05,
@@ -369,12 +378,25 @@ fn push_edge(
     } else {
         0
     };
+    let mut total_score = state.score + score;
+    let dotted_ceiling = state.dotted_ceiling.and_then(|mut ceiling| {
+        if locked || !matches!(part.lang.as_str(), "TW" | "punct") {
+            return None;
+        }
+        if part.lang == "TW" {
+            // Allocate numeric evidence for consumed digits, across both
+            // singles and phrases. Later Chinese pieces cannot escape the cap.
+            ceiling.score += part.raw.bytes().filter(u8::is_ascii_digit).count() as f64 * 2.5;
+            total_score = total_score.min(ceiling.score);
+        }
+        (at < ceiling.end).then_some(ceiling)
+    });
     let mut parts = state.parts.clone();
     let text = format!("{}{}", state.text, part.text);
     parts.push(part);
     let candidate = Candidate {
         text,
-        score: state.score + score,
+        score: total_score,
         lang: lang.map(str::to_owned),
         parts,
     };
@@ -384,6 +406,7 @@ fn push_edge(
         protected: false,
         commit: beams.commit_identity.then(|| candidate.commit_text()),
         candidate,
+        dotted_ceiling,
     });
     // Stable ordering matches JavaScript's stable sort, including tied scores.
     beam.sort_by(|a, b| b.score.total_cmp(&a.score));
@@ -927,6 +950,7 @@ pub(crate) fn diagnose(
         tone_switch: diversity,
         numbers: diversity,
         roman_dotted_numbers: diversity,
+        dotted_alternatives: diversity,
         english_frequency: diversity,
         ..Policy::default()
     };
@@ -970,6 +994,7 @@ pub(crate) fn experiment(
             tone_switch: false,
             numbers: false,
             roman_dotted_numbers: false,
+            dotted_alternatives: false,
             english_frequency: false,
             ..Policy::default()
         }
@@ -994,6 +1019,7 @@ pub(crate) fn experiment(
             "no-numbers" => policy.numbers = false,
             "no-numeric-prefix" => policy.numeric_prefix = false,
             "no-roman-dotted-numbers" => policy.roman_dotted_numbers = false,
+            "no-dotted-alternatives" => policy.dotted_alternatives = false,
             "no-english-frequency" => policy.english_frequency = false,
             "en-freq-16-005" => {
                 policy.english_offset = 1.6;
@@ -1236,6 +1262,7 @@ fn decode_lattice_planned(
                 0.0
             };
             let previous_language = state
+                .candidate
                 .parts
                 .iter()
                 .rev()
@@ -1292,6 +1319,22 @@ fn decode_lattice_planned(
                     },
                 );
                 continue;
+            }
+
+            if roman_dotted_boundary && policy.dotted_alternatives {
+                let (end, text, _, _) = roman_dotted_number.as_ref().unwrap();
+                // Reserve a quarter point below the whole numeric token,
+                // plus any later full-width-punctuation credit. A Chinese
+                // first-tone completion may consume the next Space as well.
+                let punctuation = text
+                    .chars()
+                    .rev()
+                    .take_while(|c| matches!(c, '.' | ',' | ';' | '!' | '?' | ')' | ']' | '}'))
+                    .count();
+                state.dotted_ceiling = Some(DottedCeiling {
+                    end: *end,
+                    score: state.score - 0.25 * (punctuation + 1) as f64,
+                });
             }
 
             if let Some((end, text, score, pending)) = number
@@ -1423,11 +1466,10 @@ fn decode_lattice_planned(
                     None,
                 );
             }
-            // Do not silently reinterpret a recognized Roman dotted number as
-            // Chinese, even with high-scoring custom words. Explicit Chinese
-            // locks were handled above; Chinese-only menus retain that choice.
+            // Keep dotted Chinese readings selectable below the numeric token.
+            // The historical v1 ablation excluded them at this boundary.
             if options.zhuyin
-                && !roman_dotted_boundary
+                && (!roman_dotted_boundary || policy.dotted_alternatives)
                 && (state.lang.is_none() || state.lang.as_deref() == Some("TW"))
             {
                 let mut at = i;

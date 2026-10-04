@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {createEngine,rankingId} from '../web/engine.mjs';
-import {cases,guardCases,ambiguityCases} from '../eval/roman-number-cases.mjs';
+import {cases,guardCases,ambiguityCases,dottedChineseCases,firstToneCases} from '../eval/roman-number-cases.mjs';
 import {correctionEdits} from '../scripts/correction-metrics.mjs';
 
 test('Roman-context integers, models and times retain literal numbers',()=>{
@@ -14,11 +14,28 @@ test('Roman-context integers, models and times retain literal numbers',()=>{
 });
 
 test('Roman-context dotted numbers retain their intended literal text',()=>{
-  assert.ok(rankingId.endsWith('+roman-dotted-numbers-v1'));
+  assert.ok(rankingId.endsWith('+roman-dotted-numbers-v2'));
   const engine=createEngine();
   try {
     for(const row of guardCases.filter(row=>['decimal','version'].includes(row.category)||row.sourceId==='roman-number-mixed-revision'))
       assert.equal(engine.commitCandidate(engine.decode(row.raw,row.options)[0]),row.text,row.id);
+  } finally {engine.dispose()}
+});
+
+test('Dotted numbers retain whole Chinese candidates and the first-tone week control',()=>{
+  const engine=createEngine();
+  try {
+    for(const row of dottedChineseCases) {
+      const candidates=engine.decode(row.raw,row.options),outputs=candidates.map(candidate=>engine.commitCandidate(candidate));
+      assert.equal(outputs[0],row.text,row.id);
+      assert.ok(outputs.indexOf(row.chineseTarget)>0&&outputs.indexOf(row.chineseTarget)<5,row.id);
+      assert.ok(candidates[0].score>candidates[outputs.indexOf(row.chineseTarget)].score,row.id);
+    }
+    for(const row of firstToneCases) {
+      const outputs=engine.decode(row.raw,row.options).map(candidate=>engine.commitCandidate(candidate));
+      assert.equal(outputs[0],row.text,row.id);
+      assert.ok(outputs.includes('deadline 州一'),row.id);
+    }
   } finally {engine.dispose()}
 });
 
@@ -36,6 +53,7 @@ test('Dotted numeric evidence respects explicit choices, custom entries and enab
       const options={layout,japanese},roman=text=>layout==='colemak'?engine.encode(text):text;
       const raw=roman('release 1.03'),ordinary=query('decode',raw,options);
       assert.equal(ordinary[0].text,'release 1.03');
+      assert.ok(ordinary.some(candidate=>candidate.text==='release 版'),'whole candidate remains selectable');
       const prefix=query('decode',raw,options,[{start:0,end:7,lang:'EN',text:'release'}]);
       assert.equal(prefix[0].text,ordinary[0].text);
       assert.equal(prefix[0].score,ordinary[0].score);
@@ -56,9 +74,23 @@ test('Dotted numeric evidence respects explicit choices, custom entries and enab
     query('setCustomEntries',undefined,undefined,undefined,{entries:[{reading:'ㄅㄢˇ',text:'自訂'},{reading:'ㄓㄡˇ',text:'另選'}]});
     for(const layout of ['qwerty','colemak']) {
       const roman=text=>layout==='colemak'?engine.encode(text):text;
-      assert.equal(query('decode',roman('PC 1.03'),{layout})[0].text,'PC 1.03');
-      assert.equal(query('decode',roman('PC 5.3'),{layout})[0].text,'PC 5.3');
+      for(const [literal,chinese] of [['PC 1.03','PC 自訂'],['PC 5.3','PC 另選']]) {
+        const candidates=query('decode',roman(literal),{layout});
+        assert.equal(candidates[0].text,literal);
+        assert.equal(candidates[1].text,chinese);
+        assert.ok(candidates[0].score>candidates[1].score);
+      }
+      const multiple=query('decode',roman('PC 1.031.03'),{layout});
+      assert.equal(multiple[0].text,'PC 1.031.03','a second Chinese single must not escape the token cap');
+      assert.ok(multiple.some(candidate=>candidate.text==='PC 自訂自訂'));
+      const marked=query('decode',roman('PC 1.03!!'),{layout});
+      assert.equal(marked[0].text,'PC 1.03!!','later Chinese punctuation credit stays below the numeral');
+      assert.ok(marked.some(candidate=>candidate.text==='PC 自訂！！'));
     }
+    query('setCustomEntries',undefined,undefined,undefined,{entries:[{reading:'ㄅㄢˇ ㄅㄢˇ',text:'雙訂'}]});
+    const phrase=query('decode','PC 1.031.03',{layout:'qwerty'});
+    assert.equal(phrase[0].text,'PC 1.031.03');
+    assert.equal(phrase[1].text,'PC 雙訂');
     const native=spawnSync('target/debug/polytype-json',[],{
       input:requests.map(request=>JSON.stringify(request)).join('\n')+'\n',encoding:'utf8',maxBuffer:32e6,
     });

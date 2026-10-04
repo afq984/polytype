@@ -2,18 +2,25 @@
 
 ## Dotted numbers after Roman context
 
-`+roman-dotted-numbers-v1` preserves a well-formed decimal or dotted version
+`+roman-dotted-numbers-v2` preserves a well-formed decimal or dotted version
 after a literal Space following EN/JP. Components are nonempty ASCII digit
 runs separated by periods, with an optional leading sign, trailing percent,
 and terminal `. , ; ! ? ) ] }` punctuation. Thus `version 1.03` stays literal
 instead of converting replaced ㄡ/ㄢ keys into 版. The token receives the
-existing numeric score (2.5 per digit); an automatic Chinese edge from that
-Roman boundary is excluded. This also handles clean `5.3` and high-scoring
-custom words. Explicit Chinese locks still win and the local menu retains
-Chinese choices. English must be enabled.
+existing numeric score (2.5 per digit). Chinese readings remain in the whole
+candidate list below it, including high-scoring custom words. A ceiling carries
+the consumed digits' numeric evidence through Chinese singles and phrases
+within the token. It reserves a quarter point below the number and prepays
+later punctuation credit, so continuations cannot escape the ceiling. Explicit
+Chinese locks still win and the local menu retains Chinese choices. English
+must be enabled. Thus `PC 1.03` with custom ㄅㄢˇ→自訂 offers the numeral first
+and `PC 自訂` second. A nonnumeric first-tone input such as `deadline 5. u␣`
+retains `deadline 週一`, with 州一 still selectable.
 
 `Policy.roman_dotted_numbers` controls this rule alongside `Policy.numbers`;
-`current+no-roman-dotted-numbers` reproduces main `a341ff71` traces. Historical
+`current+no-roman-dotted-numbers` reproduces main `a341ff71` traces.
+`current+no-dotted-alternatives` disables `Policy.dotted_alternatives` to replay
+the Phase 2b exclusion while keeping its numeric preference. Historical
 ablations and the prototype keep their preceding behavior. Token analysis is
 shared with numbers-v2 and cached once per reachable offset. No scoring/data
 change is made to integers, times, Chinese-only typing, or malformed dotted
@@ -23,7 +30,7 @@ dotted grammar. Clean Chinese boundaries retain the existing precedence below.
 The broader `roman-numbers-v1` experiment was rejected: digit-only homographs
 such as `53` must remain numbers after English. PC 版, soccer 吧 and HK 啊 C
 remain rank-two Chinese alternatives recoverable with one local correction.
-The [Roman-number development guards](../eval/README.md#roman-context-number-guards-phase-2b)
+The [Roman-number development guards](../eval/README.md#roman-dotted-alternatives-phase-2c)
 make that ambiguity and the rejected-build regressions visible. These are
 synthetic development probes, not held-out coverage.
 

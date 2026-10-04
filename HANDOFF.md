@@ -1,34 +1,37 @@
 # Polytype handoff
 
-## Roman dotted numbers (Phase 2b)
+## Roman dotted numbers (Phase 2c)
 
-The broad `roman-numbers-v1` experiment was rejected and abandoned: ordinary
-English integers with clean digit-key Zhuyin readings turned Chinese. New
-public synthetic guards cover integers, decimals, versions, model numbers in
-English/Chinese, times and terminal punctuation. Main `a341ff71` has 168/220
-top one and 212/220 top five; the rejected build has 76/220 and 204/220, losing
-92 previously correct targets. PC 版, soccer 吧 and HK 啊 C deliberately remain
-rank-two ambiguities with one local correction; 心/新 and 只/指 keep their order.
+`+roman-dotted-numbers-v2` preserves well-formed pure-digit dotted tokens after
+EN/JP and a literal Space. Chinese readings now remain in the whole candidate
+list, with their cumulative score capped below the numeric reading. The cap
+covers imported/custom singles and phrases, and reserves later punctuation
+credit. Explicit Chinese selections still win. `PC 1.03` with custom
+ㄅㄢˇ→自訂 offers `PC 1.03` first and `PC 自訂` second. First-tone
+`deadline 5. u␣` keeps 週一 first and 州一 among the candidates.
 
-`+roman-dotted-numbers-v1` recognizes complete pure-digit dotted tokens after
-EN/JP and a literal Space, preserves their numeric spelling and excludes the
-automatic Chinese edge from that boundary. All 220 guards pass (52 top-one
-gains, zero losses). Explicit Chinese choices still win, including custom
-entries; remembered English prefixes and native/WASM agree. Integers and
-Chinese-only replacement behavior retain their prior paths. The flag
-`current+no-roman-dotted-numbers` restores main full traces on 6,035 inputs.
-The 5,624 existing paired target gates hold; see
-[numeric rules](docs/NUMBERS.md) and
-[development guards](eval/README.md#roman-context-number-guards-phase-2b).
-This is measured synthetic development evidence for the local prototype.
-All 185,027 existing prefix outputs/revision counts hold. New guard prefixes
-have 192 changed outputs and 150 fewer revisions, with none added. All seven
-Bazel targets pass, including Chrome hosted/standalone physical-key decimal
-typing and numeric commit. No data/dictionary or frozen target is changed.
-Five alternating WASM rounds over 6,337 prefixes give median p95 ratio 1.1037
-against main: a measured 10.4% increase within the 15% budget, excluding
-initialization/rendering. The accepted rule therefore has a measured latency
-cost despite retaining existing completed-input and prefix accuracy.
+The broad `roman-numbers-v1` experiment remains rejected: ordinary English
+integers with clean digit-key Zhuyin readings turned Chinese. PC 版, soccer 吧
+and HK 啊 C remain rank-two ambiguities recoverable with one correction;
+心/新 and 只/指 retain their order. The narrow dotted rule keeps all 220
+synthetic numeric guards correct, with 52 gains and zero losses against main
+`a341ff71`. Twelve opposite-reading configurations keep the number first and
+Chinese second; four first-tone controls retain their entire candidate lists.
+These are public development probes, not held-out or broad coverage claims.
+
+`current+no-roman-dotted-numbers` restores main;
+`current+no-dotted-alternatives` restores the Phase 2b exclusion for comparison.
+See [numeric rules](docs/NUMBERS.md) and
+[development guards](eval/README.md#roman-dotted-alternatives-phase-2c).
+No dictionary, frozen target or native OS adapter is changed.
+
+All 5,624 existing paired target gates and candidate text arrays hold. Across
+189,195 prefixes, all 185,027 older development prefixes remain unchanged;
+Roman guards/controls remove 162 revisions and add none. All seven Bazel targets
+pass, including Chrome Chinese whole-candidate selection and numeric commit.
+Five quiet alternating WASM rounds over 6,337 prefixes give median p95 ratio
+1.0008 against main (budget 1.15; individual ratios 0.9656–1.1374).
+Initialization and rendering are excluded; this is a local measurement.
 
 ## English rank evidence (en-freq-v1)
 
