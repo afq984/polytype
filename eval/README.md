@@ -9,7 +9,7 @@ English/Japanese controls and prior correct targets are retained.
 language with the completion Space. Older milestone results below are historical.
 
 For the next benchmark, see [the external collection and review protocol](COLLECTION.md).
-`bazelisk run //:corpus -- init /absolute/private/polytype-corpus` prepares an
+`bazelisk run //:corpus -- init CORPUS_DIR` prepares an
 empty external collection. It supports capture import, provenance/review checks,
 grouped split validation, frozen snapshots and private report output. New source
 text and annotations stay outside every repository and Bazel input. This is
@@ -30,7 +30,7 @@ for fresh latency measurements on stdout. Historical reports retain their origin
 Run `bazelisk build //:evaluation` to build WASM and generate REPORT.md and report.json under bazel-bin/evaluation/;
 the checked-in copies were refreshed from that deterministic output after the Japanese dictionary import.
 Evaluation is entirely local. For your own cases, run
-`bazelisk run //:evaluate_local -- /path/to/cases.jsonl` after building WASM. Each line is
+`bazelisk run //:evaluate_local -- CASES_JSONL` after building WASM. Each line is
 `{"id":"optional","raw":"QWERTY-encoded keys","text":"expected output"}`.
 Local-file results go to stdout; the bundled report is not overwritten.
 Add `--correction` for [bounded local-correction recovery](../docs/CORRECTION.md):
@@ -100,7 +100,7 @@ correction actions or native IME behavior.
 To add another development case module alongside the bundled cases:
 
 ```sh
-bazelisk run //:evaluate_local -- --extra-cases=/absolute/path/to/cases.mjs
+bazelisk run //:evaluate_local -- --extra-cases=CASES_MODULE
 ```
 
 The module exports an array named `cases` (or a default array), with entries
@@ -198,7 +198,28 @@ The module path uses the built runtime so its imports use Bazel's WASM, with
 no generated bindings in the checkout. The extra-cases command also evaluates
 bundled controls; filter `asus-` groups for these counts. Detailed traces and
 experiment output stay outside the repository. This small, selected development
-set establishes regression targets and diagnosis only; fixes await Phase 2.
+set establishes regression targets and diagnosis. The broader Roman-number
+guards below record the subsequent rejected fix and numeric tradeoff.
+
+## Roman-context number guards (Phase 2b)
+
+The separate [Roman-number probes](roman-number-cases.mjs) cover ordinary
+English numbers that are also clean digit-key Zhuyin readings. They contain
+43 synthetic English inputs (integers, decimals, dotted versions, model numbers
+and times) in both layouts and EN+ZH/all, plus six Chinese-to-Roman model/time
+inputs in both typing contracts (220 guard configurations). Three additional
+Chinese-after-Roman homographs run eight modes each: PC 版, soccer 吧 and HK 啊 C.
+These keep their literal numeric interpretation first, Chinese target second,
+and one local correction; explicit TODOs retain the alternate intent.
+
+Against main `a341ff71`, the guard set has 168/220 top one and 212/220 top five.
+Main already misreads some decimal/dotted inputs, including `release 1.03` as
+`release 版`. The rejected `roman-numbers-v1` build has 76/220 top one and
+204/220 top five on this set: the old development sets missed these ordinary
+English numeric homographs. No dictionary or corpus annotation is changed.
+The regression module is synthetic development evidence, not broad English
+coverage or held-out performance. Use `--extra-cases=CASES_MODULE` with
+`bazelisk run //:evaluate_local` to evaluate it independently.
 
 ## What this measures
 
