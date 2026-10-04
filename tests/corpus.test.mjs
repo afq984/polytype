@@ -62,6 +62,34 @@ test('capture import preserves exact spaces/options without certifying or exposi
   assert.equal((await stat(join(root, 'cases.jsonl'))).mode & 0o777, 0o600);
 });
 
+test('blind capture imports are typed and eligible for reviewed held-out use', async t => {
+  const parent = await temporary(t), root = join(parent, 'corpus');
+  await main(['init', root]); await writeFile(join(root, 'sources.json'), JSON.stringify([source]));
+  const capture = {blind:true, raw:'blind-fixture  ', text:'Blind fixture  ', options:{layout:'colemak', english:true, japanese:false, zhuyin:true}, dictionary:{custom:0}};
+  const path = join(parent, 'export.jsonl'); await writeFile(path, JSON.stringify(capture));
+  assert.equal((await main(['import', root, path, 'authored'])).imported, 1);
+  const [row] = parseJSONL(await readFile(join(root, 'cases.jsonl'), 'utf8'));
+  assert.equal(row.blind, true); assert.equal(row.captureKind, 'typed'); assert.equal(row.seenDuringDevelopment, false);
+  assert.equal(row.raw, capture.raw); assert.equal(row.text, capture.text); assert.deepEqual(row.options, capture.options);
+  assert.equal(row.split, 'unassigned'); assert.equal(row.review.status, 'pending');
+  row.split = 'heldout'; row.sourceGroup = 'blind-session'; row.languages = ['en'];
+  row.review = {status:'confirmed', reviewer:'fixture-author', reviewedAt:'2026-09-13'};
+  await writeRows(root, [row]);
+  assert.equal((await main(['check', root])).readyToFreeze, true);
+  assert.equal((await main(['freeze', root, 'blind'])).rows, 1);
+  // Later exposure cannot be hidden by deduplication or undo a prior review.
+  await writeFile(path, JSON.stringify({...capture, blind:false}));
+  await assert.rejects(main(['import', root, path, 'authored']), /cannot be held out/);
+  row.split = 'development'; await writeRows(root, [row]);
+  assert.equal((await main(['import', root, path, 'authored'])).duplicates, 1);
+  const [exposed] = parseJSONL(await readFile(join(root, 'cases.jsonl'), 'utf8'));
+  assert.equal(exposed.seenDuringDevelopment, true); assert.equal(exposed.review.status, 'confirmed');
+  await writeFile(path, JSON.stringify(capture)); await main(['import', root, path, 'authored']);
+  assert.equal(parseJSONL(await readFile(join(root, 'cases.jsonl'), 'utf8'))[0].seenDuringDevelopment, true);
+  await writeFile(path, JSON.stringify({...capture, blind:'true'}));
+  await assert.rejects(main(['import', root, path, 'authored']), /invalid input/);
+});
+
 test('snapshot readiness distinguishes pending review, rights, custom entries and informational layout coverage', () => {
   const rows = rowsFor('one', 'development', '42');
   assert.equal(validateCorpus([source], rows).readyToFreeze, true);

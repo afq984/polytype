@@ -1,5 +1,6 @@
 import{decode,commitCandidate,examplesForLayout,physicalKey,setCustomEntries,dictionarySize}from'./engine.mjs';
 const $=id=>document.getElementById(id);let candidates=[],selected=0,committed='',timer=null;
+const blind=()=>$('blind-capture').checked;
 const options=()=>({layout:$('keyboard-layout').value,english:$('enable-english').checked,japanese:$('enable-japanese').checked,zhuyin:$('enable-zhuyin').checked});
 const optionsKey='polytype-input-options-v1';
 const defaultOptions={layout:'qwerty',english:true,japanese:true,zhuyin:true};
@@ -17,7 +18,12 @@ for(const language of ['english','japanese','zhuyin'])$('enable-'+language).chec
 let examples=examplesForLayout(options().layout);
 function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
 function stop(){clearInterval(timer);timer=null;$('replay').textContent='↻ Replay example'}
-function render(reset=true){if(reset)selected=0;candidates=decode($('raw').value,options());selected=Math.min(selected,Math.max(0,candidates.length-1));const best=candidates[selected];$('count').textContent=$('raw').value.length+' / 400 keys';$('preedit').replaceChildren();$('segments').replaceChildren();$('candidates').replaceChildren();$('commit').disabled=!$('raw').value||!best;$('capture-case').disabled=!$('raw').value;
+function render(reset=true){if(reset)selected=0;candidates=blind()?[]:decode($('raw').value,options());selected=Math.min(selected,Math.max(0,candidates.length-1));const best=candidates[selected];$('count').textContent=$('raw').value.length+' / 400 keys';$('preedit').replaceChildren();$('segments').replaceChildren();$('candidates').replaceChildren();$('replay').disabled=blind();$('commit').disabled=blind()||!$('raw').value||!best;$('capture-case').disabled=!$('raw').value;
+ if(blind()){
+  $('preedit').append(el('span','placeholder',$('raw').value||'Blind capture: type your raw keys.'));
+  $('segments').append(el('p','muted','Predictions are hidden. Finish to enter the intended text.'));
+  return;
+ }
  if(!$('raw').value){$('preedit').append(el('span','placeholder','Start typing to see an interpretation.'));$('segments').append(el('p','muted','Your keystrokes will appear here.'))}
  else if(best){for(const p of best.parts){$('preedit').append(el('span',p.lang==='space'?'space':'piece '+p.lang.toLowerCase(),p.text));const row=el('div','segment');row.append(el('span','tag '+p.lang.toLowerCase(),p.lang==='space'?'␣':p.lang));const middle=el('div');middle.append(el('code','',p.raw.replaceAll(' ','␣')),el('small','',p.note));
  if(p.slots){const slots=el('div','phonetic-slots');p.slots.forEach((symbol,i)=>{const slot=el('span','phonetic-slot');slot.append(el('span','slot-label',['聲母','介音','韻母'][i]),el('strong','',symbol||'—'));slots.append(slot)});middle.append(slots);if(p.changes.length)middle.append(el('small','replacements',p.changes.join(' · ')))}
@@ -26,7 +32,7 @@ function render(reset=true){if(reset)selected=0;candidates=decode($('raw').value
  candidates.forEach((c,i)=>{if(!$('raw').value)return;const b=el('button');b.setAttribute('aria-pressed',String(i===selected));const commit=commitCandidate(c),label=commit!==c.text&&candidates.some((other,j)=>j!==i&&other.text===c.text)?`${c.text} → ${commit}`:c.text;b.append(el('span','candidate-index',String(i+1)),document.createTextNode(label));b.onclick=()=>{selected=i;render(false)};$('candidates').append(b)});
  document.querySelectorAll('#examples button').forEach((b,i)=>b.classList.toggle('active',$('raw').value===examples[i].raw));}
 function setRaw(raw){stop();$('raw').value=raw.slice(0,400);render()}
-function commit(){if(!$('raw').value||!candidates[selected])return;stop();committed+=(committed?'\n':'')+commitCandidate(candidates[selected]);$('committed').textContent=committed;$('copy').disabled=false;$('raw').value='';render();$('raw').focus()}
+function commit(){if(blind()){$('capture-case').click();return}if(!$('raw').value||!candidates[selected])return;stop();committed+=(committed?'\n':'')+commitCandidate(candidates[selected]);$('committed').textContent=committed;$('copy').disabled=false;$('raw').value='';render();$('raw').focus()}
 function drawExamples(){ $('examples').replaceChildren();for(const example of examples){const b=el('button','',example.name);b.onclick=()=>{setRaw(example.raw);$('raw').focus()};$('examples').append(b)}}
 drawExamples();
 $('input-options').addEventListener('change',()=>{
@@ -34,7 +40,7 @@ $('input-options').addEventListener('change',()=>{
  catch{$('settings-status').textContent='Browser storage unavailable; settings apply for this session only.'}
  stop();examples=examplesForLayout(options().layout);drawExamples();updateLayoutLabels();render();
 });
-function updateLayoutLabels(){const name=options().layout==='qwerty'?'QWERTY':'Colemak';$('jp-layout').textContent='Romaji · '+name;$('en-layout').textContent=name;$('input-help').textContent=name+' ready · Enter commits. Esc clears.'}
+function updateLayoutLabels(){const name=options().layout==='qwerty'?'QWERTY':'Colemak';$('jp-layout').textContent='Romaji · '+name;$('en-layout').textContent=name;$('input-help').textContent=name+(blind()?' · Blind capture: Enter finishes. Esc clears.':' ready · Enter commits. Esc clears.')}
 $('raw').addEventListener('input',()=>{stop();render()});$('raw').addEventListener('keydown',e=>{
  if(e.isComposing || e.ctrlKey || e.metaKey || e.altKey)return;
  if(e.key==='Enter'){e.preventDefault();commit();return}
@@ -76,26 +82,34 @@ $('copy-debug').onclick=async()=>{
 };
 // Explicit local captures only: no automatic logging or network submission.
 const casesKey='polytype-test-cases-v1';let savedCases=[],caseSnapshot=null,casesStorageHealthy=true;
-function validCase(row){return row&&typeof row.raw==='string'&&row.raw.length<=400&&typeof row.text==='string'&&row.text.length<=2000&&row.options&&['colemak','qwerty'].includes(row.options.layout)&&['english','japanese','zhuyin'].every(key=>typeof row.options[key]==='boolean')}
+function validCase(row){return row&&typeof row.raw==='string'&&row.raw.length<=400&&typeof row.text==='string'&&row.text.length<=2000&&(row.blind===undefined||typeof row.blind==='boolean')&&row.options&&['colemak','qwerty'].includes(row.options.layout)&&['english','japanese','zhuyin'].every(key=>typeof row.options[key]==='boolean')}
 function updateCaseCount(){ $('case-count').textContent=savedCases.length+' / 100 saved locally';$('export-cases').disabled=!savedCases.length; }
 try{const rows=JSON.parse(localStorage.getItem(casesKey)||'[]');if(!Array.isArray(rows)||rows.length>100||!rows.every(validCase))throw new Error('Invalid saved cases');savedCases=rows}catch{casesStorageHealthy=false;$('case-status').textContent='Saved cases could not be loaded; existing storage will not be overwritten. Export new captures before closing.'}
 updateCaseCount();
+$('blind-capture').onchange=()=>{
+ stop();caseSnapshot=null;$('case-editor').hidden=true;$('debug-preview').hidden=true;
+ $('examples').hidden=blind();$('committed-output').hidden=blind();
+ $('case-status').textContent=blind()?'Blind capture on. Predictions stay hidden; finish before entering the intended text.':'Blind capture off.';
+ updateLayoutLabels();setRaw('');$('raw').focus();
+};
 $('capture-case').onclick=()=>{
  stop();if(!$('raw').value)return;
- caseSnapshot={raw:$('raw').value,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),ranking:'scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1'};
- $('case-raw').value=caseSnapshot.raw;$('case-expected').value=candidates[selected]?commitCandidate(candidates[selected]):'';
+ caseSnapshot={...(blind()?{blind:true}:{}),raw:$('raw').value,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),ranking:'scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1'};
+ $('case-expected-label').textContent=blind()?'Intended text · type with your OS IME':'Expected output · edit if the selected candidate is wrong';
+ $('case-raw').value=caseSnapshot.raw;$('case-expected').value=!blind()&&candidates[selected]?commitCandidate(candidates[selected]):'';
  $('case-editor').hidden=false;$('case-editor').open=true;$('case-expected').focus();
- $('case-status').textContent='Review or correct the expected output, then save. This is a snapshot; later typing does not change it.';
+ $('case-status').textContent=blind()?'Enter the intended text with your OS IME, then save locally. Predictions remain hidden.':'Review or correct the expected output, then save. This is a snapshot; later typing does not change it.';
 };
 $('case-form').addEventListener('submit',event=>{
  event.preventDefault();if(!caseSnapshot)return;
  const row={...caseSnapshot,text:$('case-expected').value,id:'local-'+Date.now()+'-'+savedCases.length,recordedAt:new Date().toISOString()};
  if(!validCase(row)||!row.text.length){$('case-status').textContent='Enter an expected output of 1–2000 characters.';return}
- if(savedCases.some(c=>c.raw===row.raw&&c.text===row.text&&JSON.stringify(c.options)===JSON.stringify(row.options))){$('case-status').textContent='This case is already saved.';return}
+ if(savedCases.some(c=>c.raw===row.raw&&c.text===row.text&&JSON.stringify(c.options)===JSON.stringify(row.options)&&Boolean(c.blind)===Boolean(row.blind))){$('case-status').textContent='This case is already saved.';return}
  if(savedCases.length>=100){$('case-status').textContent='The local case limit is 100. Export your cases before collecting more.';return}
  savedCases.push(row);updateCaseCount();
  try{if(!casesStorageHealthy)throw new Error('Storage unavailable');localStorage.setItem(casesKey,JSON.stringify(savedCases));$('case-status').textContent='Saved in this browser only. Export JSONL to share or evaluate it.'}
  catch{$('case-status').textContent='Browser storage unavailable: saved for this session only. Export JSONL before closing.'}
+ if(row.blind){caseSnapshot=null;$('case-editor').hidden=true;setRaw('');$('raw').focus()}
 });
 $('export-cases').onclick=()=>{
  const blob=new Blob([savedCases.map(row=>JSON.stringify(row)).join('\n')+'\n'],{type:'application/x-ndjson'});
@@ -119,6 +133,7 @@ $('dictionary-form').addEventListener('submit',e=>{
 });
 drawDictionary();
 document.getElementById('raw').disabled=false;
+document.getElementById('blind-capture').disabled=false;
 document.getElementById('copy-debug').disabled=false;
 document.getElementById('input-options').disabled=false;
 updateLayoutLabels();

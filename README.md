@@ -50,6 +50,9 @@ output, then **Save locally**. **Export cases (JSONL)** downloads the saved set 
 local evaluation or sharing. Nothing is uploaded; up to 100 cases are kept in
 browser storage, with a session-only fallback if storage is unavailable. Export
 before clearing browser data. Custom dictionary contents are not exported.
+For independent targets, enable **Blind capture · hide predictions** before typing;
+Enter finishes the buffer and opens a blank intended-text field for your OS IME.
+Blind exports retain `blind: true` for the external review workflow.
 
 The current ranking build includes 101,191 SCOWL English spellings, context-gated
 Japanese particles, and case/small-kana cues. Import provenance and all upstream

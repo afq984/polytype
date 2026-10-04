@@ -9,7 +9,10 @@ reports outside every jj/Git workspace. Ignore rules alone do not exclude files
 from Bazel globs. No new third-party text was downloaded or added to this tree;
 existing development corpora/notices and the decoder are unchanged.
 
-Browser imports remain pending/unassigned and exposed to development. Active
+Browser imports remain pending/unassigned. Normal captures are exposed to
+development; blind mode starts a fresh raw buffer without decoding/displaying
+predictions and asks for an independent target with the OS IME. Blind exports
+import as typed and initially unexposed, eligible for held-out review. Active
 snapshots require explicit source-use evidence, reviewed input/targets in at least one
 layout and no unresolved custom dictionary dependency. Related source groups,
 layout variants and duplicate targets cannot cross development/held-out splits.

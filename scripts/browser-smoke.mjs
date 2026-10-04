@@ -289,6 +289,32 @@ try {
       await new Promise(resolve=>setTimeout(resolve,50));
     }
     assert.equal(await evaluate("document.getElementById('case-count').textContent"),'1 / 100 saved locally');
+    // Blind mode starts fresh and never offers predictions or a prefilled target.
+    await evaluate("document.getElementById('blind-capture').click()");
+    assert.equal(await evaluate("document.getElementById('raw').value"),'');
+    await typeRoman('hello  ');
+    const blindRaw=await evaluate("document.getElementById('raw').value");
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),blindRaw);
+    assert.equal(await evaluate("document.querySelectorAll('#candidates button').length"),0);
+    assert.equal(await evaluate("document.querySelectorAll('#segments .segment').length"),0);
+    assert.equal(await evaluate("document.getElementById('commit').disabled"),true);
+    await evaluate("document.getElementById('capture-case').click()");
+    assert.equal(await evaluate("document.getElementById('case-expected').value"),'');
+    await evaluate("document.getElementById('raw').focus()"); await key('Enter','Enter',13);
+    assert.equal(await evaluate("document.activeElement.id"),'case-expected');
+    await evaluate("document.getElementById('case-expected').value='hello  ';document.getElementById('case-form').requestSubmit()");
+    const blindSaved=await evaluate("JSON.parse(localStorage.getItem('polytype-test-cases-v1')).at(-1)");
+    assert.equal(blindSaved.blind,true);assert.equal(blindSaved.raw,blindRaw);assert.equal(blindSaved.text,'hello  ');
+    assert.deepEqual(blindSaved.options,capturedOptions);assert.equal(blindSaved.selectedRank,null);
+    const blindExport=await evaluate(`(async()=>{
+      const create=URL.createObjectURL,click=HTMLAnchorElement.prototype.click;let blob;
+      URL.createObjectURL=value=>{blob=value;return create(value)};HTMLAnchorElement.prototype.click=()=>{};
+      try{document.getElementById('export-cases').click();return (await blob.text()).trim().split('\\n').map(JSON.parse).at(-1)}
+      finally{URL.createObjectURL=create;HTMLAnchorElement.prototype.click=click}
+    })()`);
+    assert.deepEqual(blindExport,blindSaved);
+    await evaluate("document.getElementById('blind-capture').click();document.getElementById('raw').value='hello';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
+    assert.ok(await evaluate("document.querySelectorAll('#candidates button').length>0"));
     // Storage denial still leaves the case exportable in this session.
     const denied=await evaluate(`(()=>{
       document.getElementById('capture-case').click();document.getElementById('case-expected').value='session only';

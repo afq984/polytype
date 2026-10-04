@@ -85,9 +85,9 @@ One JSONL record describes one configuration of a text unit:
 | `domain`, `languages`, `features` | Describe intended text, not the engine's prediction. Languages use `zh`, `ja`, `en`; features can include first-tone-space, names, numbers, code, punctuation, script-choice and replacements. |
 | `raw`, `options` | Exact QWERTY-physical-position encoding (maximum 400 UTF-16 units), with explicit `layout`, `english`, `japanese`, `zhuyin`. Null while unresolved. |
 | `text`, `acceptable` | Primary committed target and any separately reviewed acceptable alternatives. Match exact spaces, script, case and punctuation. |
-| `captureKind` | `typed`, `transcribed`, `derived` or `unknown`. Browser exports are final buffers, not proof of a physical-key recording. |
+| `captureKind` | `typed`, `transcribed`, `derived` or `unknown`. Blind browser captures import as `typed`; normal snapshots remain `unknown`. These are final buffers, not edit-event logs. |
 | `customDictionary` | `none`, `required` or `unknown`; only `none` enters the initial benchmark. |
-| `seenDuringDevelopment` | Whether this item or its engine output has informed development. Browser imports set this to true; historical cases remain exposed. |
+| `seenDuringDevelopment` | Whether this item or its engine output has informed development. Normal browser imports set this to true; blind imports start false. Historical cases remain exposed. |
 | `review` | `status: pending` or `confirmed`, plus reviewer identifier and ISO review date `YYYY-MM-DD`. |
 | `notes` | Reading decisions, input limitations and uncertainty; kept outside the repository. |
 
@@ -130,7 +130,14 @@ they can never become new held-out evidence. Synthetic probes are reported
 separately from naturally occurring text.
 
 Annotate held-out input/targets independently of engine predictions. The browser
-capture workflow exposes predictions and is therefore used for development here.
+capture workflow exposes predictions and is therefore used for development. For
+held-out capture, enable **Blind capture · hide predictions** before typing. It
+starts a fresh buffer, suppresses decoding/predictions, and asks for intended text
+in a plain field after Enter or Save test case. Use your own OS IME there.
+Exports carry `blind: true`; imports start with `seenDuringDevelopment: false`
+and `captureKind: "typed"`, pending review and grouping. This flag records the
+capture procedure, not proof that text was never seen elsewhere. Later non-blind
+imports of the same input/target mark it exposed; blind reimports never unsee it.
 For a stronger holdout, have a curator keep the held-out text away from the agent
 doing tuning. `check`/`freeze` validate it without decoding; this is procedural
 separation, not access control. Automated checks catch exact/normalized duplicate

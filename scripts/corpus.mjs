@@ -236,18 +236,23 @@ export async function main(args) {
     const [path, sourceId] = rest;
     requireThat(rest.length === 2 && sources.some(source => source.id === sourceId), 'Import requires an existing source ID.');
     const captures = parseJSONL(await readFile(await externalPath(path), 'utf8'), 'capture');
-    const seen = new Set(rows.filter(row => row.options).map(row => JSON.stringify([row.raw, row.text, row.options.layout, row.options.english, row.options.japanese, row.options.zhuyin])));
+    const captureKey = row => JSON.stringify([row.raw, row.text, row.options.layout, row.options.english, row.options.japanese, row.options.zhuyin]);
+    const seen = new Map(rows.filter(row => row.options).map(row => [captureKey(row), row]));
     const added = [];
     for (const [index, capture] of captures.entries()) {
-      requireThat(object(capture) && typeof capture.raw === 'string' && capture.raw.length > 0 && capture.raw.length <= 400 && string(capture.text) && validOptions(capture.options), `Capture row ${index + 1}: invalid input, target or options.`);
-      const key = JSON.stringify([capture.raw, capture.text, capture.options.layout, capture.options.english, capture.options.japanese, capture.options.zhuyin]);
-      if (seen.has(key)) continue;
-      seen.add(key);
+      requireThat(object(capture) && typeof capture.raw === 'string' && capture.raw.length > 0 && capture.raw.length <= 400 && string(capture.text) && validOptions(capture.options) && (capture.blind === undefined || typeof capture.blind === 'boolean'), `Capture row ${index + 1}: invalid input, target or options.`);
+      const key = captureKey(capture);
+      if (seen.has(key)) {
+        // A later visible capture exposes an earlier blind item; never unsee it.
+        if (capture.blind !== true) seen.get(key).seenDuringDevelopment = true;
+        continue;
+      }
       let number = rows.length + added.length + 1;
       while (rows.some(row => row.id === `capture-${number}`) || added.some(row => row.id === `capture-${number}`)) number++;
-      added.push({...template, id:`capture-${number}`, unitId:`capture-${number}`, sourceId, sourceGroup:'needs-grouping', raw:capture.raw, text:capture.text, options:capture.options,
+      const row = {...template, ...(capture.blind === true ? {blind:true, seenDuringDevelopment:false, captureKind:'typed'} : {}), id:`capture-${number}`, unitId:`capture-${number}`, sourceId, sourceGroup:'needs-grouping', raw:capture.raw, text:capture.text, options:capture.options,
         customDictionary:capture.dictionary?.custom === 0 ? 'none' : 'unknown',
-        notes:'Imported browser snapshot; set languages/domain/features, group related texts, and confirm the exact target and input. Capture is a final buffer, not an edit-event log.'});
+        notes:'Imported browser snapshot; set languages/domain/features, group related texts, and confirm the exact target and input. Capture is a final buffer, not an edit-event log.'};
+      added.push(row);seen.set(key, row);
     }
     validateCorpus(sources, [...rows, ...added]);
     const temporary = join(root, '.cases-' + randomUUID() + '.tmp');
@@ -255,7 +260,7 @@ export async function main(args) {
       await writeFile(temporary, jsonl([...rows, ...added]), {mode:0o600, flag:'wx'});
       await rename(temporary, join(root, 'cases.jsonl'));
     } finally {await rm(temporary, {force:true});}
-    return {imported:added.length, duplicates:captures.length - added.length, note:'All imports are pending and unassigned; browser-visible outputs cannot become held-out data.'};
+    return {imported:added.length, duplicates:captures.length - added.length, note:'All imports are pending and unassigned; only blind captures are initially unexposed and eligible for held-out review.'};
   }
   requireThat(command === 'freeze' && rest.length === 1 && identifier(rest[0]), usage);
   requireThat(summary.readyToFreeze, 'Not ready to freeze. Run check and resolve active-row blockers first.');
