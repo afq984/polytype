@@ -23,6 +23,9 @@ Space stays inside its syllable. Spacing and automatic language boundaries are
 unchanged. Nine ranked conversions are shown, with truncation labelled; local
 resegmentation uses beam 12. A missing choice is not proof of unreachability.
 An incompatible full preview cannot be applied. Unlocked neighbors may change.
+Local Chinese choices use the shared frequency, custom-priority and discarded-key
+scoring from ordinary search. Japanese dictionary and script choices share its
+scoring helpers too; neighboring language bonuses belong to the full preview.
 
 Paired punctuation is also selectable, with exactly two choices and no language
 or raw-key actions. The pairs follow the punctuation map: `<`/，, `>`/。, `?`/？,
@@ -65,6 +68,11 @@ limited to 400 units; ranges cannot overlap. Source validation is independent of
 the menu cap. Invalid/stale choices fail explicitly. Valid constraints with no
 complete surrounding path return no candidates; every fallback respects locks.
 
+Converted Chinese locks provide the same contextual punctuation evidence as
+ordinary converted parts. Unsupported Zhuyin and RAW locks do not gain that
+evidence. Roman choices can start after a mapped Chinese mark; the full lattice
+still enforces whether the preceding input actually creates that boundary.
+
 The web methods are `decodeConstrained(raw, constraints, options)`,
 `segments(raw, options, constraints, candidateIndex)` and
 `alternatives(raw, span, options, constraints, candidateIndex)`.
@@ -87,3 +95,22 @@ the ordinary tone-switch gate and opening cost; numeric/identifier choices use
 the shared boundary evidence. Bare Zhuyin choices remain phonetic and require a
 literal separator before an English or Japanese lock. See [first-tone
 switching](TONE-SWITCH.md).
+
+## Bounded recovery evaluation
+
+Use `bazelisk run //:evaluate_local -- CASES.jsonl --correction`, or add
+`--extra-cases=PATH.mjs --correction` to evaluate an additional case module.
+The optional metric starts from ordinary top one and searches the real correction
+API to depth two with a budget of 2,000 attempted distinct constraint states per
+case. It reports 0, <=1, <=2 and unresolved, separately from whole-candidate top
+five, with menu truncation and budget exhaustion labelled. Successful paths are
+saved as choice/unlock actions and can be replayed through native/WASM. Captured
+constraints are replayed for ordinary expanded evaluation but ignored as starting
+locks for this metric, so they do not supply free corrections. Prototype evaluation
+uses the uncorrected input and labels captured constraints as unsupported.
+
+Unresolved is not proof of unreachability. These are development measurements,
+not held-out accuracy. A single-span edit plus commit costs three mouse clicks or
+three keys from an already-positioned caret; navigating, splitting and merging add
+actions. Automated UI-action counting is deferred.
+

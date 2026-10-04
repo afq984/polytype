@@ -33,6 +33,12 @@ Evaluation is entirely local. For your own cases, run
 `bazelisk run //:evaluate_local -- /path/to/cases.jsonl` after building WASM. Each line is
 `{"id":"optional","raw":"QWERTY-encoded keys","text":"expected output"}`.
 Local-file results go to stdout; the bundled report is not overwritten.
+Add `--correction` for [bounded local-correction recovery](../docs/CORRECTION.md):
+depth two, 2,000 attempted states per case, first nine conversions plus explicit
+language/script/raw actions. It also works with `--extra-cases=PATH.mjs`.
+The metric reports unresolved/budget exhaustion separately from whole-candidate
+top-five recovery. Capture constraints are replayed only by expanded evaluation;
+the recovery search always starts without them. These remain development results.
 Optional `options` fields select layout and enabled languages. The demo's
 Save test case / Export cases workflow creates compatible JSONL, after the user
 reviews or corrects the expected output. Exports do not contain custom dictionary

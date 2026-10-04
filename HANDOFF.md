@@ -43,6 +43,65 @@ and scores. All six Bazel targets pass (92 Node passes, four TODOs).
 Five alternating WASM rounds over 6,337 prefixes give median p95 ratio 1.0519
 against main, within the 1.15 budget. Browser smoke needs coordinator Chrome.
 
+## Local segment correction (segment-v1)
+
+Expanded engines now expose validated UTF-16 span constraints, segment/syllable
+views, local alternatives and a raw-edit rebasing helper through the Rust API
+and protocol v1; web/engine.mjs remains a thin WASM adapter. Empty constraints
+delegate to ordinary decode. Prototype correction is explicitly unsupported.
+All lattice paths, including the independent literal-English pass, respect locks.
+
+Integration follow-up rebases the five changes onto a752db3a with the reviewed
+zh/en development cases and contextual punctuation. Converted Chinese locks feed
+the same punctuation predicate as ordinary paths; raw/unsupported Zhuyin locks
+do not gain that context. Roman alternatives can start after a mapped Chinese
+mark, with the lattice enforcing its contextual boundary. Apostrophe extensions
+still release terminal English/Japanese locks. Captures derive their base ranking
+from the shared rankingId; segment-v1 follows physical-keys-v2, zh-parens-v1
+bare-zhuyin-v1 and tone-switch-v1 only in corrected captures. Raw encoding version 2 is
+preserved in new captures and used for Roman spans and edit revalidation. Local Chinese
+alternatives and source validation now use the shared frequency and discard
+scoring, including custom-entry priority. Japanese dictionary and script scoring
+also share ordinary-search helpers. The TODO(score-merge) markers are resolved
+without duplicating constants. Follow-up correction measurements cover the
+requested 900 QWERTY configurations; detailed results are in the external report.
+
+All thirteen mapped punctuation pairs are selectable with exactly two choices;
+unpaired punctuation stays outside menus. Punctuation constraints use lang punct,
+preserve the original raw unit and do not supply Chinese conversion evidence.
+Local fallback displays share the bare-Zhuyin rule with ordinary search.
+
+The web supports keyboard/mouse correction, a full-composition preview, lock
+markers, Unlock and Unlock all. Applied choices keep the original raw keys;
+edits release touched locks and shift/revalidate others. Explicit debug/case
+captures include constraints and append +segment-v1 only when locks exist.
+Blind capture stays prediction-free. docs/CORRECTION.md describes provisional
+keys, APIs and limits; bindings are together in correctionKeyDown. Browser smoke
+coverage was extended for the coordinator to run; it has not been run here.
+
+The optional evaluator --correction flag works with --extra-cases modules and
+uses the real API in a bounded depth-two BFS, at most 2,000 distinct states.
+Existing 20 Chinese development cases in each layout: ordinary top one 12/20,
+top five 17/20; correction 0 edits 12/20, <=1 and <=2 edits 18/20, with two
+unresolved cases hitting the state budget. Five synthetic correction probes per
+layout recover 1/5 at zero edits, 4/5 within one and 5/5 within two. These are
+development diagnostics from the initial Phase B run; no held-out text was used.
+
+Against the Phase B main snapshot (4518c7e0), 8,263 prefixes retain candidate
+order, scores and traces; five alternating rounds over 6,321 prefixes give an
+ordinary median p95 ratio of 0.996 (budget 1.15). Sampled correction calls on
+3–60-unit inputs with one/two locks have p95 about 6 ms, excluding rendering
+and initialization. Full validation and measurements are in the segment stream
+report outside the repository. No dictionary data or frozen expectations changed.
+
+Constrained paths honor converted first-tone switching, including its opening
+cost and shared numeric evidence; bare Zhuyin stays phonetic. Nine conversions, beam-12 local
+resegmentation, 12-syllable Chinese merges, no trailing tone-Space extension and no pagination are deliberate
+limits. A missing preview or bounded recovery result is not an unreachability
+proof. This feature remains a local web prototype, not a native OS IME.
+
+
+
 ## Converted first-tone language switching (tone-switch-v1)
 
 Expanded search now permits English, numbers/identifiers, ASCII punctuation and

@@ -4,9 +4,10 @@ import {createHash} from 'node:crypto';
 import {createEngine, readingKeys} from '../web/engine.mjs';
 import {distance, caseMetrics, summarizeMilestone} from './evaluation-metrics.mjs';
 import {loadEvaluationCases} from './evaluation-cases.mjs';
-import {cases as bundled, corpus, mixedCorpus, japaneseCorpus, readingSequence, kanaLevel, expandedTarget,prototypeRaw} from '../eval/cases.mjs';
+import {correctionEdits, summarizeCorrections} from './correction-metrics.mjs';
+import {cases as bundled, corpus, mixedCorpus, japaneseCorpus, readingSequence, kanaLevel, expandedTarget, prototypeRaw} from '../eval/cases.mjs';
 
-const {cases, external, timing, extraModules} = await loadEvaluationCases(process.argv.slice(2), bundled);
+const {cases, external, timing, correction, extraModules} = await loadEvaluationCases(process.argv.slice(2), bundled);
 const lexicon = JSON.parse(await readFile(new URL('../data/lexicon.json',import.meta.url),'utf8'));
 const imported=(await readFile(new URL('../data/chinese.tsv',import.meta.url),'utf8')).trim().split('\n').map(line=>line.split('\t'));
 const japanese=(await readFile(new URL('../data/japanese.tsv',import.meta.url),'utf8')).trim().split('\n').map(line=>line.split('\t'));
@@ -27,6 +28,7 @@ function dictionaryOracle(expanded) {
   };
 }
 const report={method:external?'User-supplied local raw/text pairs':corpus.selection,
+  ...(correction?{correctionNotes:'Exact committed target via the real correction API, bounded BFS depth 2 and at most 2,000 attempted distinct constraint states per case. Starts at ordinary top one, ignores captured locks, and re-decodes after every local choice/unlock; no free whole-candidate selection. Local menus show nine conversions plus explicit language/script/raw actions, or exactly two mapped punctuation choices; truncation and state-budget exhaustion are labelled. Unresolved is not proof of unreachability. Whole-candidate top-five recovery is separate. A single-span mouse or already-positioned keyboard edit plus commit takes 3 actions; navigation/merging can add actions. UI-action counting is not automated.'}:{}),
   ...(extraModules?{extraCaseModules:extraModules}:{}),
   milestoneNotes:'Space normalization deletes only U+0020 runs directly between Han and Latin-script letters/ASCII digits. English exact is ordered whole-token recall over ASCII letter/digit runs including apostrophe, hyphen, underscore and period (punctuation-only runs excluded). Han CER aligns only Han characters. Wrong language counts intrusions only for targets with exclusively Latin or exclusively Han letters; spaces, numbers, punctuation and symbols are neutral. Han-only Japanese targets are indistinguishable from Chinese by this script diagnostic. Rates use pooled token/character/eligible-case denominators; null means no eligible target units. Exact and reading-level metrics remain unchanged.',
   ...(external?{}:{mixedTextNotes:mixedCorpus.notes}),
@@ -41,7 +43,7 @@ for(const profile of ['prototype','expanded']) {
   try {
     for(const original of cases) {
       const entry={...original,raw:profile==='prototype'&&!external?prototypeRaw(original):original.raw,text:profile==='expanded'&&!external&&bundled.some(row=>row.id===original.id&&row.raw===original.raw)?expandedTarget(original):original.text};
-      const candidates=engine.decode(entry.raw,entry.options);
+      const candidates=profile==='expanded'&&entry.constraints?.length?engine.decodeConstrained(entry.raw,entry.constraints,entry.options):engine.decode(entry.raw,entry.options);
       const outputs=candidates.map(candidate=>engine.commitCandidate(candidate));
       const rank=outputs.indexOf(entry.text)+1;
       const readingRank=candidates.findIndex((candidate,i)=>outputs[i]===entry.text||kanaLevel(candidate)===entry.text)+1;
@@ -49,6 +51,8 @@ for(const profile of ['prototype','expanded']) {
         const start=performance.now();engine.decode(entry.raw.slice(0,i),entry.options);prefixTimes.push(performance.now()-start);
       }
       rows.push({id:entry.id,group:entry.group,raw:entry.raw,...(entry.options?{options:entry.options}:{}),expected:entry.text,actual:outputs[0]??'',rank,readingRank,
+        ...(entry.constraints?.length?{constraints:entry.constraints,...(profile==='prototype'?{constraintsUnsupported:true}:{})}:{}),
+        ...(correction&&profile==='expanded'?{correction:correctionEdits(engine,entry)}:{}),
         ...caseMetrics(entry.text, outputs),
         edits:distance(entry.text,outputs[0]??''),characters:[...entry.text].length,reachable:oracle(entry),candidates:outputs});
     }
@@ -57,7 +61,8 @@ for(const profile of ['prototype','expanded']) {
       return {cases:selected.length,top1:selected.filter(row=>row.rank===1).length,top5:selected.filter(row=>row.rank>0).length,
         readingTop1:selected.filter(row=>row.readingRank===1).length,readingTop5:selected.filter(row=>row.readingRank>0).length,
         characterErrorRate:selected.reduce((n,row)=>n+row.edits,0)/Math.max(1,selected.reduce((n,row)=>n+row.characters,0)),
-        reachable:annotated.length?annotated.filter(row=>row.reachable).length:null, ...summarizeMilestone(selected)};
+        reachable:annotated.length?annotated.filter(row=>row.reachable).length:null, ...summarizeMilestone(selected),
+        ...(correction&&profile==='expanded'?{correction:summarizeCorrections(selected)}:{})};
     };
     const groups=Object.fromEntries([...new Set(rows.map(row=>row.group))].map(group=>[group,summarize(rows.filter(row=>row.group===group))]));
     const configurations = new Map();
@@ -89,11 +94,19 @@ for(const [profile,result] of Object.entries(report.profiles))for(const metrics 
   const languages=['english','japanese','zhuyin'].filter(key=>metrics.options[key]).join('+')||'none';
   lines.push(`| ${profile} / ${metrics.group} / ${metrics.options.layout} / ${languages} | ${metrics.top1}/${metrics.cases} | ${metrics.top5}/${metrics.cases} | ${metrics.spaceNormalizedTop1}/${metrics.cases} | ${metrics.spaceNormalizedTop5}/${metrics.cases} | ${percentage(metrics.englishExact)} (${metrics.englishMatches}/${metrics.englishTokens}) | ${percentage(metrics.hanCER)} (${metrics.hanEdits}/${metrics.hanCharacters}) | ${percentage(metrics.wrongLanguage)} (${metrics.wrongLanguageCases}/${metrics.singleLanguageCases}) |`);
 }
+if(correction){
+  lines.push('','## Bounded segment correction','',report.correctionNotes,'',
+    '| Expanded group | 0 edits | <=1 edit | <=2 edits | Unresolved | State budget hit | Whole-candidate top 5 |',
+    '| --- | --- | --- | --- | --- | --- | --- |');
+  for(const [group,metrics] of Object.entries(report.profiles.expanded.groups)){
+    const m=metrics.correction;lines.push(`| ${group} | ${m.zero}/${m.cases} | ${m.atMostOne}/${m.cases} | ${m.atMostTwo}/${m.cases} | ${m.unresolved} | ${m.budgetExhausted} | ${m.wholeCandidateTop5}/${m.cases} |`);
+  }
+}
 lines.push('',`Top-1 regressions: ${report.regressions.join(', ')||'none'} (reading level: ${report.readingRegressions.join(', ')||'none'}).`, `Top-5 regressions: ${report.top5Regressions.join(', ')||'none'} (reading level: ${report.readingTop5Regressions.join(', ')||'none'}).`,'');
 if(timing)for(const [profile,result] of Object.entries(report.profiles))lines.push(`${profile}: engine instance ${result.instanceCreationMs.toFixed(1)} ms; prefix decode p50 ${result.prefixLatency.p50Ms.toFixed(2)} ms, p95 ${result.prefixLatency.p95Ms.toFixed(2)} ms (this run; module already loaded).`);
 lines.push('','## Remaining expanded-profile errors','');
 for(const row of after.filter(row=>row.rank!==1))lines.push(`- ${row.id}: ${row.expected} → ${row.actual} (target rank: ${row.rank||'outside top 5'}; reading-level rank: ${row.readingRank||'outside top 5'}; dictionary reachable: ${row.reachable??'not measured'})`);
-if(external||extraModules||timing){console.log(JSON.stringify(report,null,2));}
+if(external||extraModules||timing||correction){console.log(JSON.stringify(report,null,2));}
 else {
   await writeFile(new URL('../eval/report.json',import.meta.url),JSON.stringify(report,null,2)+'\n');
   await writeFile(new URL('../eval/REPORT.md',import.meta.url),lines.join('\n')+'\n');
