@@ -312,6 +312,10 @@ try {
     assert.ok((await evaluate("document.getElementById('preedit').textContent")).includes('跟 claude 討論'));
     const islandReport=await evaluate("(async()=>{await document.getElementById('copy-debug').onclick();return JSON.parse(document.getElementById('debug-report').value)})()");
     assert.equal(islandReport.ranking,rankingId);
+    // Confidence cues replace the existing underline and carry accessible help.
+    await evaluate("document.getElementById('raw').value='u4';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
+    const cues=await evaluate("[...document.querySelectorAll('#preedit .uncertain')].map(e=>({description:e.getAttribute('aria-description'),style:getComputedStyle(e,'::after').borderBottomStyle}))");
+    assert.ok(cues.length);for(const cue of cues){assert.ok(cue.description.includes('alternative'));assert.equal(cue.style,'dotted')}
     // Local correction uses exact raw spans, independent of whole-sentence rank.
     await evaluate("document.getElementById('keyboard-layout').value='qwerty';document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('clear').click();document.getElementById('raw').value='y94 y94 hello';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('raw').setSelectionRange(3,3);document.getElementById('raw').focus()");
     await new Promise(resolve=>setTimeout(resolve,50));
@@ -539,6 +543,7 @@ try {
     assert.equal(correctedCapture.text,'再 hello');assert.ok(correctedCapture.ranking.endsWith('+segment-v1'));
     await evaluate("document.getElementById('blind-capture').click()");
     assert.equal(await evaluate("document.getElementById('correction-tools').hidden"),true);
+    assert.equal(await evaluate("document.querySelectorAll('#preedit .uncertain').length"),0);
     assert.equal(await evaluate("document.getElementById('segment-menu').hidden"),true);
     assert.deepEqual(browserErrors, []);
     console.log('Browser passed:', url);

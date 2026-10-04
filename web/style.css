@@ -104,3 +104,6 @@ main>.notes{margin-top:16px}
 .segment-preview{flex-shrink:0;background:#f5fafb;border-top:1px solid #b8cdd5;padding-top:4px;font-size:13px;line-height:1.6;white-space:pre;overflow-x:auto;margin-top:4px;scrollbar-width:thin}
 .segment-preview::before{content:'Preview: ';color:#5d6f77}
 @media(max-width:600px){.under{gap:8px}.under #count{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.correction-tools{gap:8px}}
+
+/* A score ambiguity cue occupies the existing underline, without adding height. */
+.preedit .segment-piece.uncertain::after{border-bottom-style:dotted}

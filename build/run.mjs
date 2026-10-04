@@ -75,6 +75,8 @@ if (mode === 'test') {
 
 } else if (mode === 'benchmark') {
   run('scripts/benchmark-search.mjs', args.map(arg => resolve(caller, arg)));
+} else if (mode === 'confidence-diagnostics') {
+  run('scripts/confidence-diagnostics.mjs', args);
 } else if (mode === 'numbers-diagnostics') {
   run('scripts/numbers-diagnostics.mjs', args.map(arg => resolve(caller, arg)));
 } else if (mode === 'diagnose') {

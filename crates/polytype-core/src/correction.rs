@@ -662,6 +662,9 @@ pub struct Segment {
     pub part_index: usize,
     pub locked: bool,
     pub splits: Vec<Span>,
+    /// Chosen Chinese local score minus the best different finalized output.
+    /// None for locks, other languages, or spans without a competitor.
+    pub confidence_margin: Option<f64>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -742,6 +745,27 @@ pub(crate) fn segments(
             } else {
                 Vec::new()
             };
+            let confidence_margin = if editable && lang == "TW" && lock.is_none() {
+                let span = Span { start, end };
+                let choice = Constraint {
+                    start,
+                    end,
+                    text: text.clone(),
+                    lang: lang.clone(),
+                };
+                chinese_path(&raw, &choice, dictionary)
+                    .ok()
+                    .and_then(|chosen| {
+                        chinese_paths(&raw, span, dictionary)
+                            .into_iter()
+                            .filter(|path| path.text() != text)
+                            .map(|path| path.score)
+                            .max_by(f64::total_cmp)
+                            .map(|runner_up| chosen.score - runner_up)
+                    })
+            } else {
+                None
+            };
             let segment = Segment {
                 start,
                 end,
@@ -751,6 +775,7 @@ pub(crate) fn segments(
                 part_index: owner,
                 locked: lock.is_some(),
                 splits: split.clone(),
+                confidence_margin,
             };
             if editable {
                 spans.push(Span { start, end });
@@ -762,6 +787,7 @@ pub(crate) fn segments(
                             end: span.end,
                             raw: range(&raw, span.start, span.end)?,
                             text: None,
+                            confidence_margin: None,
                             splits: Vec::new(),
                             ..segment.clone()
                         });

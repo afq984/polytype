@@ -1,5 +1,16 @@
 # Polytype handoff
 
+## Chinese local ambiguity cues
+
+Unlocked Chinese segments expose a deterministic local `confidenceMargin` through
+the segment API. The web replaces the existing underline with dots at <=0.5,
+with accessible review help, without changing decode or keys. Blind capture
+hides cues. On 300 target QWERTY en-zh ASCEND development sentences, 89/3,129
+editable segments are marked; 57/160 errors are caught (64.0% precision, 35.6%
+recall). Thirty-two correct segments are marked and 103 errors are missed.
+See docs/CORRECTION.md and `bazelisk run //:confidence_diagnostics`; local margins
+are not calibrated probabilities, and English/Japanese errors have no cue.
+
 ## Numeric evidence at Chinese boundaries (numbers-v2)
 
 Expanded engines recognize numeric/short identifier syntax at sentence start,

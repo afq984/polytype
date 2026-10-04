@@ -118,3 +118,39 @@ not held-out accuracy. A single-span edit plus commit costs three mouse clicks o
 three keys from an already-positioned caret; navigating, splitting and merging add
 actions. Automated UI-action counting is deferred.
 
+
+## Local ambiguity cue
+
+A dotted underline replaces the ordinary Chinese underline when an unlocked
+segment's `confidenceMargin` is at most 0.5. Its accessible description invites
+review with ArrowDown or a click. Nothing flips automatically. Locks, spaces,
+punctuation, English/Japanese and unsupported single-choice spans have no cue;
+blind capture never requests segments or renders cues. Height and keys stay the same.
+
+The Rust segment API computes the chosen Chinese local score minus the best
+different finalized Chinese output for the identical raw span, before the menu's
+nine-item cap. It shares Chinese source scoring and beam-12 resegmentation with
+the alternatives API. `confidenceMargin` is null without a competitor, for
+non-Chinese segments, locks and split units without their own output. This is
+local score ambiguity, not calibrated probability or sentence-level correctness;
+cross-language and missing-source errors can be unmarked. Ordinary candidate
+text, scores and traces are unchanged.
+
+`bazelisk run //:confidence_diagnostics` measures the 300 ASCEND development
+sentences in target QWERTY en-zh, using gold reading/key spans to compare each
+editable top-one segment to the corresponding target output. No user dictionary
+is loaded. Predeclared thresholds were -0.5, 0, .25, .5, 1 and 2. There are 3,129
+editable segments and 160 wrong segments, with no unscorable spans.
+
+| Threshold | Marked | Wrong marked | Precision | Recall | Mark rate |
+| --- | --- | --- | --- | --- | --- |
+| -0.5 / 0 | 0 | 0 | n/a | 0% | 0% |
+| .25 | 36 | 17 | 47.2% | 10.6% | 1.15% |
+| .5 | 89 | 57 | 64.0% | 35.6% | 2.84% |
+| 1 | 206 | 109 | 52.9% | 68.1% | 6.58% |
+| 2 | 779 | 141 | 18.1% | 88.1% | 24.90% |
+
+The .5 threshold catches over a third of errors while marking under 3% of
+segments. Thirty-two correct segments receive a cue; 103 wrong segments do not.
+These selected development readings are visible evidence used for threshold
+selection, not held-out validation or representative accuracy.

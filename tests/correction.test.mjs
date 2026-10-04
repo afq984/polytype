@@ -363,3 +363,21 @@ test('raw edits rebase or release whole locks, with native/WASM parity', () => {
     assert.equal(engine.rebaseConstraints('y94', 'y94', custom).removed.length, 1);
   } finally { engine.dispose(); }
 });
+
+ test('Chinese local confidence is deterministic, bounded to editable unlocked segments and native/WASM equal', () => {
+ const engine=createEngine(), options={layout:'qwerty',japanese:false};
+ try {
+  const before=engine.decode('y94 hello',options),view=engine.segments('y94 hello',options);
+  const margin=view.segments[0].confidenceMargin;assert.equal(typeof margin,'number');
+  assert.equal(view.segments[1].confidenceMargin,null);assert.equal(view.segments[2].confidenceMargin,null);
+  assert.deepEqual(engine.segments('y94 hello',options),view);
+  assert.deepEqual(engine.decodeConstrained('y94 hello',[],options),before);
+  const lock=engine.alternatives('y94 hello',{start:0,end:3},options).items[1].constraint;
+  assert.equal(engine.segments('y94 hello',options,[lock]).segments[0].confidenceMargin,null);
+  const request={version:1,op:'segments',input:'y94 hello',options};
+  const child=spawnSync(native,[],{input:JSON.stringify(request)+'\n',encoding:'utf8'});
+  assert.equal(child.status,0,child.stderr);
+  const normalized=value=>JSON.parse(JSON.stringify(value,(key,v)=>typeof v==='number'?Math.round(v*1e10)/1e10:v));
+  assert.deepEqual(normalized(JSON.parse(child.stdout).ok),normalized(view));
+ }finally {engine.dispose()}
+ });
