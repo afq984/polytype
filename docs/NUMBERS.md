@@ -1,8 +1,10 @@
 # Numbers at Chinese boundaries
 
-Expanded ranking appends `+numbers-v1`. `Policy.numbers` controls the behavior;
+Expanded ranking appends `+numbers-v2`. `Policy.numbers` controls the behavior;
 `--experiment=current+no-numbers` reproduces the preceding main engine with the
-same dictionary. Historical native ablations and the prototype stay unchanged.
+same dictionary. `Policy.numeric_prefix` protects unfinished Chinese;
+`current+no-numeric-prefix` reproduces numbers-v1. Historical native ablations
+and the prototype stay unchanged.
 The browser exposes no experiment flags.
 
 A numeric or short identifier span can start at sentence start, after literal
@@ -29,6 +31,25 @@ receive the former unconditional digit-bearing identifier bonus. A completed
 alphabetic Chinese syllable followed by unfinished keys without a Space also
 stays on the Chinese path (`us3l` remains 你ㄠ while typing 你好).
 
+At the end of input, a clean unfinished Zhuyin reading keeps its phonetic
+display ahead of the numeric alternative when Chinese is enabled. It must have
+no discarded/repeated/replaced keys and match a subset of the slots of an actual
+imported or custom syllable; slot order remains unrestricted. Completed preceding
+syllables also need clean dictionary coverage. Thus `5`, `5j`, `5j/`, `wu0`,
+`ru8` and `1` keep ㄓ, ㄓㄨ, ㄓㄨㄥ, ㄊㄧㄢ, ㄐㄧㄚ and ㄅ while typing.
+The cached slot subsets come from dictionary readings, not evaluation text.
+The independent English fallback also respects the original Chinese setting.
+
+The lower numeric alternative receives 0.3 per key minus 0.1, just below a clean
+phonetic fallback; this pending alternative has no first-tone opening cost so
+it stays selectable after Chinese. Ordinary and explicitly locked numeric edges
+reuse this score. Without Chinese enabled, or with discarded/replaced keys or
+an invalid syllable (`17` = ㄅ˙), ordinary numeric evidence can win immediately.
+After a Space or a non-Zhuyin punctuation boundary, complete-token evidence
+applies. Physical `.` is also ㄡ, so unfinished `5.` remains ㄓㄡ; QWERTY `5:` is Roman
+punctuation. A valid first-tone Space still converts `5␣` to 之, whereas
+`1␣` is the literal `1 ` because standalone ㄅ has no clean dictionary reading.
+
 Eligible numeric evidence sums 2.5 per digit and 1.8 per ASCII letter; punctuation
 adds no evidence. The existing first-tone opening cost still applies (two per
 trailing first tone plus discarded-key cost). Numeric analysis is cached per
@@ -45,8 +66,9 @@ key cannot turn an already converted Chinese prefix into an identifier.
 
 Some numeric strings are also clean Chinese readings. Conservative precedence
 leaves `19␣` as 掰 and `04/16` as 案甭; these remain visible numeric failures.
-Conversely, unsupported first-syllable prefixes can temporarily become numeric
-until a tone completes their Chinese reading. The synthetic controls and every
-Chinese prefix are measured in [the development report](../eval/NUMBERS.md).
+An unfinished numeric `5` also matches clean ㄓ, so `只剩 5` has the numeric
+answer second until a boundary or explicit selection resolves it. The synthetic
+controls and every Chinese prefix are measured in
+[the development report](../eval/NUMBERS.md).
 This is development evidence for a local prototype, not native IME support or
 held-out accuracy.

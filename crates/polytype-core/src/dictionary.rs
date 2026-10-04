@@ -164,6 +164,7 @@ pub(crate) struct Dictionary {
     pub singles: HashMap<String, Vec<ChineseWord>>,
     pub phrases: HashMap<String, Vec<ChineseWord>>,
     pub prefixes: HashSet<String>,
+    pub partial_syllables: HashSet<String>,
 }
 
 impl Dictionary {
@@ -208,6 +209,7 @@ impl Dictionary {
             singles: HashMap::new(),
             phrases: HashMap::new(),
             prefixes: HashSet::new(),
+            partial_syllables: HashSet::new(),
         };
         let mut phrases = 0;
         let rows = dict
@@ -243,6 +245,27 @@ impl Dictionary {
             .chain(LEXICON.chinese.iter().map(|(r, t)| (r, t, Some(0.0))));
         for (reading, text, log_frequency) in rows {
             let keys = reading_keys(reading).expect("validated dictionary reading");
+            // Any subset of the three ordered slots is a valid typing prefix:
+            // users can enter the slots in any physical-key order. Cache these
+            // from actual readings rather than accepting impossible syllables.
+            for key in &keys {
+                let body = &key[..key.len() - 1];
+                // The set is closed under subsets; a previously inserted body
+                // already supplied all its prefixes. Most phrase readings recur.
+                if dict.partial_syllables.contains(body) {
+                    continue;
+                }
+                let body = body.as_bytes();
+                for mask in 1..1 << body.len() {
+                    let partial: String = body
+                        .iter()
+                        .enumerate()
+                        .filter(|(index, _)| mask & (1 << index) != 0)
+                        .map(|(_, unit)| *unit as char)
+                        .collect();
+                    dict.partial_syllables.insert(partial);
+                }
+            }
             let values = if keys.len() == 1 {
                 dict.singles.entry(keys[0].clone()).or_default()
             } else {

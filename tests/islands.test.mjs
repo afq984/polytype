@@ -40,9 +40,6 @@ test('English islands survive frequency ranking and converted first-tone switchi
         :row.id==='chinese-qwerty-3-prefix-5'?'跟す' // su temporarily composes Japanese す.
         :row.id==='chinese-qwerty-4-prefix-4'?'資ぅ' // xu temporarily composes small kana.
         :/^chinese-(qwerty|colemak)-0(?:-prefix-7)?$/.test(row.id)?'中內' // Rare 那 ㄋㄟˋ no longer inherits its common reading's count.
-        :/^chinese-(qwerty|colemak)-0-prefix-[123]$/.test(row.id)
-          ||/^chinese-(qwerty|colemak)-2-prefix-3$/.test(row.id)
-          ?(row.options.layout==='colemak'?e.colemak(row.raw):row.raw) // Numeric-shaped unfinished first syllables; completed Chinese is retained.
         :row.candidates[0]?.text;
       if(row.chinese||row.id.startsWith('probe-')||row.id.startsWith('abbreviation-'))assert.ok(texts[0]===expected||readings[0]===expected,`${row.id}: ${texts[0]}`);
       // Imported Japanese, frequency-aware Chinese and numeric evidence change

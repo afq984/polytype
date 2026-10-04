@@ -23,14 +23,14 @@ test('numeric development annotations cover the declared contracts and layouts',
 });
 
 const engine=createEngine(),requests=[];
-const decode=(raw,options)=>{
-  requests.push({version:1,op:'decode',input:raw,options});
-  return engine.decode(raw,options);
+const decode=(raw,options,constraints)=>{
+  requests.push({version:1,op:'decode',input:raw,options,...(constraints?{constraints}:{})});
+  return constraints?engine.decodeConstrained(raw,constraints,options):engine.decode(raw,options);
 };
 const roman=(text,layout)=>layout==='qwerty'?text:encode(text);
 
 test('numbers and identifiers survive literal and converted first-tone boundaries',()=>{
-  assert.ok(rankingId.endsWith('+numbers-v1'));
+  assert.ok(rankingId.endsWith('+numbers-v2'));
   for(const layout of ['qwerty','colemak'])for(const japanese of [false,true]){
     const options={layout,japanese};
     for(const token of ['15','17','2025','5090','x3','v3','Q3','M2','3.8-27B','+0.3','-2.5','70%','11:25','1/2','v1.5','NT$120','11/']){
@@ -55,6 +55,38 @@ test('clean digit-key Chinese continuations keep their dictionary evidence',()=>
     assert.deepEqual(engine.decodeConstrained(raw,[],{layout}),candidates);
     const lock={start:0,end:4,lang:'TW',text:'心'};
     assert.equal(engine.decodeConstrained(raw,[lock],{layout})[0].text,'心電圖');
+  }
+});
+
+test('clean unfinished Zhuyin keeps its display and a lower numeric alternative',()=>{
+  for(const layout of ['qwerty','colemak'])for(const japanese of [false,true]){
+    const options={layout,japanese};
+    const first=readingKeys('ㄍㄤ').join('');
+    const nonFirst=readingKeys('ㄋㄧˇ ㄏㄠˇ').join('');
+    for(const [prefix,text] of [['5','ㄓ'],['5j','ㄓㄨ'],['5j/','ㄓㄨㄥ'],['wu0','ㄊㄧㄢ'],['ru8','ㄐㄧㄚ'],['1','ㄅ']]){
+      // These are physical Zhuyin keys in both layouts, not Roman strings.
+      const literal=layout==='colemak'?engine.colemak(prefix):prefix;
+      for(const [stem,converted] of [['',''],[nonFirst+' ','你好 '],[first,'剛'],[first+' ','剛 ']]){
+        const raw=stem+prefix,candidates=decode(raw,options);
+        assert.equal(candidates[0].text,converted+text,`${layout}: ${raw}`);
+        assert.ok(candidates.slice(1).some(c=>c.text===converted+literal),`${layout}: lower alternative ${raw}`);
+        assert.deepEqual(engine.decodeConstrained(raw,[],options),candidates);
+      }
+      assert.equal(decode(prefix,{...options,zhuyin:false})[0].text,literal);
+    }
+    // Unordered slots are clean; replacements, repeated slots and an invalid
+    // complete syllable can still supply the stronger numeric interpretation.
+    assert.equal(decode('/j5',options)[0].text,'ㄓㄨㄥ');
+    assert.equal(decode('104wu',options)[0].text,'辦ㄊㄧ');
+    assert.equal(decode('5.',options)[0].text,'ㄓㄡ');
+    for(const token of ['15','17','2025','11','rj8'])assert.equal(decode(roman(token,layout),options)[0].text,token);
+    // Completion by punctuation/Space enables numeric evidence, subject to
+    // the existing dictionary guard: a valid first tone still becomes Chinese.
+    assert.equal(decode(roman('5:',layout),options)[0].text,'5:');
+    assert.equal(decode('5 ',options)[0].text,'之');
+    assert.equal(decode('1 ',options)[0].text,'1 ');
+    const locked=decode(first+'wu0',options,[{start:first.length,end:first.length+3,lang:'EN',text:layout==='colemak'?'wl0':'wu0'}]);
+    assert.equal(locked[0].text,layout==='colemak'?'剛wl0':'剛wu0');
   }
 });
 
@@ -93,7 +125,7 @@ test('native/WASM numeric traces agree and empty locks preserve ordinary decode'
   const results=native.stdout.trim().split('\n').map(line=>JSON.parse(line).ok);
   const normalize=value=>JSON.parse(JSON.stringify(value,(key,v)=>key==='score'?Math.round(v*1e9)/1e9:v));
   assert.equal(results.length,requests.length);
-  requests.forEach((r,i)=>assert.deepEqual(normalize(results[i]),normalize(engine.decode(r.input,r.options)),r.input));
+  requests.forEach((r,i)=>assert.deepEqual(normalize(results[i]),normalize(r.constraints?engine.decodeConstrained(r.input,r.constraints,r.options):engine.decode(r.input,r.options)),r.input));
   const child=spawnSync('target/release/polytype-search',['--experiment=current+no-numbers'],{input:JSON.stringify({raw:readingKeys('ㄋㄧˇ ㄏㄠˇ').join('')+' x3',options:{layout:'qwerty'},width:12})+'\n',encoding:'utf8'});
   assert.equal(child.status,0,child.stderr);
   assert.equal(JSON.parse(child.stdout).ok.candidates[0].text,'你好 ㄌˇ');

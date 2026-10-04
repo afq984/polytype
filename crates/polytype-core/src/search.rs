@@ -74,6 +74,7 @@ struct Policy {
     bare_zhuyin: bool,
     physical_keys: bool,
     numbers: bool,
+    numeric_prefix: bool,
 }
 
 impl Default for Policy {
@@ -92,6 +93,7 @@ impl Default for Policy {
             bare_zhuyin: true,
             physical_keys: true,
             numbers: true,
+            numeric_prefix: true,
         }
     }
 }
@@ -427,17 +429,25 @@ fn english_boundary_number_score(spelling: &str, tone_switch: bool) -> Option<f6
 // never by splitting a Chinese syllable. Keep a clean dictionary reading ahead
 // of the literal interpretation, including phrases composed from digit keys.
 // Comparing raw length also catches repeated slots that do not record a change.
-fn clean_chinese_token(raw: &[u16], dictionary: &Dictionary) -> bool {
+fn clean_chinese_token(raw: &[u16], dictionary: &Dictionary, allow_pending: bool) -> bool {
     let mut at = 0;
     let mut keys = Vec::new();
+    let mut pending = false;
     while at < raw.len() {
         let Some(syllable) = read_units(raw, at) else {
             return false;
         };
-        if !syllable.complete || syllable.end - at != syllable.key.len() {
+        if syllable.end - at != syllable.key.len() {
             return false;
         }
         at = syllable.end;
+        if !syllable.complete {
+            pending = allow_pending && dictionary.partial_syllables.contains(&syllable.key);
+            if !pending {
+                return false;
+            }
+            break;
+        }
         keys.push(syllable.key);
     }
     let mut reachable = vec![false; keys.len() + 1];
@@ -461,7 +471,7 @@ fn clean_chinese_token(raw: &[u16], dictionary: &Dictionary) -> bool {
             }
         }
     }
-    !keys.is_empty() && reachable[keys.len()]
+    (!keys.is_empty() || pending) && reachable[keys.len()]
 }
 
 // A whole, space-delimited ASCII numeric span. Internal marks must connect
@@ -824,7 +834,16 @@ fn decode_planned(
     policy: Policy,
     plan: Option<&Plan>,
 ) -> Vec<Candidate> {
-    let mut result = decode_lattice_planned(input, dictionary, options, width, limit, policy, plan);
+    let mut result = decode_lattice_planned(
+        input,
+        dictionary,
+        options,
+        width,
+        limit,
+        policy,
+        plan,
+        options.zhuyin,
+    );
     // A bounded mixed-language beam can discard every English path before a
     // later operator arrives. Reserve a slot for an independently decoded
     // literal-English path, even when phonetic scores crowd it out.
@@ -842,6 +861,7 @@ fn decode_planned(
             limit,
             policy,
             plan,
+            options.zhuyin,
         )
         .into_iter()
         .next()
@@ -948,6 +968,7 @@ pub(crate) fn experiment(
             "no-tone-switch" => policy.tone_switch = false,
             "numbers" => policy.numbers = true,
             "no-numbers" => policy.numbers = false,
+            "no-numeric-prefix" => policy.numeric_prefix = false,
             "current" => {}
             "no-frequency" => policy.frequency = false,
             "frequency" => policy.frequency = true,
@@ -988,9 +1009,19 @@ fn decode_lattice(
     limit: usize,
     policy: Policy,
 ) -> Vec<Candidate> {
-    decode_lattice_planned(input, dictionary, options, width, limit, policy, None)
+    decode_lattice_planned(
+        input,
+        dictionary,
+        options,
+        width,
+        limit,
+        policy,
+        None,
+        options.zhuyin,
+    )
 }
 
+#[allow(clippy::too_many_arguments)]
 fn decode_lattice_planned(
     input: &str,
     dictionary: &Dictionary,
@@ -999,6 +1030,9 @@ fn decode_lattice_planned(
     limit: usize,
     policy: Policy,
     plan: Option<&Plan>,
+    // The independent English fallback must respect the original Chinese
+    // setting, otherwise it can promote a clean unfinished syllable again.
+    chinese_enabled: bool,
 ) -> Vec<Candidate> {
     if !options.english && !options.japanese && !options.zhuyin {
         return Vec::new();
@@ -1050,7 +1084,7 @@ fn decode_lattice_planned(
                 && text.bytes().any(|c| c.is_ascii_alphabetic())
                 && raw[i..end].iter().enumerate().any(|(offset, &unit)| {
                     chinese_punctuation(unit, policy.chinese_parentheses).is_some()
-                        && clean_chinese_token(&raw[i..i + offset], dictionary)
+                        && clean_chinese_token(&raw[i..i + offset], dictionary, false)
                 });
             // A trailing Space may be the next Chinese syllable's first tone.
             // Try the token alone as well when its last tone was explicit.
@@ -1067,13 +1101,24 @@ fn decode_lattice_planned(
                             && p.end == p.key.len()
                             && dictionary.singles.contains_key(&p.key)
                     }))
-                || clean_chinese_token(&raw[i..end], dictionary)
-                || clean_chinese_token(&raw[i..phonetic_end], dictionary)
+                || clean_chinese_token(&raw[i..end], dictionary, false)
+                || clean_chinese_token(&raw[i..phonetic_end], dictionary, false)
             {
                 None
             } else {
-                let score = number_token_score(&text);
-                Some((end, text, score))
+                // At end of input the user may still be typing a Chinese
+                // syllable. Keep its Roman alternative just below the clean
+                // phonetic fallback until a separator completes the token.
+                let pending = policy.numeric_prefix
+                    && chinese_enabled
+                    && end == raw.len()
+                    && clean_chinese_token(&raw[i..end], dictionary, true);
+                let score = if pending {
+                    utf16_len(&text) as f64 * 0.3 - 0.1
+                } else {
+                    number_token_score(&text)
+                };
+                Some((end, text, score, pending))
             }
         } else {
             None
@@ -1149,17 +1194,30 @@ fn decode_lattice_planned(
                     options,
                     BoundaryEvidence {
                         tone_switch,
-                        switch_cost,
+                        switch_cost: if lock.constraint.lang == "EN"
+                            && lock.parts.len() == 1
+                            && number.as_ref().is_some_and(|n| {
+                                number_boundary && n.0 == lock.constraint.end && n.3
+                            }) {
+                            0.0
+                        } else {
+                            switch_cost
+                        },
                         numbers: policy.numbers,
-                        number_score: number.as_ref().and_then(|(end, _, score)| {
-                            (number_boundary && *end == lock.constraint.end).then_some(*score)
+                        number_score: number.as_ref().and_then(|(end, _, score, pending)| {
+                            // A selected pending alternative must use the cap
+                            // on every prior-language path. Otherwise its local
+                            // English-only score can promote a Roman prefix and
+                            // displace the Chinese context it was selected from.
+                            ((number_boundary || *pending) && *end == lock.constraint.end)
+                                .then_some(*score)
                         }),
                     },
                 );
                 continue;
             }
 
-            if let Some((end, text, score)) = &number
+            if let Some((end, text, score, pending)) = &number
                 && number_boundary
                 && (state.lang.is_none() || state.lang.as_deref() == Some("EN"))
             {
@@ -1171,11 +1229,15 @@ fn decode_lattice_planned(
                         raw: segment(&raw, i, *end),
                         text: text.clone(),
                         lang: "EN".into(),
-                        note: "Numeric / identifier evidence without a clean Chinese reading"
-                            .into(),
+                        note: if *pending {
+                            "Numeric / identifier alternative while waiting for a Chinese tone"
+                        } else {
+                            "Numeric / identifier evidence without a clean Chinese reading"
+                        }
+                        .into(),
                         ..Part::default()
                     },
-                    score - switch_cost,
+                    score - if *pending { 0.0 } else { switch_cost },
                     Some("EN"),
                 );
             }
