@@ -6,6 +6,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {createEngine,colemak} from '../web/engine.mjs';
 import {zhEnCorpus,englishOnlyCorpus,zhEnCases,englishOnlyCases,zhEnSkipped,generateZhEnCases} from '../eval/zh-en-cases.mjs';
+import {summarizeZhEnCases,renderZhEnSummary} from '../scripts/zh-en-summary.mjs';
 import {parseCsv,maximalMatch,taiwanConverter,cedictDictionary,annotate,pinyinToZhuyin} from '../scripts/zh-en-annotation.mjs';
 const root=new URL('../',import.meta.url);
 
@@ -85,7 +86,7 @@ test('every generated development case decodes without error with native/WASM pa
   const results=child.stdout.trim().split('\n').map(line=>JSON.parse(line));
   assert.equal(results.length,cases.length);
   const normalize=value=>JSON.parse(JSON.stringify(value,(key,v)=>key==='score'?Math.round(v*1e10)/1e10:v));
-  const engine=createEngine();
+  const engine=createEngine(),outputs=new Map();
   try {
     for(const [index,row] of cases.entries()) {
       assert.ok(row.raw.length<=400,row.id);
@@ -93,7 +94,43 @@ test('every generated development case decodes without error with native/WASM pa
       assert.ok(candidates.length,row.id);
       assert.ok(!results[index].error,`${row.id}: ${results[index].error}`);
       assert.deepEqual(normalize(results[index].ok),normalize(candidates),row.id);
-      for(const candidate of candidates)assert.equal(typeof engine.commitCandidate(candidate),'string');
+      const committed=candidates.map(candidate=>engine.commitCandidate(candidate));
+      for(const text of committed)assert.equal(typeof text,'string');
+      outputs.set(row.id,committed);
     }
   } finally {engine.dispose();}
+  const summary=summarizeZhEnCases(cases,entry=>outputs.get(entry.id));
+  assert.equal(summary.cases,3200);assert.equal(summary.sourceCases,550);
+  assert.equal(renderZhEnSummary(summary,{skippedUnmapped:zhEnSkipped.length}),readFileSync(new URL('eval/zh-en/REPORT.md',root),'utf8'));
+  for(const strata of Object.values(summary.groups)) {
+    assert.equal(strata.all.cases,strata['review-pending'].cases+strata.automatic.cases);
+    for(const metric of ['top1','top5','spaceNormalizedTop1','spaceNormalizedTop5','englishMatches','englishTokens','hanEdits','hanCharacters','wrongLanguageCases','singleLanguageCases'])assert.equal(strata.all[metric],strata['review-pending'][metric]+strata.automatic[metric]);
+  }
+});
+
+
+test('summary separates review strata and uses boundary-only normalization',()=>{
+  const entries=[
+    {id:'pending',group:'mixed',review:'pending',text:'剛 call one two'},
+    {id:'automatic',group:'mixed',review:'automatic',text:'剛 call'},
+    {id:'english',group:'en-only',text:'hello world'},
+  ];
+  const outputs={pending:['剛call one  two','剛 call one two'],automatic:['剛call'],english:['hello 中']};
+  const summary=summarizeZhEnCases(entries,entry=>outputs[entry.id]);
+  const mixed=summary.groups.mixed;
+  assert.equal(mixed.all.cases,2);assert.equal(mixed.all.top1,0);assert.equal(mixed.all.top5,1);
+  assert.equal(mixed.all.spaceNormalizedTop1,1);assert.equal(mixed.all.spaceNormalizedTop5,2);
+  assert.equal(mixed['review-pending'].spaceNormalizedTop1,0);assert.equal(mixed['review-pending'].spaceNormalizedTop5,1);
+  assert.equal(mixed.automatic.spaceNormalizedTop1,1);assert.equal(mixed.all.englishExact,1);
+  assert.equal(mixed.all.hanCER,0);assert.equal(mixed.all.wrongLanguage,null);
+  const english=summary.groups['en-only'];
+  assert.equal(english.automatic.cases,1);assert.equal(english.all.englishExact,0.5);
+  assert.equal(english.all.wrongLanguage,1);assert.equal(english.all.hanCER,null);
+  assert.equal(english['review-pending'].cases,0);
+  for(const key of ['englishExact','hanCER','wrongLanguage'])assert.equal(english['review-pending'][key],null);
+  assert.deepEqual(summarizeZhEnCases([...entries].reverse(),entry=>outputs[entry.id]),summary);
+  const markdown=renderZhEnSummary(summary);
+  assert.ok(markdown.includes('n/a (0/0)'));
+  for(const entry of entries)assert.ok(!markdown.includes(entry.text));
+  assert.ok(!JSON.stringify(summary).includes('hello world'));
 });

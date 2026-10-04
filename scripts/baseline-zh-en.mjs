@@ -1,14 +1,13 @@
-// Quick development baseline only; does not update the evaluator's reports.
+// Deterministic aggregate summary; never adds configurations to eval/report.json.
+import {writeFile} from 'node:fs/promises';
 import {createEngine} from '../web/engine.mjs';
-import {zhEnCases,englishOnlyCases,zhEnSkipped} from '../eval/zh-en-cases.mjs';
-const engine=createEngine(),groups={};
+import {cases,zhEnSkipped} from '../eval/zh-en-cases.mjs';
+import {summarizeZhEnCases,renderZhEnSummary} from './zh-en-summary.mjs';
+if(process.argv.length>2)throw new Error('Use bazelisk run //:baseline_zh_en');
+const engine=createEngine();
 try {
-  for(const row of [...zhEnCases,...englishOnlyCases]) {
-    const outputs=engine.decode(row.raw,row.options).map(c=>engine.commitCandidate(c));
-    const group=groups[row.group]??={cases:0,top1:0,top5:0,spaceNormalizedTop1:0,pending:0};
-    group.cases++;group.top1+=Number(outputs[0]===row.text);group.top5+=Number(outputs.includes(row.text));
-    group.spaceNormalizedTop1+=Number(outputs[0]?.replaceAll(' ','')===row.text.replaceAll(' ',''));
-    group.pending+=Number(row.review==='pending');
-  }
-  console.log(JSON.stringify({baseline:'Current expanded engine; record the revision alongside these development counts',notes:'Development transcripts; auto-readings with pending review are included and counted. Both layouts/configurations reuse each source utterance.',skippedUnmapped:zhEnSkipped,groups},null,2));
+  const summary=summarizeZhEnCases(cases,entry=>engine.decode(entry.raw,entry.options).map(candidate=>engine.commitCandidate(candidate)));
+  const markdown=renderZhEnSummary(summary,{skippedUnmapped:zhEnSkipped.length});
+  await writeFile(new URL('../eval/zh-en/REPORT.md',import.meta.url),markdown);
+  console.log(markdown);
 } finally {engine.dispose();}

@@ -18,6 +18,22 @@ in LICENSE. This does not replace the following third-party terms:
 - Sourced evaluation text and adapted annotations retain their attribution and
   CC BY-SA terms, documented in eval/README.md and eval/sources/. The project MIT
   license does not relicense this material. It is not compiled into the demo.
+- ASCEND transcripts by Holy Lovenia, Samuel Cahyawijaya, Genta Indra Winata
+  and their coauthors (HLTCHKUST/CAiRE), and UD English EWT sentences/annotations
+  by the Universal Dependencies English EWT contributors, retain CC BY-SA 4.0.
+  Their selected test-split text and adapted evaluation cases live in eval/zh-en/;
+  attribution and source notices are in eval/sources/ASCEND-README.md and
+  eval/sources/UD_English-EWT-{README.md,LICENSE.txt}.
+- CC-CEDICT evaluation pronunciation annotations retain CC BY-SA 4.0, with
+  attribution to its community contributors and publisher MDBG, and the original
+  CEDICT work by Paul Andrew Denisowski. The export notice is retained in
+  eval/sources/CC-CEDICT-NOTICE.txt. These annotations are independent of the
+  runtime dictionary and are not compiled into either demo.
+- OpenCC's conversion dictionaries by BYVoid and the OpenCC contributors retain
+  Apache-2.0, with the upstream license in eval/sources/OpenCC-LICENSE.txt.
+  They are used only for offline evaluation-text conversion. Pinned revisions,
+  source hashes and transformation details for these four evaluation sources
+  are in eval/sources/zh-en-pins.json and eval/README.md.
 - Cargo dependencies retain their own licenses. The build bundles MIT notices
   for the currently locked dependencies, selecting MIT where offered as an
   alternative, plus unicode-ident's additional Unicode license. Build-only

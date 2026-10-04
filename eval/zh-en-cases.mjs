@@ -47,3 +47,5 @@ export const englishOnlyCases=englishOnlyCorpus.cases.flatMap(entry=>['qwerty','
   options:{layout,english:true,japanese:true,zhuyin:true},segments:[{lang:'en',text:entry.text}],
 })));
 export const zhEnSkipped=zhEnCorpus.cases.filter(entry=>entry.segments.some(s=>s.lang==='zh'&&!s.reading)).map(entry=>entry.id);
+// Optional --extra-cases hook; default tracked evaluator reports stay unchanged.
+export const cases=[...zhEnCases,...englishOnlyCases];

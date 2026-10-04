@@ -325,14 +325,24 @@ Apostrophes, hyphens, case and representable punctuation remain exact. Both layo
 use the same source sentences with all three languages enabled.
 
 `eval/zh-en-cases.mjs` exports `zhEnCorpus`, `englishOnlyCorpus`, `zhEnCases`,
-`englishOnlyCases`, `zhEnSkipped` and `generateZhEnCases(entries, {spacing})`.
+`englishOnlyCases`, `zhEnSkipped`, `cases` and `generateZhEnCases(entries, {spacing})`.
 Each ASCEND entry yields eight cases: QWERTY/Colemak × EN+ZH/all languages ×
 `current`/`target`. Chinese controls have separate `zh-only-*` groups. English
 controls yield two `en-only-*` cases. Cases carry `sourceId`, source segments,
 options and review status so downstream metrics can separate provisional targets.
 The generator reuses Rust/WASM `readingKeys` and the existing case-preserving
-Colemak encoder. It is intentionally **not** added to `eval/cases.mjs` or the
-existing report metrics; the evaluation stream owns that integration.
+Colemak encoder. `cases` supports the evaluator's optional `--extra-cases` hook.
+These 3,200 configurations are not added to `eval/cases.mjs` or tracked
+`eval/report.json`. Instead, `//:baseline_zh_en` uses the shared milestone metrics
+in `scripts/evaluation-metrics.mjs` and writes the deterministic aggregate-only
+[Chinese/English summary](zh-en/REPORT.md). Each group is split into all,
+review-pending and automatic; EWT guards have no reading queue and appear under
+automatic. No detected annotation issue does not mean human-approved gold.
+The summary includes exact/space-normalized top-1 and top-5, pooled English exact,
+Han CER and wrong-language counts with denominators, and omits timings and case
+text. Unlike the generator's optional all-space scoring view, the shared summary
+normalizes only Han/Latin and Han/digit boundary spaces, preserving English
+internal spaces and Han/Han spaces.
 
 The `current` contract types a separator at each language change, in addition to
 any first-tone completion Space. The `target` contract uses the first-tone Space
@@ -356,7 +366,7 @@ bazelisk run //:import_zh_en                 # explicit network import, pinned h
 bazelisk run //:verify_zh_en                 # fetch, hash-check and reproduce without writes
 bazelisk run //:import_zh_en -- --from-dir=DIR # same source basenames, offline reproduction
 bazelisk run //:verify_zh_en -- --from-dir=DIR
-bazelisk run //:baseline_zh_en               # quick current-engine counts on stdout
+bazelisk run //:baseline_zh_en               # refresh aggregate eval/zh-en/REPORT.md
 bazelisk test //...                         # offline data hashes, contracts, native/WASM parity
 ```
 
