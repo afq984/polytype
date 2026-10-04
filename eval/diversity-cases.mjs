@@ -5,5 +5,6 @@ export const diversityCases=controls.cases.flatMap(row=>['colemak','qwerty'].fla
   ...row,id:`diversity-${row.id}-${layout}-${zhuyin?'all':'en-jp'}`,
   group:`diversity-${row.group}`,
   raw:(row.chunks??[{roman:row.input}]).map(chunk=>chunk.keys??(layout==='colemak'?encodeMixedInput(chunk.roman):chunk.roman)).join(''),
+  ...(layout==='colemak'&&row.input?.includes(':')?{prototypeRaw:encodeMixedInput(row.input).replaceAll('P',':')}:{}),
   options:{layout,english:true,japanese:true,zhuyin},
 }))));

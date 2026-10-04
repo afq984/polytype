@@ -35,17 +35,18 @@ export const feedbackCases = [
     text:"I think 注音's priority is too high  (this is also a good test sentence)"},
 ];
 export const mixedCorpus=JSON.parse(readFileSync(new URL('./mixed-text.json',import.meta.url)));
-// The legacy encode helper does not invert uppercase letters. Keep this test
-// adapter explicit and validate its round trip rather than silently changing
-// case in the supplied examples. Uppercase O has no current physical encoding.
+// Validate the case-preserving physical encoding of supplied Roman examples.
 export function encodeMixedInput(text) {
-  const raw=[...text].map(c=>/[A-Z]/.test(c)?encode(c.toLowerCase()).toUpperCase():encode(c)).join('');
+  const raw=encode(text);
   if(colemak(raw)!==text)throw new Error('Mixed-text fixture cannot round-trip through the current Colemak raw encoding');
   return raw;
 }
+// Explicit adapter for generated Roman fixtures evaluated by the frozen profile.
+export const prototypeRaw = row => row.prototypeRaw ?? row.raw;
 export const mixedCases=mixedCorpus.cases.flatMap(entry=>['colemak','qwerty'].flatMap(layout=>[true,false].map(zhuyin=>({
   ...entry,id:`${entry.id}-${layout}-${zhuyin?'all':'en-jp'}`,group:`mixed-${layout}-${zhuyin?'all':'en-jp'}`,
   raw:layout==='colemak'?encodeMixedInput(entry.input):entry.input,
+  ...(layout==='colemak'&&entry.input.includes(':')?{prototypeRaw:encodeMixedInput(entry.input).replaceAll('P',':')}:{}),
   options:{layout,english:true,japanese:true,zhuyin},
 }))));
 export const cases = [...realCases,...guardCases,...feedbackCases,...mixedCases,...japaneseCases];

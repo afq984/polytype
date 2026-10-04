@@ -36,6 +36,25 @@ Optional `options` fields select layout and enabled languages. The demo's
 Save test case / Export cases workflow creates compatible JSONL, after the user
 reviews or corrects the expected output. Exports do not contain custom dictionary
 entries; restore those separately when reproducing custom-dependent cases.
+Current browser exports include `rawEncodingVersion: 2` and ranking suffix
+`+physical-keys-v2`. The loader does not migrate supplied files: review older
+Colemak colon captures using the [collection instructions](COLLECTION.md)
+before evaluating them with the expanded profile.
+
+PT-006 explicitly migrates Roman colon input for `mixed-02-colemak-all` and
+`mixed-02-colemak-en-jp` (`10:00` raw becomes `10P00`) and
+`diversity-mixed-meeting-colemak-all` and
+`diversity-mixed-meeting-colemak-en-jp` (`14:30` becomes `14P30`). These four
+rows occur in `diversity-baseline.json`, `diversity-after.json` and
+`island-baseline.json`; their frozen bytes remain unchanged, with current test
+inputs adapted explicitly by `physical-keys.mjs`. Generated mixed/control
+cases use version-2 keys and keep `prototypeRaw` for the historical profile.
+The two expanded mixed-02 rows in the refreshed `report.json` use `10P00`;
+its two prototype rows retain the historical colon. Outputs/scores are unchanged.
+The generated EWT Colemak cases `ewt-test-051`, `054`, `058`, `181`, `182`,
+`183` and `187` likewise use `P` for Roman colon, with unchanged targets and
+candidate outputs. No other stored raw fixtures require migration; the source
+texts, annotation files and source selection are unchanged.
 
 ## Milestone diagnostics and extra cases
 
@@ -276,7 +295,7 @@ Latin letters) and first 50 Han-only utterances passing the documented encoding
 and length filters. Of 1,315 test utterances, 379 contain Han and Latin; 21 Han
 utterances contain annotation markup (`[UNK]`) and are excluded. After markup
 exclusion there are 358 mixed and 679 Chinese-only eligible utterances. One
-prospective selected mixed utterance cannot round-trip in Colemak (uppercase O);
+prospective selected mixed utterance failed the historical Colemak uppercase-O filter;
 no utterance is excluded by the conservative 400-key length bound. Counts and
 original transcripts/source row identifiers are retained in the data. These are
 selected excerpts from an ordered corpus, with speaker/topic clustering, rather
@@ -353,7 +372,12 @@ with 4–25 integer-ID tokens, printable ASCII sentence text, at most 400 raw un
 and an exact Colemak round trip. Of 2,077 test sentences, 1,409 meet the token
 range; 88 fail the encoding filter across the whole eligible split. The filter
 conservatively limits this guard to ASCII keyboard text and excludes Unicode
-punctuation as well as the existing Colemak uppercase-O limitation (PT-006).
+punctuation as well as the historical Colemak uppercase-O limitation (PT-006).
+PT-006 fixes uppercase O in the engine and case encoder. The importer explicitly
+retains that historic uppercase-O exclusion for both ASCEND and EWT so this
+task does not change source selection. Removing it would make 86 additional
+EWT sentences eligible and change the first-200 guard. This requires a separate
+corpus-selection update.
 Apostrophes, hyphens, case and representable punctuation remain exact. Both layouts
 use the same source sentences with all three languages enabled.
 

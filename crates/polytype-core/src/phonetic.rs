@@ -10,9 +10,24 @@ pub fn utf16_len(value: &str) -> usize {
 }
 
 pub fn colemak(value: &str) -> String {
+    map_colemak(value, true)
+}
+
+pub(crate) fn legacy_colemak(value: &str) -> String {
+    map_colemak(value, false)
+}
+
+fn map_colemak(value: &str, physical_keys: bool) -> String {
     value
         .chars()
         .map(|c| {
+            if physical_keys {
+                match c {
+                    'P' => return ':',
+                    ':' => return 'O',
+                    _ => {}
+                }
+            }
             QWERTY.find(c.to_ascii_lowercase()).map_or(c, |index| {
                 let mapped = COLEMAK.as_bytes()[index] as char;
                 if c.is_ascii_uppercase() {
@@ -26,6 +41,24 @@ pub fn colemak(value: &str) -> String {
 }
 
 pub fn encode(value: &str) -> String {
+    value
+        .chars()
+        .map(|c| match c {
+            ':' => 'P',
+            'O' => ':',
+            _ => COLEMAK.find(c.to_ascii_lowercase()).map_or(c, |i| {
+                let mapped = QWERTY.as_bytes()[i] as char;
+                if c.is_ascii_uppercase() {
+                    mapped.to_ascii_uppercase()
+                } else {
+                    mapped
+                }
+            }),
+        })
+        .collect()
+}
+
+pub(crate) fn legacy_encode(value: &str) -> String {
     value
         .chars()
         .map(|c| COLEMAK.find(c).map_or(c, |i| QWERTY.as_bytes()[i] as char))

@@ -11,6 +11,12 @@ const pins=JSON.parse(await readFile(new URL('eval/sources/zh-en-pins.json',root
 const adjudicationText=await readFile(new URL('eval/zh-en/adjudications.json',root),'utf8');
 const adjudications=JSON.parse(adjudicationText);
 const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
+// Preserve the pinned selection made before PT-006. Removing this historic
+// eligibility restriction is a separate corpus-selection change.
+function selectionEncoding(text) {
+  if(text.includes('O'))throw new Error('Frozen selection excludes uppercase O');
+  return encodeMixedInput(text);
+}
 const from=process.argv.find(a=>a.startsWith('--from-dir='))?.slice(11);
 const verify=process.argv.includes('--verify');
 if(process.argv.slice(2).some(a=>a!=='--verify'&&!a.startsWith('--from-dir=')))throw new Error('Use --verify and/or --from-dir=DIR');
@@ -51,7 +57,7 @@ try {
         segments.push({lang:'zh',text:part,reading:annotation.reading,evidence:annotation.evidence});
         length+=[...part].length*5;
       } else {
-        try{encodeMixedInput(part);}catch{issues.push({kind:'encoding',character:part,candidates:[],recommendation:'Unsupported Colemak raw encoding.'});}
+        try{selectionEncoding(part);}catch{issues.push({kind:'encoding',character:part,candidates:[],recommendation:'Unsupported Colemak raw encoding.'});}
         segments.push({lang:'en',text:part,...(!/[A-Za-z]/.test(part)?{kind:'literal'}:{})});length+=part.length+2;
       }
     }
@@ -71,7 +77,7 @@ try {
     const sourceSent=block.match(/^# sent_id = (.+)$/m)?.[1]?.replace(/\r$/,'');
     const tokens=block.split(/\r?\n/).filter(l=>/^\d+\t/.test(l)).length;
     if(tokens<4||tokens>25)continue;englishCounts.lengthEligible++;
-    try{if(!/^[\x20-\x7e]+$/.test(text)||text.length>400)throw new Error('Unsupported');encodeMixedInput(text);}catch{englishCounts.unsupportedDropped++;continue;}
+    try{if(!/^[\x20-\x7e]+$/.test(text)||text.length>400)throw new Error('Unsupported');selectionEncoding(text);}catch{englishCounts.unsupportedDropped++;continue;}
     if(english.length<200)english.push({id:`ewt-test-${String(english.length+1).padStart(3,'0')}`,sourceSent,tokens,text});
   }
   englishCounts.selected=english.length;

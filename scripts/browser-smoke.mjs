@@ -7,7 +7,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {feedbackCases,mixedCases} from '../eval/cases.mjs';
 import {captureA,captureB} from '../eval/island-cases.mjs';
-import {rankingId} from '../web/engine.mjs';
+import {rankingId,rawEncodingVersion} from '../web/engine.mjs';
 
 const profile = await mkdtemp(join(tmpdir(), 'polytype-browser-'));
 const chrome = spawn(process.env.CHROME_BIN || 'google-chrome', [
@@ -125,7 +125,12 @@ try {
     await typeRoman('conclusion');
     assert.equal(await evaluate("document.getElementById('preedit').textContent"), 'conclusion');
     await key(':', 'KeyP', undefined, 8);
+    assert.equal(await evaluate("document.getElementById('raw').value"), 'c;jcuidl;jP');
     assert.equal(await evaluate("document.getElementById('preedit').textContent"), 'conclusion:');
+    await key('Escape', 'Escape', 27);
+    await key('O', 'Semicolon', undefined, 8);
+    assert.equal(await evaluate("document.getElementById('raw').value"), ':');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"), 'O');
     await key('Escape', 'Escape', 27);
     for(const row of feedbackCases) {
       await evaluate(`document.getElementById('raw').value=${JSON.stringify(row.raw)}; document.getElementById('raw').dispatchEvent(new Event('input', {bubbles:true}))`);
@@ -278,6 +283,7 @@ try {
     await evaluate("document.getElementById('case-expected').value='My corrected output.'; document.getElementById('raw').value='different'; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true})); document.getElementById('case-form').requestSubmit()");
     const saved=await evaluate("JSON.parse(localStorage.getItem('polytype-test-cases-v1'))");
     assert.equal(saved.length,1);assert.equal(saved[0].raw,'kan.');assert.equal(saved[0].text,'My corrected output.');
+    assert.equal(saved[0].rawEncodingVersion,rawEncodingVersion);assert.equal(saved[0].ranking,rankingId);
     assert.deepEqual(saved[0].options,capturedOptions);assert.equal('committed' in saved[0],false);
     await evaluate("document.getElementById('case-form').requestSubmit()");
     assert.match(await evaluate("document.getElementById('case-status').textContent"),/already saved/);
@@ -355,6 +361,19 @@ try {
     assert.equal(await evaluate("localStorage.getItem('polytype-input-options-v1')"),persisted);
     await reloadReady();
     assert.equal((await readOptions()).japanese,false);
+    // Loading/exporting old saved captures must not rewrite their encoding.
+    const historical={raw:'a: b',text:'a: b',options:{layout:'colemak',english:true,japanese:false,zhuyin:false},ranking:'zh-punct-v1'};
+    const historicalJSON=JSON.stringify([historical]);
+    await evaluate(`localStorage.setItem('polytype-test-cases-v1',${JSON.stringify(historicalJSON)})`);
+    await reloadReady();
+    assert.equal(await evaluate("localStorage.getItem('polytype-test-cases-v1')"),historicalJSON);
+    const oldExport=await evaluate(`(async()=>{
+      let blob;const original=URL.createObjectURL;
+      URL.createObjectURL=value=>{blob=value;return original(value)};
+      try{document.getElementById('export-cases').click();return await blob.text()}
+      finally{URL.createObjectURL=original}
+    })()`);
+    assert.deepEqual(JSON.parse(oldExport),historical);
     // Access to the localStorage property itself can throw in restricted browsers.
     const blockedStorage=await send('Page.addScriptToEvaluateOnNewDocument',{source:"Object.defineProperty(window,'localStorage',{get(){throw new Error('denied')}})"});
     await reloadReady();

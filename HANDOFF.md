@@ -1,5 +1,37 @@
 # Polytype handoff
 
+## Physical Colemak uppercase O (PT-006)
+
+Expanded raw encoding version 2 preserves QWERTY physical positions: Shift+P
+is `P`, Shift+Semicolon is `:`. Colemak Roman mapping interprets them as colon
+and uppercase O; Roman token boundaries use that layout mapping. Raw `:` after
+converted Chinese still prefers full-width `：` as a standalone mark in both layouts;
+following Roman letters can form an uppercase-O word after a literal Space. CapsLock on
+Colemak's physical P punctuation key keeps its previous behavior. The prototype
+and historical diagnostics retain the old encoding; `current+no-physical-keys`
+reproduces the previous expanded behavior. Ranking suffix: `+physical-keys-v2`.
+
+New browser captures/debug reports include `rawEncodingVersion: 2`. Existing
+captures are not rewritten, and corpus imports preserve encoding/ranking fields.
+See [collection migration](eval/COLLECTION.md). Four frozen Roman-colon rows
+use explicit adapters in `eval/physical-keys.mjs`; snapshot JSON stays unchanged.
+The mixed fixture generators encode colon as `P` and provide historical buffers
+for prototype evaluation and timing. Source selection remains pinned: the
+importer explicitly retains uppercase-O exclusion despite the fixed encoder.
+Removing that exclusion would admit 86 additional EWT sentences.
+
+Focused regressions cover uppercase words/names, code, URLs, time colons and
+Chinese punctuation with native/WASM parity. The existing all-language URL
+ambiguity remains: `http:ㄥ` ranks above literal `http://` in either layout;
+English-only mode keeps the literal first. Browser physical-key and export
+metadata assertions are provided for coordinator validation.
+All six Bazel test targets pass (74 Node passes, three existing TODOs). Against
+main 845169a4, all 436 existing case outputs/scores in both profiles and all
+3,200 zh-en configuration outputs/scores remain unchanged after the explicit
+Roman-colon input migrations. The regenerated zh-en report is byte-identical.
+Five alternating WASM rounds over 6,321 prefixes measured median p95 ratio
+0.9791 against that main snapshot (budget 1.15).
+
 ## Chinese frequency scoring and 40k phrase cut (freq-v1)
 
 Expanded Chinese now scores dictionary edges by `2 * normalized key units +
@@ -540,8 +572,7 @@ The playground is not browser-native composition, and partial phonetics can comm
 With English enabled, a literal candidate is retained even for arbitrary input;
 without English, unsupported input may have no interpretation.
 
-Shift/CapsLock, firmware remapping and virtual keyboards need testing. Physical
-Semicolon with Shift still maps to colon rather than Colemak uppercase O.
+Firmware remapping, additional CapsLock combinations and virtual keyboards need testing.
 Native undo integration and OS-composed input handling remain incomplete.
 
 Custom entries are browser-local, with no import/export. Original browser-local

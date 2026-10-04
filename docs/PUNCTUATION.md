@@ -1,6 +1,6 @@
 # Contextual Chinese punctuation
 
-Expanded ranking `scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1+zh-punct-v1`
+Expanded ranking `scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1+zh-punct-v1+freq-v1+physical-keys-v2`
 uses the following subset of McBopomofo's standard-layout punctuation. Prototype
 engines and the frozen reference retain their previous behavior.
 
@@ -15,13 +15,20 @@ The upstream MIT notice is already retained in `data/sources/mcbopomofo/`.
 | Shift+Period | `>` | `。` | 247–252 (Standard) |
 | Shift+Slash | `?` | `？` | 203 (generic) |
 | Shift+1 | `!` | `！` | 193 (generic) |
-| Shift+Semicolon; Colemak Shift+P | `:` | `：` | 255 (Standard) |
+| Shift+Semicolon; Colemak Shift+P | `:`; Colemak `P` | `：` | 255 (Standard) |
 | Quote without Shift | `'` | `、` | 253 (Standard) |
 | Shift+Quote | `"` | `；` | 254 (Standard) |
 | Left bracket without Shift | `[` | `「` | 187 (generic) |
 | Right bracket without Shift | `]` | `」` | 188 (generic) |
 | Shift+Left bracket | `{` | `『` | 208–214 (generic) |
 | Shift+Right bracket | `}` | `』` | 215–221 (generic) |
+
+`:` is Roman uppercase O in Colemak encoding version 2, so it is not a Roman
+token boundary there. A standalone mark after converted Chinese retains the
+physical colon interpretation and full-width preference. Following Roman letters
+also permit an uppercase-O word after a literal-space boundary. Colemak Roman colon uses physical raw
+`P` and keeps the old colon segmentation and scores. See
+[capture migration](../eval/COLLECTION.md) for older raw buffers.
 
 Standard-specific entries override generic entries: in particular, generic
 `'` and `"` have different mappings. McBopomofo supplies multiple equal-score

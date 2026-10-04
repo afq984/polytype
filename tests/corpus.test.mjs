@@ -46,7 +46,7 @@ test('capture import preserves exact spaces/options without certifying or exposi
   await main(['init', root]);
   assert.equal((await stat(root)).mode & 0o777, 0o700);
   await writeFile(join(root, 'sources.json'), JSON.stringify([source]));
-  const capture = {raw:'private-fixture  ', text:'private-fixture  ', options:{layout:'colemak', english:true, japanese:true, zhuyin:true}, dictionary:{custom:0}};
+  const capture = {raw:'private-fixture  ', text:'private-fixture  ', rawEncodingVersion:2, ranking:'physical-keys-v2', options:{layout:'colemak', english:true, japanese:true, zhuyin:true}, dictionary:{custom:0}};
   const path = join(parent, 'export.jsonl'); await writeFile(path, JSON.stringify(capture));
   const result = await main(['import', root, path, 'authored']);
   assert.equal(result.imported, 1);
@@ -55,6 +55,7 @@ test('capture import preserves exact spaces/options without certifying or exposi
   const [row] = parseJSONL(await readFile(join(root, 'cases.jsonl'), 'utf8'));
   assert.equal(row.raw, capture.raw); assert.equal(row.text, capture.text);
   assert.deepEqual(row.options, capture.options);
+  assert.equal(row.rawEncodingVersion,2);assert.equal(row.ranking,capture.ranking);
   assert.equal(row.review.status, 'pending'); assert.equal(row.seenDuringDevelopment, true);
   assert.equal(row.split, 'unassigned'); assert.equal(row.customDictionary, 'none');
   await assert.rejects(main(['freeze', root, 'unreviewed']), /Not ready/);
@@ -70,6 +71,7 @@ test('blind capture imports are typed and eligible for reviewed held-out use', a
   assert.equal((await main(['import', root, path, 'authored'])).imported, 1);
   const [row] = parseJSONL(await readFile(join(root, 'cases.jsonl'), 'utf8'));
   assert.equal(row.blind, true); assert.equal(row.captureKind, 'typed'); assert.equal(row.seenDuringDevelopment, false);
+  assert.equal(row.rawEncodingVersion,undefined); // Old captures are never relabeled.
   assert.equal(row.raw, capture.raw); assert.equal(row.text, capture.text); assert.deepEqual(row.options, capture.options);
   assert.equal(row.split, 'unassigned'); assert.equal(row.review.status, 'pending');
   row.split = 'heldout'; row.sourceGroup = 'blind-session'; row.languages = ['en'];

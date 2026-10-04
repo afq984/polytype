@@ -67,7 +67,7 @@ test('examples and shifted physical keys respect the selected roman layout',()=>
    assert.equal(engine.decode(examples.at(-1).raw,{layout})[0].text,'資料庫 hello');
   }
   assert.equal(physicalKey({code:'KeyP',shiftKey:true},'qwerty'),'P');
-  assert.equal(physicalKey({code:'KeyP',shiftKey:true},'colemak'),':');
+  assert.equal(physicalKey({code:'KeyP',shiftKey:true},'colemak'),'P');
   assert.equal(physicalKey({code:'Semicolon',shiftKey:true},'qwerty'),':');
   assert.equal(physicalKey({code:'KeyP',getModifierState:()=>true},'qwerty'),'P');
  }finally{engine.dispose()}

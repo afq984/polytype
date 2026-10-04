@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {createEngine} from '../web/engine.mjs';
 import {mixedCases,kanaLevel,expandedTarget} from '../eval/cases.mjs';
 import {diversityCases} from '../eval/diversity-cases.mjs';
+import {currentRaw} from '../eval/physical-keys.mjs';
 
 const baseline=JSON.parse(readFileSync(new URL('../eval/diversity-baseline.json',import.meta.url)));
 test('frozen controls and existing correct candidates survive family retention',()=>{
@@ -15,7 +16,7 @@ test('frozen controls and existing correct candidates survive family retention',
   const engine=createEngine();
   try{
     for(const row of baseline.rows.filter(row=>row.group!=='diversity-ambiguous')){
-      const before=row.runs[0],after=engine.decode(row.raw,row.options),texts=after.map(c=>engine.commitCandidate(c)),readings=after.map(kanaLevel);
+      const before=row.runs[0],after=engine.decode(currentRaw(row),row.options),texts=after.map(c=>engine.commitCandidate(c)),readings=after.map(kanaLevel);
       // Kana-annotated targets accept an imported conversion of the same reading.
       const expected=expandedTarget({...row,text:row.expected});
       const accepted=[row.expected,...row.alternatives];

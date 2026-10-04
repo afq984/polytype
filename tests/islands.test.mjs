@@ -5,6 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {createEngine} from '../web/engine.mjs';
 import {captureA,captureB,islandCases} from '../eval/island-cases.mjs';
 import {kanaLevel,expandedTarget} from '../eval/cases.mjs';
+import {currentRaw} from '../eval/physical-keys.mjs';
 const baseline=JSON.parse(readFileSync(new URL('../eval/island-baseline.json',import.meta.url)));
 const normalize=v=>JSON.parse(JSON.stringify(v,(k,x)=>k==='score'?Math.round(x*1e9)/1e9:x));
 
@@ -22,7 +23,7 @@ test('English islands survive frequency ranking with unchanged tone boundaries',
     assert.ok(!e.decode(captureB,{layout:'colemak'}).some(c=>e.commitCandidate(c).includes('跟claude')),'first-tone experiment must not ship');
     assert.ok(e.commitCandidate(e.decode(captureB.replace('ep cuaigk','ep  cuaigk'),{layout:'colemak'})[0]).includes('跟 claude 討論'));
     for(const row of baseline.rows){
-      const candidates=e.decode(row.raw,row.options),texts=candidates.map(c=>e.commitCandidate(c)),readings=candidates.map(kanaLevel);
+      const candidates=e.decode(currentRaw(row),row.options),texts=candidates.map(c=>e.commitCandidate(c)),readings=candidates.map(kanaLevel);
       // Kana-annotated targets accept an imported conversion of the same reading.
       const accepted=[row.text,...(row.alternatives??[])];
       if(row.text&&row.candidates[0]?.text===row.text)assert.ok(texts[0]===expandedTarget(row)||readings[0]===expandedTarget(row),`${row.id}: ${texts[0]}`);
@@ -47,7 +48,7 @@ test('English islands survive frequency ranking with unchanged tone boundaries',
 });
 
 test('native and WASM match island cases and Chinese typing prefixes',()=>{
-  const rows=baseline.rows,requests=rows.map(r=>({version:1,op:'decode',input:r.raw,options:r.options}));
+  const rows=baseline.rows,requests=rows.map(r=>({version:1,op:'decode',input:currentRaw(r),options:r.options}));
   const p=spawnSync('target/debug/polytype-json',[],{input:requests.map(r=>JSON.stringify(r)).join('\n')+'\n',encoding:'utf8',maxBuffer:64e6});
   assert.equal(p.status,0,p.stderr);
   const results=p.stdout.trim().split('\n').map(s=>JSON.parse(s).ok),e=createEngine();

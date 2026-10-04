@@ -68,6 +68,7 @@ struct Policy {
     legacy_romaji: bool,
     chinese_punctuation: bool,
     frequency: bool,
+    physical_keys: bool,
 }
 
 impl Default for Policy {
@@ -81,6 +82,7 @@ impl Default for Policy {
             legacy_romaji: false,
             chinese_punctuation: true,
             frequency: true,
+            physical_keys: true,
         }
     }
 }
@@ -443,6 +445,7 @@ pub(crate) fn diagnose(
         legacy_romaji: !diversity,
         chinese_punctuation: diversity,
         frequency: diversity,
+        physical_keys: diversity,
         ..Policy::default()
     };
     let candidates = decode_configured(input, dictionary, options, width, 5, policy);
@@ -479,6 +482,7 @@ pub(crate) fn experiment(
             legacy_romaji: true,
             chinese_punctuation: false,
             frequency: false,
+            physical_keys: false,
             ..Policy::default()
         }
     };
@@ -488,6 +492,7 @@ pub(crate) fn experiment(
             "floor" => policy.floor = true,
             "punctuation" => policy.chinese_punctuation = true,
             "no-punctuation" => policy.chinese_punctuation = false,
+            "no-physical-keys" => policy.physical_keys = false,
             "discards" => policy.discards = true,
             "identifiers" => policy.identifiers = true,
             "first-tone" => policy.first_tone = true,
@@ -536,6 +541,18 @@ fn decode_lattice(
     let raw: Vec<u16> = input.encode_utf16().take(400).collect();
     let modern_romaji = dictionary.expanded && !policy.legacy_romaji;
     let mapped_punctuation = dictionary.expanded && policy.chinese_punctuation;
+    let physical_keys = dictionary.expanded && policy.physical_keys;
+    let roman = |value: &str| options.roman(value, physical_keys);
+    let roman_colon = physical_keys && matches!(options.layout, Layout::Colemak);
+    let is_punctuation = |unit| {
+        if roman_colon && unit == b':' as u16 {
+            false
+        } else if roman_colon && unit == b'P' as u16 {
+            true
+        } else {
+            punctuation(unit, dictionary.expanded)
+        }
+    };
     let mut beams = Lattice {
         states: vec![Vec::new(); raw.len() + 1],
         width,
@@ -566,7 +583,13 @@ fn decode_lattice(
                 state.candidate.lang = None;
             }
             let full = mapped_punctuation
-                .then(|| chinese_punctuation(raw[i]))
+                .then(|| {
+                    chinese_punctuation(if roman_colon && raw[i] == b'P' as u16 {
+                        b':' as u16
+                    } else {
+                        raw[i]
+                    })
+                })
                 .flatten();
             let chinese_context = full.is_some()
                 && state
@@ -579,16 +602,20 @@ fn decode_lattice(
             let possessive = raw[i] == b'\'' as u16
                 && raw
                     .get(i + 1)
-                    .is_some_and(|&c| options.roman(&segment(&[c], 0, 1)) == "s")
-                && (i + 2 == raw.len()
-                    || raw[i + 2] == b' ' as u16
-                    || punctuation(raw[i + 2], dictionary.expanded));
-            if punctuation(raw[i], dictionary.expanded)
+                    .is_some_and(|&c| roman(&segment(&[c], 0, 1)) == "s")
+                && (i + 2 == raw.len() || raw[i + 2] == b' ' as u16 || is_punctuation(raw[i + 2]));
+            if is_punctuation(raw[i])
                 || (mapped_punctuation
                     && "、「」『』".contains(char::from_u32(raw[i] as u32).unwrap_or_default()))
                 || (chinese_context && full.is_some() && !possessive)
             {
-                let text = segment(&raw, i, i + 1);
+                // Raw ':' still has the physical Zhuyin colon interpretation
+                // after Chinese; its literal punctuation alternative stays ':'.
+                let text = if roman_colon && raw[i] == b'P' as u16 {
+                    ":".into()
+                } else {
+                    segment(&raw, i, i + 1)
+                };
                 for (text, score, note) in
                     std::iter::once((text.clone(), 0.0, "Literal punctuation")).chain(full.map(
                         |full| {
@@ -615,7 +642,21 @@ fn decode_lattice(
                         None,
                     );
                 }
-                continue;
+                // A standalone physical colon after Chinese keeps its default.
+                // Following Roman letters may instead form an uppercase-O word
+                // after a literal-space language boundary (e.g. Chinese + OK).
+                let starts_roman_word = roman_colon
+                    && raw[i] == b':' as u16
+                    && raw.get(i + 1).is_some_and(|&unit| {
+                        !is_punctuation(unit)
+                            && (unit == b':' as u16
+                                || unit == b'\'' as u16
+                                || char::from_u32(unit as u32)
+                                    .is_some_and(|c| c.is_ascii_alphabetic()))
+                    });
+                if !starts_roman_word {
+                    continue;
+                }
             }
             if raw[i] == b' ' as u16 {
                 push(
@@ -768,14 +809,12 @@ fn decode_lattice(
                 }
             }
             let mut end = i;
-            while end < raw.len()
-                && raw[end] != b' ' as u16
-                && !punctuation(raw[end], dictionary.expanded)
-            {
+            while end < raw.len() && raw[end] != b' ' as u16 && !is_punctuation(raw[end]) {
                 end += 1;
             }
             let token = segment(&raw, i, end);
-            let roman = options.roman(&token).to_lowercase();
+            let roman_text = roman(&token);
+            let roman = roman_text.to_lowercase();
             let token_len = (end - i) as f64;
             // Period/comma/semicolon are also Zhuyin positions. Strip them
             // only inside Roman interpretations, never from the shared input.
@@ -799,11 +838,8 @@ fn decode_lattice(
                     0.0
                 }
             };
-            let has_case = dictionary.expanded
-                && options
-                    .roman(&token)
-                    .chars()
-                    .any(|c| c.is_ascii_uppercase());
+            let has_case =
+                dictionary.expanded && roman_text.chars().any(|c| c.is_ascii_uppercase());
             // Context crosses up to three Latin islands, but never a hard
             // punctuation boundary. No unconditional particle bonus in English.
             let japanese_context = dictionary.expanded
@@ -815,7 +851,7 @@ fn decode_lattice(
                     .filter(|p| p.lang != "space")
                     .take(4)
                     .any(|p| {
-                        let roman = options.roman(&p.raw).to_lowercase();
+                        let roman = options.roman(&p.raw, physical_keys).to_lowercase();
                         let word = roman.trim_end_matches(['.', ',', ';']);
                         p.lang == "JP"
                             && p.complete != Some(false)
@@ -844,7 +880,7 @@ fn decode_lattice(
                     &state,
                     Part {
                         raw: token.clone(),
-                        text: options.roman(&token),
+                        text: roman_text.clone(),
                         lang: "EN".into(),
                         note: "Attached English possessive".into(),
                         ..Part::default()
@@ -980,7 +1016,7 @@ fn decode_lattice(
                     &state,
                     Part {
                         raw: token.clone(),
-                        text: options.roman(&token),
+                        text: roman_text.clone(),
                         lang: "EN".into(),
                         note: format!(
                             "{} · {}",

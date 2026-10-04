@@ -84,6 +84,7 @@ One JSONL record describes one configuration of a text unit:
 | `split` | `unassigned`, `development`, `heldout`, `regression` or `challenge`. |
 | `domain`, `languages`, `features` | Describe intended text, not the engine's prediction. Languages use `zh`, `ja`, `en`; features can include first-tone-space, names, numbers, code, punctuation, script-choice and replacements. |
 | `raw`, `options` | Exact QWERTY-physical-position encoding (maximum 400 UTF-16 units), with explicit `layout`, `english`, `japanese`, `zhuyin`. Null while unresolved. |
+| `rawEncodingVersion`, `ranking` | Browser encoding/build identity, preserved on import. Version 2 includes physical Colemak uppercase O; absent version is historical or unverified. |
 | `text`, `acceptable` | Primary committed target and any separately reviewed acceptable alternatives. Match exact spaces, script, case and punctuation. |
 | `captureKind` | `typed`, `transcribed`, `derived` or `unknown`. Blind browser captures import as `typed`; normal snapshots remain `unknown`. These are final buffers, not edit-event logs. |
 | `customDictionary` | `none`, `required` or `unknown`; only `none` enters the initial benchmark. |
@@ -104,9 +105,23 @@ and QWERTY variants share the same intended output. `check` reports
 variant/language-toggle configuration. This is informational, never a freeze
 blocker. Use actual typing or a separately verified transcription. Never apply a Roman
 layout conversion to the whole mixed raw buffer: Zhuyin positions stay fixed.
-Derived variants must be labelled and reviewed. The current uppercase-O Colemak
-encoding limitation belongs in challenge coverage until it can be represented;
-do not silently change case or drop a character to make a test pass.
+Derived variants must be labelled and reviewed. Colemak uppercase O is now
+representable: physical Shift+Semicolon produces raw `:`, interpreted as Roman
+`O`; physical Shift+P produces raw `P`, interpreted as Roman `:`. Never change
+case or drop a character to make a test pass.
+
+Browser captures and debug reports carry `rawEncodingVersion: 2` and ranking
+suffix `+physical-keys-v2`. The corpus importer preserves both fields. Existing
+local storage and imported rows are not converted or relabeled; absent encoding
+metadata denotes historical or unverified input. Exporting a saved older row
+preserves its original metadata. Before current evaluation, review a separate
+copy of an older Colemak capture: change raw `:` to `P` only in Roman spans that
+encoded a colon. Keep physical Zhuyin colon positions unchanged, and verify the
+intended output and layout before marking that copy version 2. Old uppercase
+raw `P` represented a Roman semicolon; if that was intended, use physical raw
+`p` in the reviewed copy. Do not apply a global replacement to mixed input.
+The historical prototype profile still uses the old encoding; a version-2
+capture needs a separately reviewed historical transcription for that profile.
 
 Uncertain readings, disputed script choices, unsupported switching and examples
 with unknown keystrokes stay `unassigned` or `challenge`, with pending review.

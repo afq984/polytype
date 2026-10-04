@@ -1,4 +1,4 @@
-import{rankingId,decode,commitCandidate,examplesForLayout,physicalKey,setCustomEntries,dictionarySize}from'./engine.mjs';
+import{rankingId,rawEncodingVersion,decode,commitCandidate,examplesForLayout,physicalKey,setCustomEntries,dictionarySize}from'./engine.mjs';
 const $=id=>document.getElementById(id);let candidates=[],selected=0,committed='',timer=null;
 const blind=()=>$('blind-capture').checked;
 const options=()=>({layout:$('keyboard-layout').value,english:$('enable-english').checked,japanese:$('enable-japanese').checked,zhuyin:$('enable-zhuyin').checked});
@@ -61,7 +61,7 @@ $('copy-debug').onclick=async()=>{
   engine:'Rust/WASM',profile:'expanded',ranking:rankingId,
   options:options(),
   browser:navigator.userAgent,mode:location.protocol==='file:'?'standalone':'web',
-  raw:$('raw').value,rawEncoding:'QWERTY physical positions; roman interpretation uses options.layout',
+  raw:$('raw').value,rawEncodingVersion,rawEncoding:'QWERTY physical positions; roman interpretation uses options.layout',
   selection:{start:$('raw').selectionStart,end:$('raw').selectionEnd},
   selectedRank:visibleCandidates.length?selected+1:null,
   candidates:visibleCandidates.map((c,i)=>({rank:i+1,text:c.text,commitText:commitCandidate(c),score:c.score,lang:c.lang})),
@@ -94,7 +94,7 @@ $('blind-capture').onchange=()=>{
 };
 $('capture-case').onclick=()=>{
  stop();if(!$('raw').value)return;
- caseSnapshot={...(blind()?{blind:true}:{}),raw:$('raw').value,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),ranking:rankingId};
+ caseSnapshot={...(blind()?{blind:true}:{}),raw:$('raw').value,rawEncodingVersion,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),ranking:rankingId};
  $('case-expected-label').textContent=blind()?'Intended text · type with your OS IME':'Expected output · edit if the selected candidate is wrong';
  $('case-raw').value=caseSnapshot.raw;$('case-expected').value=!blind()&&candidates[selected]?commitCandidate(candidates[selected]):'';
  $('case-editor').hidden=false;$('case-editor').open=true;$('case-expected').focus();
@@ -104,7 +104,7 @@ $('case-form').addEventListener('submit',event=>{
  event.preventDefault();if(!caseSnapshot)return;
  const row={...caseSnapshot,text:$('case-expected').value,id:'local-'+Date.now()+'-'+savedCases.length,recordedAt:new Date().toISOString()};
  if(!validCase(row)||!row.text.length){$('case-status').textContent='Enter an expected output of 1–2000 characters.';return}
- if(savedCases.some(c=>c.raw===row.raw&&c.text===row.text&&JSON.stringify(c.options)===JSON.stringify(row.options)&&Boolean(c.blind)===Boolean(row.blind))){$('case-status').textContent='This case is already saved.';return}
+ if(savedCases.some(c=>c.raw===row.raw&&c.text===row.text&&(c.rawEncodingVersion??1)===row.rawEncodingVersion&&JSON.stringify(c.options)===JSON.stringify(row.options)&&Boolean(c.blind)===Boolean(row.blind))){$('case-status').textContent='This case is already saved.';return}
  if(savedCases.length>=100){$('case-status').textContent='The local case limit is 100. Export your cases before collecting more.';return}
  savedCases.push(row);updateCaseCount();
  try{if(!casesStorageHealthy)throw new Error('Storage unavailable');localStorage.setItem(casesKey,JSON.stringify(savedCases));$('case-status').textContent='Saved in this browser only. Export JSONL to share or evaluate it.'}

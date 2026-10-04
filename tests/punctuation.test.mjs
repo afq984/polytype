@@ -39,7 +39,7 @@ test('existing Roman punctuation preferences remain, with mapped alternatives',(
       [encode('hello '), 'hello ', {layout}],
       [encode('gakkou '), '学校 ', {layout}],
     ]){
-      const candidates=decode(prefix+key,options);
+      const candidates=decode(prefix+encode(key),options);
       // Mozc already prefers corner quotes here; preserve its table behavior.
       const mozcBracket=prefix&&['[',']'].includes(key);
       assert.equal(engine.commitCandidate(candidates[0]),stem+(mozcBracket?full:key),`${layout} ${prefix} ${key}`);
@@ -104,7 +104,7 @@ test('non-BMP literal text cannot alias a punctuation key through truncation',()
 test('physical keys already produce every mapped punctuation key in both layouts',()=>{
   const positions=[['Comma','<',true],['Period','>',true],['Slash','?',true],['Digit1','!',true],['Semicolon',':',true],['Quote',"'",false],['Quote','"',true],['BracketLeft','[',false],['BracketRight',']',false],['BracketLeft','{',true],['BracketRight','}',true]];
   for(const layout of ['qwerty','colemak'])for(const [code,key,shiftKey] of positions)assert.equal(physicalKey({code,shiftKey},layout),key);
-  assert.equal(physicalKey({code:'KeyP',shiftKey:true},'colemak'),':');
+  assert.equal(physicalKey({code:'KeyP',shiftKey:true},'colemak'),'P');
 });
 
 test('the policy ablation reproduces pre-punctuation behavior with current dictionaries',()=>{

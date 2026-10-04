@@ -245,7 +245,7 @@ export async function main(args) {
     const [path, sourceId] = rest;
     requireThat(rest.length === 2 && sources.some(source => source.id === sourceId), 'Import requires an existing source ID.');
     const captures = parseJSONL(await readFile(await externalPath(path), 'utf8'), 'capture');
-    const captureKey = row => JSON.stringify([row.raw, row.text, row.options.layout, row.options.english, row.options.japanese, row.options.zhuyin]);
+    const captureKey = row => JSON.stringify([row.raw, row.text, row.options.layout, row.options.english, row.options.japanese, row.options.zhuyin, row.rawEncodingVersion ?? 1]);
     const seen = new Map(rows.filter(row => row.options).map(row => [captureKey(row), row]));
     const added = [];
     for (const [index, capture] of captures.entries()) {
@@ -259,6 +259,8 @@ export async function main(args) {
       let number = rows.length + added.length + 1;
       while (rows.some(row => row.id === `capture-${number}`) || added.some(row => row.id === `capture-${number}`)) number++;
       const row = {...template, ...(capture.blind === true ? {blind:true, seenDuringDevelopment:false, captureKind:'typed'} : {}), id:`capture-${number}`, unitId:`capture-${number}`, sourceId, sourceGroup:'needs-grouping', raw:capture.raw, text:capture.text, options:capture.options,
+        ...(capture.rawEncodingVersion===undefined?{}:{rawEncodingVersion:capture.rawEncodingVersion}),
+        ...(capture.ranking===undefined?{}:{ranking:capture.ranking}),
         customDictionary:capture.dictionary?.custom === 0 ? 'none' : 'unknown',
         notes:'Imported browser snapshot; set languages/domain/features, group related texts, and confirm the exact target and input. Capture is a final buffer, not an edit-event log.'};
       added.push(row);seen.set(key, row);

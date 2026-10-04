@@ -2,12 +2,11 @@
 export function physicalKey(event, layout='colemak') {
  if(event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return null;
  const code=event.code || '';
- // Colemak moves semicolon to physical P.
- // Shift affects punctuation; CapsLock does not.
- if(layout==='colemak' && code==='KeyP') return event.shiftKey ? ':' : 'p';
  if(/^Key[A-Z]$/.test(code)) {
   const letter=code.slice(3).toLowerCase();
-  return Boolean(event.shiftKey)!==Boolean(event.getModifierState?.('CapsLock')) ? letter.toUpperCase() : letter;
+  // Colemak P is a punctuation key: preserve its existing CapsLock behavior.
+  const caps=layout==='colemak'&&code==='KeyP'?false:Boolean(event.getModifierState?.('CapsLock'));
+  return Boolean(event.shiftKey)!==caps ? letter.toUpperCase() : letter;
  }
  if(/^Digit[0-9]$/.test(code)) return event.shiftKey ? ')!@#$%^&*('[Number(code.slice(5))] : code.slice(5);
  const punctuation={Space:[' ',' '],Semicolon:[';',':'],Quote:["'",'"'],Comma:[',','<'],Period:['.','>'],Slash:['/','?'],Backslash:['\\','|'],BracketLeft:['[','{'],BracketRight:[']','}'],Minus:['-','_'],Equal:['=','+'],Backquote:['`','~']};

@@ -44,6 +44,9 @@ clearing them. Layout and language choices persist in this browser, including an
 all-languages-disabled selection. If storage is unavailable, changes still work
 for the session; invalid saved settings fall back to QWERTY with all languages on.
 No typed input is stored with these preferences. Copy debug report captures settings and candidates.
+Physical Shift+P is raw `P`; Shift+Semicolon is raw `:`. Colemak Roman text
+interprets these as `:` and `O`, respectively. After converted Chinese, raw `:`
+still offers the standard full-width `：` in either layout.
 
 For a useful regression, click **Save test case…**, review/edit the expected
 output, then **Save locally**. **Export cases (JSONL)** downloads the saved set for
@@ -53,6 +56,9 @@ before clearing browser data. Custom dictionary contents are not exported.
 For independent targets, enable **Blind capture · hide predictions** before typing;
 Enter finishes the buffer and opens a blank intended-text field for your OS IME.
 Blind exports retain `blind: true` for the external review workflow.
+New captures carry `rawEncodingVersion: 2` and ranking suffix `+physical-keys-v2`.
+Older saved captures remain unchanged; review their Colemak Roman colon spans
+before evaluating with this build. See [encoding migration](eval/COLLECTION.md).
 
 The current ranking build includes 101,191 SCOWL English spellings, context-gated
 Japanese particles, and case/small-kana cues. Import provenance and all upstream

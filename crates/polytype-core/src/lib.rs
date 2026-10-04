@@ -43,8 +43,9 @@ impl Default for DecodeOptions {
 }
 
 impl DecodeOptions {
-    fn roman(&self, raw: &str) -> String {
+    fn roman(&self, raw: &str, physical_keys: bool) -> String {
         match self.layout {
+            Layout::Colemak if !physical_keys => phonetic::legacy_colemak(raw),
             Layout::Colemak => colemak(raw),
             Layout::Qwerty => raw.to_owned(),
         }
@@ -148,8 +149,16 @@ impl Engine {
                     .unwrap_or_default();
                 json!(self.decode_with_options(input()?, &options))
             }
-            "colemak" => json!(colemak(input()?)),
-            "encode" => json!(encode(input()?)),
+            "colemak" => json!(if self.dictionary.expanded {
+                colemak(input()?)
+            } else {
+                phonetic::legacy_colemak(input()?)
+            }),
+            "encode" => json!(if self.dictionary.expanded {
+                encode(input()?)
+            } else {
+                phonetic::legacy_encode(input()?)
+            }),
             "zhuyin" => json!(zhuyin(input()?)),
             "readZhuyin" => json!(read_zhuyin(
                 input()?,

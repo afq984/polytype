@@ -10,10 +10,12 @@ import {islandCases} from '../eval/island-cases.mjs';
 if(!process.argv[2])throw new Error('Provide a baseline web/engine.mjs path');
 const baseline=await import(pathToFileURL(resolve(process.argv[2])).href);
 const engines={baseline:baseline.createEngine(),current:createEngine()};
-const inputs=[...cases,...diversityCases,...(process.argv[4]?islandCases:[])].flatMap(row=>Array.from({length:row.raw.length},(_,i)=>({raw:row.raw.slice(0,i+1),options:row.options})));
+// The four explicitly migrated Roman-colon fixtures keep a historical raw
+// buffer for comparisons with snapshots predating physical encoding version 2.
+const inputs=[...cases,...diversityCases,...(process.argv[4]?islandCases:[])].flatMap(row=>Array.from({length:row.raw.length},(_,i)=>({raw:row.raw.slice(0,i+1),baselineRaw:(baseline.rawEncodingVersion===2?row.raw:row.prototypeRaw??row.raw).slice(0,i+1),options:row.options})));
 const measure=name=>{
   const times=[];
-  for(const input of inputs){const start=performance.now();engines[name].decode(input.raw,input.options);times.push(performance.now()-start)}
+  for(const input of inputs){const start=performance.now();engines[name].decode(name==='baseline'?input.baselineRaw:input.raw,input.options);times.push(performance.now()-start)}
   times.sort((a,b)=>a-b);
   return {p50:times[Math.floor(times.length*.5)],p95:times[Math.floor(times.length*.95)]};
 };

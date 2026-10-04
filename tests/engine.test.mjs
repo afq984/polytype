@@ -30,7 +30,7 @@ test('Colemak OS events use physical positions; shortcuts pass through',()=>{
  for(const caps of [false,true]) {
   const event={code:'KeyP',getModifierState:()=>caps};
   assert.equal(colemak(physicalKey({...event,shiftKey:false})),';');
-  assert.equal(physicalKey({...event,shiftKey:true}),':');
+  assert.equal(physicalKey({...event,shiftKey:true}),'P');
   assert.equal(best(physicalKey({...event,shiftKey:true})),':');
  }
  for(const event of [{code:'KeyC',ctrlKey:true},{code:'KeyC',metaKey:true},{code:'KeyC',altKey:true},{code:'KeyC',isComposing:true},{code:'ArrowLeft'}])assert.equal(physicalKey(event),null);
