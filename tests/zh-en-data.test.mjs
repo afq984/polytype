@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {createEngine,colemak} from '../web/engine.mjs';
 import {zhEnCorpus,englishOnlyCorpus,zhEnCases,englishOnlyCases,zhEnSkipped,generateZhEnCases} from '../eval/zh-en-cases.mjs';
 import {summarizeZhEnCases,renderZhEnSummary} from '../scripts/zh-en-summary.mjs';
+import {validateAdjudications,applyAdjudications,conventionIssues} from '../scripts/zh-en-adjudication.mjs';
 import {parseCsv,maximalMatch,taiwanConverter,cedictDictionary,annotate,pinyinToZhuyin} from '../scripts/zh-en-annotation.mjs';
 const root=new URL('../',import.meta.url);
 
@@ -19,11 +20,12 @@ test('checked-in development data and notices match offline hashes',()=>{
     assert.equal(createHash('sha256').update(bytes).digest('hex'),file.sha256,file.path);
   }
   const review=JSON.parse(readFileSync(new URL('eval/zh-en/review.json',root)));
-  const pending=new Set(review.issues.map(i=>i.id));
+  const pending=new Set(review.issues.filter(i=>!i.adjudication).map(i=>i.id));
+  const reviewed=new Set(review.issues.map(i=>i.id));
   const ids=new Set();
   for(const entry of zhEnCorpus.cases) {
     assert.ok(!ids.has(entry.id));ids.add(entry.id);
-    assert.equal(entry.review,pending.has(entry.id)?'pending':'automatic',entry.id);
+    assert.equal(entry.review,pending.has(entry.id)?'pending':reviewed.has(entry.id)?'model-reviewed':'automatic',entry.id);
     assert.equal(entry.segments.map(s=>s.text).join(''),entry.text);
     for(const segment of entry.segments.filter(s=>s.lang==='zh')) {
       if(segment.reading)assert.equal(segment.reading.split(' ').length,[...segment.text].length,entry.id);
@@ -77,6 +79,79 @@ test('annotation uses maximal match, Taiwan evidence and independent readings',(
   assert.equal(annotate('字',map,accepted).issues[0].kind,'unmapped');
 });
 
+test('positional adjudications reproduce all reviewed annotations and reject stale or unknown decisions',()=>{
+  const data=JSON.parse(readFileSync(new URL('eval/zh-en/adjudications.json',root)));
+  const queue=JSON.parse(readFileSync(new URL('eval/zh-en/review.json',root))).issues;
+  const ids=new Set(zhEnCorpus.cases.map(c=>c.id));
+  validateAdjudications(data,ids);
+  let applied=0;
+  for(const entry of zhEnCorpus.cases) {
+    const issues=queue.filter(i=>i.id===entry.id).map(({id,adjudication,...issue})=>issue);
+    const segments=entry.segments.map(({provisionalText,provisionalReading,...s})=>({...s,
+      text:provisionalText??s.text,...(s.lang==='zh'?{reading:provisionalReading??s.reading}:{}),
+      ...(s.evidence?{evidence:s.evidence.map(({adjudicatedReading,provisionalText,...e})=>({...e,text:provisionalText??e.text}))}:{}),
+    }));
+    const provisional={id:entry.id,text:segments.map(s=>s.text).join(''),segments,review:issues.length?'pending':'automatic'};
+    const actual=applyAdjudications(provisional,issues,data);
+    assert.deepEqual(actual,applyAdjudications(provisional,issues,data),entry.id);
+    assert.deepEqual(actual.entry.segments,entry.segments,entry.id);
+    assert.equal(actual.entry.text,entry.text,entry.id);
+    assert.equal(actual.entry.review,entry.review,entry.id);
+    assert.deepEqual(actual.entry.reviewedBy,entry.reviewedBy,entry.id);
+    assert.equal(actual.issues.filter(i=>i.adjudication).length,issues.length,entry.id);
+    applied+=issues.length;
+    if(issues.length) {
+      const partial=structuredClone(data);partial.cases[entry.id]=partial.cases[entry.id].slice(1);
+      assert.equal(applyAdjudications(provisional,issues,partial).entry.review,'pending');
+      const stale=structuredClone(data);stale.cases[entry.id][0].character+='字';
+      assert.throws(()=>applyAdjudications(provisional,issues,stale),/Stale character/);
+    }
+  }
+  assert.equal(applied,Object.values(data.cases).flat().length);
+  const malformed=structuredClone(data);malformed.extra=true;
+  assert.throws(()=>validateAdjudications(malformed,ids),/Unknown adjudication key/);
+  const unknown=structuredClone(data);unknown.cases.unknown=[];
+  assert.throws(()=>validateAdjudications(unknown,ids),/Unknown case key/);
+  const first=Object.keys(data.cases)[0];
+  for(const key of ['unknown','confirmed']) {
+    const invalid=structuredClone(data);invalid.cases[first][0][key]=true;
+    assert.throws(()=>validateAdjudications(invalid,ids),/Unknown decision key/);
+  }
+  const duplicate=structuredClone(data);duplicate.cases[first].push(duplicate.cases[first][0]);
+  assert.throws(()=>validateAdjudications(duplicate,ids),/duplicate issue/);
+  const sample=zhEnCorpus.cases.find(c=>c.id===first);
+  const missing=structuredClone(data);missing.cases[first][0].issue=99999;
+  assert.throws(()=>applyAdjudications(sample,queue.filter(i=>i.id===first),missing),/Unknown flagged issue/);
+  for(const entry of zhEnCorpus.cases)for(const segment of entry.segments.filter(s=>s.lang==='zh')) {
+    for(const [index,character] of [...segment.text].entries())if(character==='一'||character==='不')assert.equal(segment.reading.split(' ')[index],character==='一'?'ㄧ':'ㄅㄨˋ',entry.id);
+  }
+});
+
+test('review enforces conversion positions, consistent overlapping readings and full-tone compound flags',()=>{
+  const entry={id:'case',text:'念個',segments:[{lang:'zh',text:'念個',reading:'ㄋㄧㄢˋ ㄍㄜ˙',evidence:[{text:'念',offset:0},{text:'個',offset:1}]}]};
+  const issues=[{kind:'conversion-alternatives',stage:0,offset:0,character:'念',candidates:['念','唸']},...conventionIssues(entry.segments,[])];
+  const conversion={issue:0,kind:'conversion-alternatives',stage:0,offset:0,character:'念',conversion:'唸',reason:'Study',confidence:'high'};
+  const reading={issue:1,kind:'lexical-neutral-tone',segment:0,offset:1,character:'個',reading:'ㄍㄜˋ',reason:'Full citation',confidence:'high'};
+  const data={cases:{case:[conversion,reading]}};
+  assert.equal(applyAdjudications(entry,issues,data).entry.text,'唸個');
+  assert.equal(applyAdjudications(entry,issues,data).entry.segments[0].reading,'ㄋㄧㄢˋ ㄍㄜˋ');
+  assert.equal(entry.text,'念個');
+  assert.throws(()=>applyAdjudications(entry,issues,{cases:{case:[{...conversion,conversion:'唸書'}]}}),/Invalid conversion decision/);
+  assert.throws(()=>applyAdjudications(entry,issues,{cases:{case:[{...reading,reading:'bad'}]}}),/Invalid reading decision/);
+  assert.throws(()=>applyAdjudications(entry,issues,{cases:{case:[{...reading,reading:'ㄍㄜˋ ㄍㄜˋ'}]}}),/Reading length mismatch/);
+  const duplicateIssue={...issues[1],kind:'dictionary-disagreement'};
+  assert.throws(()=>applyAdjudications(entry,[...issues,duplicateIssue],{cases:{case:[reading,{...reading,issue:2,kind:duplicateIssue.kind,reading:'ㄍㄜ'}]}}),/Conflicting readings/);
+  const inputs={'opencc-STPhrases.txt':'','opencc-STCharacters.txt':'念\t念 唸\n','opencc-TWPhrasesIT.txt':'','opencc-TWPhrasesName.txt':'','opencc-TWPhrasesOther.txt':'','opencc-TWVariants.txt':''};
+  const doubts=taiwanConverter(inputs)('I念念').doubts;
+  assert.deepEqual(doubts.map(i=>i.offset),[1,2]);
+  const collapsed=taiwanConverter({...inputs,'opencc-STCharacters.txt':'吃\t喫 吃\n','opencc-TWVariants.txt':'喫\t吃\n'})('吃').doubts[0];
+  assert.deepEqual(collapsed.candidates,['喫','吃']);
+  assert.deepEqual(collapsed.outputCandidates,['吃','吃']);
+  const meal={id:'meal',text:'吃',segments:[{lang:'zh',text:'吃',reading:'ㄔ',evidence:[{text:'吃',offset:0}]}]};
+  const choice={...conversion,character:'吃',conversion:'吃'};
+  assert.equal(applyAdjudications(meal,[collapsed],{cases:{meal:[choice]}}).entry.text,'吃');
+});
+
 test('every generated development case decodes without error with native/WASM parity',()=>{
   const cases=[...zhEnCases,...englishOnlyCases];
   const native=fileURLToPath(new URL('../target/debug/polytype-json',import.meta.url));
@@ -103,8 +178,8 @@ test('every generated development case decodes without error with native/WASM pa
   assert.equal(summary.cases,3200);assert.equal(summary.sourceCases,550);
   assert.equal(renderZhEnSummary(summary,{skippedUnmapped:zhEnSkipped.length}),readFileSync(new URL('eval/zh-en/REPORT.md',root),'utf8'));
   for(const strata of Object.values(summary.groups)) {
-    assert.equal(strata.all.cases,strata['review-pending'].cases+strata.automatic.cases);
-    for(const metric of ['top1','top5','spaceNormalizedTop1','spaceNormalizedTop5','englishMatches','englishTokens','hanEdits','hanCharacters','wrongLanguageCases','singleLanguageCases'])assert.equal(strata.all[metric],strata['review-pending'][metric]+strata.automatic[metric]);
+    assert.equal(strata.all.cases,strata['review-pending'].cases+strata['model-reviewed'].cases+strata.automatic.cases);
+    for(const metric of ['top1','top5','spaceNormalizedTop1','spaceNormalizedTop5','englishMatches','englishTokens','hanEdits','hanCharacters','wrongLanguageCases','singleLanguageCases'])assert.equal(strata.all[metric],strata['review-pending'][metric]+strata['model-reviewed'][metric]+strata.automatic[metric]);
   }
 });
 
@@ -113,14 +188,17 @@ test('summary separates review strata and uses boundary-only normalization',()=>
   const entries=[
     {id:'pending',group:'mixed',review:'pending',text:'剛 call one two'},
     {id:'automatic',group:'mixed',review:'automatic',text:'剛 call'},
+    {id:'reviewed',group:'mixed',review:'model-reviewed',text:'人 call'},
     {id:'english',group:'en-only',text:'hello world'},
   ];
-  const outputs={pending:['剛call one  two','剛 call one two'],automatic:['剛call'],english:['hello 中']};
+  const outputs={pending:['剛call one  two','剛 call one two'],automatic:['剛call'],reviewed:['人 call'],english:['hello 中']};
   const summary=summarizeZhEnCases(entries,entry=>outputs[entry.id]);
   const mixed=summary.groups.mixed;
-  assert.equal(mixed.all.cases,2);assert.equal(mixed.all.top1,0);assert.equal(mixed.all.top5,1);
-  assert.equal(mixed.all.spaceNormalizedTop1,1);assert.equal(mixed.all.spaceNormalizedTop5,2);
+  assert.equal(mixed.all.cases,3);assert.equal(mixed.all.top1,1);assert.equal(mixed.all.top5,2);
+  assert.equal(mixed.all.spaceNormalizedTop1,2);assert.equal(mixed.all.spaceNormalizedTop5,3);
   assert.equal(mixed['review-pending'].spaceNormalizedTop1,0);assert.equal(mixed['review-pending'].spaceNormalizedTop5,1);
+  assert.equal(mixed['model-reviewed'].cases,1);assert.equal(mixed['model-reviewed'].top1,1);
+  assert.throws(()=>summarizeZhEnCases([{group:'x',review:'confirmed',text:'x'}],()=>['x']),/Unknown review status/);
   assert.equal(mixed.automatic.spaceNormalizedTop1,1);assert.equal(mixed.all.englishExact,1);
   assert.equal(mixed.all.hanCER,0);assert.equal(mixed.all.wrongLanguage,null);
   const english=summary.groups['en-only'];

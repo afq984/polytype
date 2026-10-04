@@ -291,7 +291,8 @@ The pinned May 28, 2026 MDBG export is fetched from an immutable
 This mirror is used to make the export reproducible rather than fetching MDBG's
 moving latest release. The importer uses longest word matches, retains source
 line evidence and all candidate pinyin readings, prefers explicit `Taiwan pr.`
-readings, and converts numbered citation pinyin to Zhuyin without tone sandhi.
+readings, and converts numbered citation pinyin to Zhuyin without tone sandhi. 一 is always ㄧ and 不 always
+ㄅㄨˋ, including 不是; third-tone sandhi is never written.
 Ambiguous candidates receive a deterministic provisional reading, preferring a
 Taiwan entry and then a non-name entry, never choosing from McBopomofo.
 
@@ -299,13 +300,39 @@ Every selected syllable is compared with the expanded/prototype single-character
 readings accepted by the evaluated engine. Disagreements, single-character
 polyphones without word-level evidence, word ambiguity, conversion alternatives,
 erhua/unsupported readings and unmapped characters enter `eval/zh-en/review.json`.
-Affected entries stay `review: "pending"`; `review: "automatic"` means no detected
+Unresolved entries stay `review: "pending"`; all flagged items resolved by the model
+become `review: "model-reviewed"`, with reviewer/date provenance, never
+`confirmed`. `review: "automatic"` means no detected
 issue, **not** human-approved gold. These auto-annotations cannot guarantee Taiwan
 citation pronunciation or conversational intent. The stream's full human-readable
 queue is in the out-of-tree stream report `data-review.md`, which is not part of
 the public corpus. Unmapped entries remain in the corpus and are listed
 by the generator's `zhEnSkipped`; they do not silently receive dictionary readings.
 The manifest records the evaluated dictionary hashes used for this comparison.
+
+`eval/zh-en/adjudications.json` contains explicit decisions keyed by source case
+and local issue index, guarded by the issue type, character, segment/offset or
+conversion stage/offset. Import rejects stale positions, unknown fields/cases,
+duplicate indices, inconsistent overlapping readings and unsupported conversions.
+Provisional CC-CEDICT evidence is retained alongside adjudicated readings. Each
+resolved queue item retains its decision, reason and high/low confidence; a
+low-confidence choice still counts as model-reviewed, not user-confirmed.
+Original source selection, transcripts, keyboard contracts and runtime dictionaries
+are unchanged. The retained conversion queue uses Unicode-character offsets.
+
+The amended annotation convention uses Taiwan particles and conventional suffixes
+with neutral tones (的、了、嗎、呢、吧、啊、們、麼、得、著、子; also discourse
+嘛、呀 and the MOE acknowledgment particle 嗯). Lexical words use full citation
+tones: 起來 ㄑㄧˇ ㄌㄞˊ, 時候 ㄕˊ ㄏㄡˋ, 學生 ㄒㄩㄝˊ ㄕㄥ, 還是 ㄏㄞˊ ㄕˋ,
+東西 ㄉㄨㄥ ㄒㄧ, 不是 ㄅㄨˋ ㄕˋ, 個 ㄍㄜˋ. A corpus-only neutral-word detector
+adds positional `lexical-neutral-tone` flags where original coverage checks missed
+light compound syllables (那個/這個/一個、爸爸、關係); the replacements still come
+from explicit review data, not the evaluated dictionary. The initial 749 issues
+and these additional 103 flags are adjudicated; 290 utterances are model-reviewed
+and 60 remain automatic. This does not constitute an exhaustive review of every
+unflagged syllable or conversion. User spot-checks of uncertain discourse fillers
+and disfluent fragments remain useful.
+
 
 ASCEND English is mostly lowercase, with capitalized names, `I`, acronyms and
 spelled-out letters (e.g. `G P A`); 44 selected mixed utterances contain capitals.
@@ -336,7 +363,7 @@ These 3,200 configurations are not added to `eval/cases.mjs` or tracked
 `eval/report.json`. Instead, `//:baseline_zh_en` uses the shared milestone metrics
 in `scripts/evaluation-metrics.mjs` and writes the deterministic aggregate-only
 [Chinese/English summary](zh-en/REPORT.md). Each group is split into all,
-review-pending and automatic; EWT guards have no reading queue and appear under
+review-pending, model-reviewed and automatic; EWT guards have no reading queue and appear under
 automatic. No detected annotation issue does not mean human-approved gold.
 The summary includes exact/space-normalized top-1 and top-5, pooled English exact,
 Han CER and wrong-language counts with denominators, and omits timings and case

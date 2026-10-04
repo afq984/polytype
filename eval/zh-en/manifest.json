@@ -3,8 +3,8 @@
   "files": [
     {
       "path": "eval/zh-en/ascend.json",
-      "sha256": "4c51964b754b7aaaafc774e36586b310e03333c990403220d7701d7ce9981da7",
-      "bytes": 623985
+      "sha256": "59adbc45e18b954182f12c535aa860b496f9dc4e361d17a607fdcbda14612ebb",
+      "bytes": 701307
     },
     {
       "path": "eval/zh-en/english-only.json",
@@ -13,8 +13,8 @@
     },
     {
       "path": "eval/zh-en/review.json",
-      "sha256": "7d8c1754b8609e529f45c5922e3117c1e7a96b76f8bf545122a6e77a0f00d5cb",
-      "bytes": 216404
+      "sha256": "1a2888a7c5adab718f59922c4835dc9541615de886d0d345e432de1734fdff6a",
+      "bytes": 429781
     },
     {
       "path": "eval/sources/ASCEND-README.md",
@@ -40,6 +40,11 @@
       "path": "eval/sources/CC-CEDICT-NOTICE.txt",
       "sha256": "c813a638296826bf786cf47f6644e2513b0fc3bfdbe8c7c6321438e17cf0591b",
       "bytes": 777
+    },
+    {
+      "path": "eval/zh-en/adjudications.json",
+      "sha256": "37926992a845d7e64be95216fedb503efc44de74317099d7f1af31dcdb34f2bb",
+      "bytes": 260924
     }
   ]
 }

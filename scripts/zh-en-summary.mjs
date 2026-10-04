@@ -1,14 +1,15 @@
 // Aggregate-only development diagnostics, using the shared milestone definitions.
 import {caseMetrics,summarizeMilestone} from './evaluation-metrics.mjs';
-export const reviewStrata=['all','review-pending','automatic'];
+export const reviewStrata=['all','review-pending','model-reviewed','automatic'];
 export function summarizeZhEnCases(cases,outputsFor) {
   const groups=new Map();
   for(const entry of cases) {
     const outputs=outputsFor(entry).slice(0,5);
     const row={rank:outputs.indexOf(entry.text)+1,...caseMetrics(entry.text,outputs)};
-    if(!groups.has(entry.group))groups.set(entry.group,{all:[],'review-pending':[],automatic:[]});
+    if(![undefined,'pending','model-reviewed','automatic'].includes(entry.review))throw new Error(`Unknown review status: ${entry.review}`);
+    if(!groups.has(entry.group))groups.set(entry.group,{all:[],'review-pending':[],'model-reviewed':[],automatic:[]});
     const group=groups.get(entry.group);
-    group.all.push(row);group[entry.review==='pending'?'review-pending':'automatic'].push(row);
+    group.all.push(row);group[entry.review==='pending'?'review-pending':entry.review??'automatic'].push(row);
   }
   const summarize=rows=>({cases:rows.length,top1:rows.filter(row=>row.rank===1).length,top5:rows.filter(row=>row.rank>0).length,...summarizeMilestone(rows)});
   return {profile:'expanded',cases:cases.length,sourceCases:new Set(cases.map(entry=>entry.sourceId??entry.id)).size,
@@ -19,7 +20,7 @@ export function renderZhEnSummary(summary,{skippedUnmapped=0}={}) {
   const lines=['# Chinese and English development summary','',
     `Expanded profile; ${summary.cases} configurations from ${summary.sourceCases} selected source utterances/sentences. Unmapped source utterances omitted: ${skippedUnmapped}.`,
     'Regenerate with `bazelisk run //:baseline_zh_en`. Aggregates only; no timings or per-case outputs. These configurations reuse source text and are not independent observations.','',
-    'ASCEND/CC-CEDICT targets remain provisional: review-pending needs adjudication; automatic means no issue detected, not human-approved gold. English EWT guards have no reading queue and appear under automatic. The all stratum includes both. See [selection, attribution and limitations](../README.md#chinese--english-development-data).','',
+    'ASCEND/CC-CEDICT targets remain development evidence: review-pending has unresolved issues; model-reviewed means every flagged issue was adjudicated by a model, not confirmed by the user; automatic means no issue detected, not human-approved gold. English EWT guards have no reading queue and appear under automatic. The all stratum includes every status. See [selection, attribution and limitations](../README.md#chinese--english-development-data).','',
     'Metrics use `scripts/evaluation-metrics.mjs`: exact committed text; space normalization only at Han/Latin or Han/digit boundaries; ordered exact English-token recall; Han-only edit distance; wrong-script intrusion only for single-language targets. Rates pool denominators; n/a means no eligible units. Both top-five measures inspect at most five candidates.','',
     '| Group | Stratum | Cases | Exact top 1 / top 5 | Space-normalized top 1 / top 5 | English exact | Han CER | Wrong language |',
     '| --- | --- | --- | --- | --- | --- | --- | --- |'];

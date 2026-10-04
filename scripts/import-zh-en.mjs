@@ -4,9 +4,12 @@ import {readFile,writeFile,mkdir,mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {parseCsv,taiwanConverter,cedictDictionary,annotate} from './zh-en-annotation.mjs';
+import {validateAdjudications,applyAdjudications,conventionIssues} from './zh-en-adjudication.mjs';
 import {encodeMixedInput} from '../eval/cases.mjs';
 const root=new URL('../',import.meta.url);
 const pins=JSON.parse(await readFile(new URL('eval/sources/zh-en-pins.json',root),'utf8'));
+const adjudicationText=await readFile(new URL('eval/zh-en/adjudications.json',root),'utf8');
+const adjudications=JSON.parse(adjudicationText);
 const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
 const from=process.argv.find(a=>a.startsWith('--from-dir='))?.slice(11);
 const verify=process.argv.includes('--verify');
@@ -54,10 +57,13 @@ try {
     }
     if(issues.some(x=>x.kind==='encoding')){counts.unsupportedDropped++;continue;}
     if(length>400){counts.lengthDropped++;continue;}
-    const entry={id,sourceRow:index+1,sourceFile:row.file_name,kind,original,text:converted.text,segments,review:issues.length?'pending':'automatic'};
-    (hasLatin?mixed:zhOnly).push(entry);
-    review.push(...issues.map(issue=>({id,...issue})));
+    issues.push(...conventionIssues(segments,issues));
+    const provisional={id,sourceRow:index+1,sourceFile:row.file_name,kind,original,text:converted.text,segments,review:issues.length?'pending':'automatic'};
+    const adjudicated=applyAdjudications(provisional,issues,adjudications);
+    (hasLatin?mixed:zhOnly).push(adjudicated.entry);
+    review.push(...adjudicated.issues.map(issue=>({id,...issue})));
   }
+  validateAdjudications(adjudications,new Set([...mixed,...zhOnly].map(entry=>entry.id)));
   const englishCounts={total:0,lengthEligible:0,unsupportedDropped:0,selected:0};const english=[];
   for(const block of inputs['ewt-en_ewt-ud-test.conllu'].trim().split(/\r?\n\r?\n/)) {
     englishCounts.total++;
@@ -70,16 +76,16 @@ try {
   }
   englishCounts.selected=english.length;
   const output={
-    'eval/zh-en/ascend.json':JSON.stringify({source:'CAiRE/ASCEND',revision:pins.revisions.ascend,split:'test',license:'CC BY-SA 4.0',selection:'First 300 representable mixed and first 50 Han-only utterances in test CSV order; markup excluded before selection; no decoder output used.',counts:{...counts,mixedSelected:mixed.length,zhOnlySelected:zhOnly.length,pending:[...mixed,...zhOnly].filter(e=>e.review==='pending').length},comparison:{source:'data/chinese.tsv + prototype single-character entries',sha256:comparisonSha256,prototypeSha256:sha256(prototype)},cases:[...mixed,...zhOnly]})+'\n',
+    'eval/zh-en/ascend.json':JSON.stringify({source:'CAiRE/ASCEND',revision:pins.revisions.ascend,split:'test',license:'CC BY-SA 4.0',selection:'First 300 representable mixed and first 50 Han-only utterances in test CSV order; markup excluded before selection; no decoder output used.',counts:{...counts,mixedSelected:mixed.length,zhOnlySelected:zhOnly.length,pending:[...mixed,...zhOnly].filter(e=>e.review==='pending').length,modelReviewed:[...mixed,...zhOnly].filter(e=>e.review==='model-reviewed').length,automatic:[...mixed,...zhOnly].filter(e=>e.review==='automatic').length},adjudications:{sha256:sha256(adjudicationText),reviewer:adjudications.reviewer,date:adjudications.date,conventions:adjudications.conventions},comparison:{source:'data/chinese.tsv + prototype single-character entries',sha256:comparisonSha256,prototypeSha256:sha256(prototype)},cases:[...mixed,...zhOnly]})+'\n',
     'eval/zh-en/english-only.json':JSON.stringify({source:'UniversalDependencies/UD_English-EWT',revision:pins.revisions.ewt,split:'test',license:'CC BY-SA 4.0',selection:'First 200 test sentences in file order with 4–25 integer-ID tokens, printable ASCII text, <=400 raw units, and exact Colemak round trip. Eligibility/drop counts cover entire test split.',counts:englishCounts,cases:english},null,2)+'\n',
-    'eval/zh-en/review.json':JSON.stringify({status:'pending',issues:review})+'\n',
+    'eval/zh-en/review.json':JSON.stringify({status:review.every(issue=>issue.adjudication)?'model-reviewed':'pending',issues:review})+'\n',
     'eval/sources/ASCEND-README.md':inputs['ascend-README.md'],
     'eval/sources/UD_English-EWT-README.md':inputs['ewt-README.md'],
     'eval/sources/UD_English-EWT-LICENSE.txt':inputs['ewt-LICENSE.txt'],
     'eval/sources/OpenCC-LICENSE.txt':inputs['opencc-LICENSE'],
     'eval/sources/CC-CEDICT-NOTICE.txt':inputs['cedict_ts.u8'].split(/\r?\n/).filter(l=>l.startsWith('#')).join('\n')+'\n',
   };
-  output['eval/zh-en/manifest.json']=JSON.stringify({version:1,files:Object.entries(output).map(([path,text])=>({path,sha256:sha256(text),bytes:Buffer.byteLength(text)}))},null,2)+'\n';
+  output['eval/zh-en/manifest.json']=JSON.stringify({version:1,files:Object.entries({...output,'eval/zh-en/adjudications.json':adjudicationText}).map(([path,text])=>({path,sha256:sha256(text),bytes:Buffer.byteLength(text)}))},null,2)+'\n';
   for(const [name,text] of Object.entries(output)) {
     if(Buffer.byteLength(text)>=1_000_000)throw new Error(`Split generated file before committing: ${name}`);
     if(verify){if(await readFile(new URL(name,root),'utf8')!==text)throw new Error(`Reproduction mismatch: ${name}`);}

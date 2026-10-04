@@ -36,11 +36,21 @@ export function taiwanConverter(inputs) {
   const stages=[first,regional,dictionary(inputs['opencc-TWVariants.txt'])].map(maximalMatch);
   return text=>{
     const doubts=[];
-    for(const [stage,match] of stages.entries())text=match(text).map(span=>{
-      if(span.value?.length>1)doubts.push({kind:'conversion-alternatives',stage,character:span.text,candidates:span.value,recommendation:'Review context; provisional OpenCC first alternative.'});
-      if(span.value&&[...span.value[0]].length!==span.length)doubts.push({kind:'conversion-length',stage,character:span.text,candidates:span.value,recommendation:'Review Taiwan phrase substitution against original.'});
-      return span.value?.[0]??span.text;
-    }).join('');
+    for(const [stage,match] of stages.entries()) {
+      let offset=0;
+      text=match(text).map(span=>{
+        if(span.value?.length>1)doubts.push({kind:'conversion-alternatives',stage,offset,character:span.text,candidates:span.value,recommendation:'Review context; provisional OpenCC first alternative.'});
+        if(span.value&&[...span.value[0]].length!==span.length)doubts.push({kind:'conversion-length',stage,offset,character:span.text,candidates:span.value,recommendation:'Review Taiwan phrase substitution against original.'});
+        offset+=span.length;
+        return span.value?.[0]??span.text;
+      }).join('');
+    }
+    // Later stages can collapse alternatives (ST 喫/吃 both become Taiwan 吃).
+    // Keep source alternatives and their final forms for positional review.
+    for(const doubt of doubts)doubt.outputCandidates=doubt.candidates.map(value=>{
+      for(const match of stages.slice(doubt.stage+1))value=match(value).map(span=>span.value?.[0]??span.text).join('');
+      return value;
+    });
     return {text,doubts};
   };
 }
