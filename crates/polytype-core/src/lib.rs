@@ -5,7 +5,7 @@ mod japanese;
 mod phonetic;
 mod search;
 
-pub use correction::Constraint;
+pub use correction::{Alternative, AlternativePage, Constraint, Segment, SegmentView, Span};
 pub use dictionary::Entry;
 use dictionary::{
     Dictionary, LEXICON, english_size, expanded_size, japanese_size, validate_entries,
@@ -90,6 +90,34 @@ impl Engine {
         correction::decode(raw, constraints, &self.dictionary, options)
     }
 
+    pub fn segments(
+        &self,
+        raw: &str,
+        options: &DecodeOptions,
+        constraints: &[Constraint],
+        candidate_index: usize,
+    ) -> Result<SegmentView, String> {
+        correction::segments(raw, options, constraints, candidate_index, &self.dictionary)
+    }
+
+    pub fn alternatives(
+        &self,
+        raw: &str,
+        options: &DecodeOptions,
+        constraints: &[Constraint],
+        candidate_index: usize,
+        span: Span,
+    ) -> Result<AlternativePage, String> {
+        correction::alternatives(
+            raw,
+            options,
+            constraints,
+            candidate_index,
+            span,
+            &self.dictionary,
+        )
+    }
+
     /// Bounded native-only search experiment; not part of the browser protocol.
     #[cfg(feature = "diagnostics")]
     pub fn diagnose(
@@ -151,14 +179,44 @@ impl Engine {
                 .ok_or_else(|| "Expected string input".to_owned())
         };
         let result = match value["op"].as_str().ok_or("Expected operation")? {
-            "decode" => {
+            "decode" | "segments" | "alternatives" => {
                 let options = value
                     .get("options")
                     .map(|v| serde_json::from_value::<DecodeOptions>(v.clone()))
                     .transpose()
                     .map_err(|e| e.to_string())?
                     .unwrap_or_default();
-                json!(self.decode_with_options(input()?, &options))
+                let constraints = value
+                    .get("constraints")
+                    .map(|v| serde_json::from_value::<Vec<Constraint>>(v.clone()))
+                    .transpose()
+                    .map_err(|e| e.to_string())?
+                    .unwrap_or_default();
+                let index = || -> Result<usize, String> {
+                    value
+                        .get("candidateIndex")
+                        .map(|v| serde_json::from_value(v.clone()).map_err(|e| e.to_string()))
+                        .unwrap_or(Ok(0))
+                };
+                match value["op"].as_str().unwrap() {
+                    "decode" => json!(self.decode_constrained(input()?, &options, &constraints)?),
+                    "segments" => {
+                        json!(self.segments(input()?, &options, &constraints, index()?)?)
+                    }
+                    _ => {
+                        let span: Span = serde_json::from_value(
+                            json!({"start":value["start"],"end":value["end"]}),
+                        )
+                        .map_err(|e| e.to_string())?;
+                        json!(self.alternatives(
+                            input()?,
+                            &options,
+                            &constraints,
+                            index()?,
+                            span
+                        )?)
+                    }
+                }
             }
             "colemak" => json!(if self.dictionary.expanded {
                 colemak(input()?)

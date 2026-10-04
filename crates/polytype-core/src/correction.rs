@@ -7,7 +7,7 @@ use crate::{
     search,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -516,4 +516,363 @@ pub(crate) fn decode(
     Ok(search::decode_constrained(
         input, dictionary, options, &plan,
     ))
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct Span {
+    pub start: usize,
+    pub end: usize,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Segment {
+    pub start: usize,
+    pub end: usize,
+    pub raw: String,
+    pub text: Option<String>,
+    pub lang: String,
+    pub part_index: usize,
+    pub locked: bool,
+    pub splits: Vec<Span>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SegmentView {
+    pub input_length: usize,
+    pub candidate: Option<Candidate>,
+    pub segments: Vec<Segment>,
+    pub units: Vec<Segment>,
+    /// Exactly the ranges reachable by the correction UI, including merges.
+    pub spans: Vec<Span>,
+}
+
+pub(crate) fn segments(
+    input: &str,
+    options: &DecodeOptions,
+    constraints: &[Constraint],
+    candidate_index: usize,
+    dictionary: &Dictionary,
+) -> Result<SegmentView, String> {
+    if !dictionary.expanded {
+        return Err("Segment correction is unavailable for the prototype profile".into());
+    }
+    let raw = units(input)?;
+    let candidates = decode(input, constraints, dictionary, options)?;
+    let candidate = if candidates.is_empty() && candidate_index == 0 {
+        None
+    } else {
+        Some(
+            candidates
+                .get(candidate_index)
+                .ok_or("Candidate index is out of range")?
+                .clone(),
+        )
+    };
+    let mut segments = Vec::new();
+    let mut leaves = Vec::new();
+    let mut spans = Vec::new();
+    if let Some(candidate) = &candidate {
+        let mut start = 0;
+        let mut index = 0;
+        while index < candidate.parts.len() {
+            let first = &candidate.parts[index];
+            let lock = constraints.iter().find(|c| c.start == start);
+            let end = lock.map_or(start + utf16_len(&first.raw), |c| c.end);
+            let mut text = String::new();
+            let mut at = start;
+            let owner = index;
+            while index < candidate.parts.len() && at < end {
+                let part = &candidate.parts[index];
+                text.push_str(&part.text);
+                at += utf16_len(&part.raw);
+                index += 1;
+            }
+            if at != end {
+                return Err("Candidate parts do not align with correction spans".into());
+            }
+            let paired = end == start + 1
+                && search::punctuation_pair(raw[start], options.layout)
+                    .is_some_and(|(ascii, full)| text == ascii || text == full);
+            let lang = if paired {
+                "punct".into()
+            } else {
+                lock.map_or_else(|| first.lang.clone(), |c| c.lang.clone())
+            };
+            let unpaired_punctuation = !paired && text.chars().all(|c| c.is_ascii_punctuation());
+            let editable = lang != "space" && (lang != "punct" || paired) && !unpaired_punctuation;
+            let split = if lang == "TW" && lock.is_none() {
+                syllables(&raw, start, end)
+                    .unwrap_or_default()
+                    .into_iter()
+                    .scan(start, |at, (end, _)| {
+                        let span = Span { start: *at, end };
+                        *at = end;
+                        Some(span)
+                    })
+                    .collect::<Vec<_>>()
+            } else {
+                Vec::new()
+            };
+            let segment = Segment {
+                start,
+                end,
+                raw: range(&raw, start, end)?,
+                text: Some(text),
+                lang,
+                part_index: owner,
+                locked: lock.is_some(),
+                splits: split.clone(),
+            };
+            if editable {
+                spans.push(Span { start, end });
+                if split.len() > 1 {
+                    for span in split {
+                        spans.push(span);
+                        leaves.push(Segment {
+                            start: span.start,
+                            end: span.end,
+                            raw: range(&raw, span.start, span.end)?,
+                            text: None,
+                            splits: Vec::new(),
+                            ..segment.clone()
+                        });
+                    }
+                } else {
+                    leaves.push(segment.clone());
+                }
+            }
+            segments.push(segment);
+            start = end;
+        }
+        if start != raw.len() {
+            return Err("Candidate does not cover the complete raw buffer".into());
+        }
+    }
+    for (index, unit) in leaves.iter().enumerate() {
+        if unit.lang != "TW" || unit.locked {
+            continue;
+        }
+        let mut end = unit.end;
+        for next in leaves.iter().skip(index + 1).take(11) {
+            if next.start != end || next.lang != "TW" || next.locked {
+                break;
+            }
+            end = next.end;
+            spans.push(Span {
+                start: unit.start,
+                end,
+            });
+        }
+    }
+    let mut seen = HashSet::new();
+    spans.retain(|span| seen.insert(*span));
+    Ok(SegmentView {
+        input_length: raw.len(),
+        candidate,
+        segments,
+        units: leaves,
+        spans,
+    })
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Alternative {
+    pub text: String,
+    pub commit_text: String,
+    pub lang: String,
+    pub kind: String,
+    pub parts: Vec<Part>,
+    pub score: f64,
+    pub constraint: Constraint,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AlternativePage {
+    pub start: usize,
+    pub end: usize,
+    pub raw: String,
+    pub items: Vec<Alternative>,
+    pub actions: Vec<Alternative>,
+    pub truncated: bool,
+    pub search_bounded: bool,
+}
+
+fn chinese_paths(raw: &[u16], span: Span, dictionary: &Dictionary) -> Vec<Path> {
+    let Ok(syllables) = syllables(raw, span.start, span.end) else {
+        return Vec::new();
+    };
+    let mut states = vec![Vec::new(); syllables.len() + 1];
+    states[0].push(Path {
+        parts: Vec::new(),
+        score: 0.0,
+    });
+    let mut result = Vec::new();
+    for index in 0..syllables.len() {
+        let edges = chinese_edges(raw, span.start, &syllables, index, dictionary);
+        for path in states[index].clone() {
+            for (next, part, score) in &edges {
+                let mut parts = path.parts.clone();
+                parts.push(part.clone());
+                let next_path = Path {
+                    parts,
+                    score: path.score + score,
+                };
+                if *next == syllables.len() {
+                    result.push(next_path);
+                } else {
+                    let beam = &mut states[*next];
+                    beam.push(next_path);
+                    beam.sort_by(|a, b| b.score.total_cmp(&a.score));
+                    let mut seen = HashSet::new();
+                    beam.retain(|path| seen.insert(path.text()));
+                    beam.truncate(12);
+                }
+            }
+        }
+    }
+    result
+}
+
+fn alternative(path: Path, span: Span, lang: &str, kind: &str) -> Alternative {
+    let commit_text = path.text();
+    Alternative {
+        text: path.parts.iter().map(|p| p.text.as_str()).collect(),
+        commit_text: commit_text.clone(),
+        lang: lang.into(),
+        kind: kind.into(),
+        parts: path.parts,
+        score: path.score,
+        constraint: Constraint {
+            start: span.start,
+            end: span.end,
+            text: commit_text,
+            lang: lang.into(),
+        },
+    }
+}
+
+pub(crate) fn alternatives(
+    input: &str,
+    options: &DecodeOptions,
+    constraints: &[Constraint],
+    candidate_index: usize,
+    span: Span,
+    dictionary: &Dictionary,
+) -> Result<AlternativePage, String> {
+    let view = segments(input, options, constraints, candidate_index, dictionary)?;
+    if !view.spans.contains(&span) {
+        return Err("Span is not an editable segment or Chinese syllable selection".into());
+    }
+    let raw = units(input)?;
+    let text = range(&raw, span.start, span.end)?;
+    if view
+        .units
+        .iter()
+        .any(|unit| unit.start == span.start && unit.end == span.end && unit.lang == "punct")
+    {
+        let (ascii, full) = search::punctuation_pair(raw[span.start], options.layout).unwrap();
+        let candidate = view.candidate.as_ref().unwrap();
+        let mut end = 0;
+        let previous = candidate
+            .parts
+            .iter()
+            .take_while(|part| {
+                end += utf16_len(&part.raw);
+                end <= span.start
+            })
+            .filter(|part| part.lang != "space" && part.lang != "punct")
+            .last();
+        let chinese_context =
+            previous.is_some_and(|part| search::converted_chinese(part, dictionary));
+        let mut items = Vec::new();
+        for choice in [full, ascii] {
+            let constraint = Constraint {
+                start: span.start,
+                end: span.end,
+                text: choice.into(),
+                lang: "punct".into(),
+            };
+            let mut path = punctuation_path(&raw, &constraint, options)?;
+            path.score = search::punctuation_score(choice == full, chinese_context);
+            items.push(alternative(path, span, "punct", "punctuation"));
+        }
+        items.sort_by(|a, b| b.score.total_cmp(&a.score));
+        return Ok(AlternativePage {
+            start: span.start,
+            end: span.end,
+            raw: text,
+            items,
+            actions: Vec::new(),
+            truncated: false,
+            search_bounded: false,
+        });
+    }
+    let mut items = Vec::new();
+    let mut actions = Vec::new();
+    if options.zhuyin {
+        items.extend(
+            chinese_paths(&raw, span, dictionary)
+                .into_iter()
+                .map(|path| alternative(path, span, "TW", "conversion")),
+        );
+    }
+    if options.japanese {
+        for path in japanese_paths(&raw, span.start, span.end, dictionary, options) {
+            let note = &path.parts[0].note;
+            let kind = if note.contains("→ Hiragana") {
+                "hiragana"
+            } else if note.contains("→ Katakana") {
+                "katakana"
+            } else {
+                "conversion"
+            };
+            let item = alternative(path, span, "JP", kind);
+            if kind == "conversion" {
+                items.push(item);
+            } else {
+                actions.push(item);
+            }
+        }
+    }
+    if options.english
+        && let Some(path) = english_path(&raw, span.start, span.end, dictionary, options)
+    {
+        actions.push(alternative(path, span, "EN", "english"));
+    }
+    if options.english || options.japanese || options.zhuyin {
+        actions.push(alternative(
+            Path {
+                parts: vec![Part {
+                    raw: text.clone(),
+                    text: text.clone(),
+                    lang: "RAW".into(),
+                    note: "Explicit raw-key choice".into(),
+                    ..Part::default()
+                }],
+                score: 0.0,
+            },
+            span,
+            "RAW",
+            "raw",
+        ));
+    }
+    items.sort_by(|a, b| b.score.total_cmp(&a.score));
+    let mut seen = HashSet::new();
+    items.retain(|item| seen.insert((item.commit_text.clone(), item.lang.clone())));
+    let truncated = items.len() > 9;
+    items.truncate(9);
+    Ok(AlternativePage {
+        start: span.start,
+        end: span.end,
+        raw: text,
+        items,
+        actions,
+        truncated,
+        search_bounded: true,
+    })
 }
