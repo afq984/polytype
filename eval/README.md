@@ -221,6 +221,35 @@ The regression module is synthetic development evidence, not broad English
 coverage or held-out performance. Use `--extra-cases=CASES_MODULE` with
 `bazelisk run //:evaluate_local` to evaluate it independently.
 
+The replacement rule `+roman-dotted-numbers-v1` preserves a whole decimal or
+dotted version after EN/JP and a literal Space, while leaving digit-only Chinese
+homographs second. All 220 guards now match literally at top one (52 gains,
+zero losses against main); all 24 ambiguity configurations stay rank two with
+one local correction. Well-formed dotted tokens also take precedence over clean
+Chinese `5.3` and custom Chinese entries; explicit locks and Chinese menu choices
+remain available. See [numeric rules](../docs/NUMBERS.md) for the grammar,
+Policy flag, ablation and scope. No frozen input/output target is rewritten.
+
+All 5,624 existing paired target gates and candidate text arrays hold; 123
+numeric score arrays change. The usual 4,124 GSD/control prefix outputs are
+unchanged. A broader sweep retains all 185,027 existing prefix outputs and
+revision counts. New guards/ambiguities add 4,016 prefixes: 192 top outputs
+change to the literal numeric reading, with zero added and 150 removed
+revisions (530 → 380). These counts include repeated contracts/modes and
+measure development typing behavior, not independent sentence accuracy.
+
+Five alternating built-WASM rounds over 6,337 prefixes give median p95 ratio
+**1.1037** against main (10.4% slower, within the 15% budget). Initialization
+and rendering are excluded. All seven Bazel targets pass, including Chrome
+hosted/standalone physical-key decimal typing and commit. No portable latency
+or broad corpus-coverage claim follows from this development measurement.
+
+```sh
+bazelisk run //:numbers_diagnostics -- MAIN_RUNTIME/web/engine.mjs OUT_DIR
+bazelisk run //:benchmark -- MAIN_RUNTIME/web/engine.mjs OUT_DIR/latency.json OUT_DIR/main-results.json
+bazelisk test //... //:browser_test --test_env=CHROME_BIN=CHROME
+```
+
 ## What this measures
 
 japanese-words.json contains the first 100 long-unit words tagged NOUN, PROPN,

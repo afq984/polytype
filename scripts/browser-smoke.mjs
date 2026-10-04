@@ -1,5 +1,5 @@
 // Optional browser check using Chrome's debugging protocol; no npm dependencies.
-// CHROME_BIN=/path/to/chrome node scripts/browser-smoke.mjs
+// CHROME_BIN=CHROME node scripts/browser-smoke.mjs
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {mkdtemp} from 'node:fs/promises';
@@ -184,6 +184,22 @@ try {
       else for(const letter of 'call')await key(letter,'Key'+letter.toUpperCase());
       assert.equal(await evaluate("document.getElementById('preedit').textContent"),spaces===1?'剛call':'剛 call',layout);
       assert.equal(await evaluate("document.getElementById('raw').value"),'e;'+' '.repeat(spaces)+(layout==='qwerty'?'call':'cauu'));
+    }
+    // Dotted Roman numbers stay literal; digit-only Chinese is a local choice.
+    for(const layout of ['qwerty','colemak']){
+      await evaluate(`document.getElementById('keyboard-layout').value=${JSON.stringify(layout)};document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('clear').click();document.getElementById('raw').focus()`);
+      const type=async text=>{
+        if(layout==='colemak')return typeRoman(text);
+        for(const letter of text)await key(letter,letter===' '?'Space':'Key'+letter.toUpperCase());
+      };
+      await type('release ');
+      await key('1','Digit1');await key('.','Period');await key('0','Digit0');await key('3','Digit3');
+      assert.equal(await evaluate("document.getElementById('preedit').textContent"),'release 1.03');
+      await key('Enter','Enter',13);
+      assert.ok(await evaluate("document.getElementById('committed').textContent.endsWith('release 1.03')"));
+      await evaluate("document.getElementById('clear').click();document.getElementById('raw').focus()");
+      await type('page ');await key('5','Digit5');await key('3','Digit3');
+      assert.equal(await evaluate("document.getElementById('preedit').textContent"),'page 53');
     }
     // Numeric spans use the same physical first-tone switch and exact Spaces.
     for(const layout of ['qwerty','colemak'])for(const spaces of [1,2]){

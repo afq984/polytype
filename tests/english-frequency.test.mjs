@@ -50,7 +50,7 @@ test('English frequency import pins ranks, vocabulary, morphology and bundled li
 });
 
 test('frequency evidence preserves uppercase-O words, homographs and constrained English scores',()=>{
-  assert.ok(rankingId.endsWith('+en-freq-v1'));
+  assert.ok(rankingId.includes('+en-freq-v1'));
   const engine=createEngine(),requests=[],expected=[];
   const decode=(input,options,constraints)=>{
     const candidates=constraints?engine.decodeConstrained(input,constraints,options):engine.decode(input,options);

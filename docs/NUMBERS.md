@@ -1,5 +1,34 @@
 # Numbers at Chinese boundaries
 
+## Dotted numbers after Roman context
+
+`+roman-dotted-numbers-v1` preserves a well-formed decimal or dotted version
+after a literal Space following EN/JP. Components are nonempty ASCII digit
+runs separated by periods, with an optional leading sign, trailing percent,
+and terminal `. , ; ! ? ) ] }` punctuation. Thus `version 1.03` stays literal
+instead of converting replaced ㄡ/ㄢ keys into 版. The token receives the
+existing numeric score (2.5 per digit); an automatic Chinese edge from that
+Roman boundary is excluded. This also handles clean `5.3` and high-scoring
+custom words. Explicit Chinese locks still win and the local menu retains
+Chinese choices. English must be enabled.
+
+`Policy.roman_dotted_numbers` controls this rule alongside `Policy.numbers`;
+`current+no-roman-dotted-numbers` reproduces main `a341ff71` traces. Historical
+ablations and the prototype keep their preceding behavior. Token analysis is
+shared with numbers-v2 and cached once per reachable offset. No scoring/data
+change is made to integers, times, Chinese-only typing, or malformed dotted
+forms. Letter-prefixed versions such as `v1.03` are outside this pure-digit
+dotted grammar. Clean Chinese boundaries retain the existing precedence below.
+
+The broader `roman-numbers-v1` experiment was rejected: digit-only homographs
+such as `53` must remain numbers after English. PC 版, soccer 吧 and HK 啊 C
+remain rank-two Chinese alternatives recoverable with one local correction.
+The [Roman-number development guards](../eval/README.md#roman-context-number-guards-phase-2b)
+make that ambiguity and the rejected-build regressions visible. These are
+synthetic development probes, not held-out coverage.
+
+## Existing Chinese-boundary behavior
+
 Expanded ranking appends `+numbers-v2`. `Policy.numbers` controls the behavior;
 `--experiment=current+no-numbers` reproduces the preceding main engine with the
 same dictionary. `Policy.numeric_prefix` protects unfinished Chinese;

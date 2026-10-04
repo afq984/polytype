@@ -1,5 +1,35 @@
 # Polytype handoff
 
+## Roman dotted numbers (Phase 2b)
+
+The broad `roman-numbers-v1` experiment was rejected and abandoned: ordinary
+English integers with clean digit-key Zhuyin readings turned Chinese. New
+public synthetic guards cover integers, decimals, versions, model numbers in
+English/Chinese, times and terminal punctuation. Main `a341ff71` has 168/220
+top one and 212/220 top five; the rejected build has 76/220 and 204/220, losing
+92 previously correct targets. PC 版, soccer 吧 and HK 啊 C deliberately remain
+rank-two ambiguities with one local correction; 心/新 and 只/指 keep their order.
+
+`+roman-dotted-numbers-v1` recognizes complete pure-digit dotted tokens after
+EN/JP and a literal Space, preserves their numeric spelling and excludes the
+automatic Chinese edge from that boundary. All 220 guards pass (52 top-one
+gains, zero losses). Explicit Chinese choices still win, including custom
+entries; remembered English prefixes and native/WASM agree. Integers and
+Chinese-only replacement behavior retain their prior paths. The flag
+`current+no-roman-dotted-numbers` restores main full traces on 6,035 inputs.
+The 5,624 existing paired target gates hold; see
+[numeric rules](docs/NUMBERS.md) and
+[development guards](eval/README.md#roman-context-number-guards-phase-2b).
+This is measured synthetic development evidence for the local prototype.
+All 185,027 existing prefix outputs/revision counts hold. New guard prefixes
+have 192 changed outputs and 150 fewer revisions, with none added. All seven
+Bazel targets pass, including Chrome hosted/standalone physical-key decimal
+typing and numeric commit. No data/dictionary or frozen target is changed.
+Five alternating WASM rounds over 6,337 prefixes give median p95 ratio 1.1037
+against main: a measured 10.4% increase within the 15% budget, excluding
+initialization/rendering. The accepted rule therefore has a measured latency
+cost despite retaining existing completed-input and prefix accuracy.
+
 ## English rank evidence (en-freq-v1)
 
 Expanded English now uses a pinned, MIT-licensed ECDICT rank join onto the
@@ -465,7 +495,7 @@ have been removed. CI now invokes Bazel; nothing was pushed or deployed.
 
 Use `bazelisk test //...`, `bazelisk run //:serve`, and
 `bazelisk build //:standalone`. Normal actions write only Bazel outputs. Browser checks start
-their own server: `bazelisk test //:browser_test --test_env=CHROME_BIN=/path/to/chrome`.
+their own server: `bazelisk test //:browser_test --test_env=CHROME_BIN=CHROME`.
 Default evaluation reports under bazel-bin/evaluation omit timing measurements
 for reproducibility. `bazelisk run //:measure_evaluation` prints fresh timings.
 Historical checked-in reports retain their original measurement data.

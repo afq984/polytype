@@ -75,6 +75,7 @@ struct Policy {
     physical_keys: bool,
     numbers: bool,
     numeric_prefix: bool,
+    roman_dotted_numbers: bool,
     english_frequency: bool,
     english_offset: f64,
     english_weight: f64,
@@ -97,6 +98,7 @@ impl Default for Policy {
             physical_keys: true,
             numbers: true,
             numeric_prefix: true,
+            roman_dotted_numbers: true,
             english_frequency: true,
             english_offset: 1.8,
             english_weight: 0.05,
@@ -538,6 +540,18 @@ fn number_token_score(text: &str) -> f64 {
         .sum()
 }
 
+// Decimal and dotted-version components must be nonempty digit runs. Keep
+// digit-only Zhuyin homographs and malformed dotted input on their old paths.
+fn dotted_number_shape(text: &str) -> bool {
+    let text = text.trim_end_matches(['.', ',', ';', '!', '?', ')', ']', '}']);
+    let text = text.strip_prefix(['+', '-']).unwrap_or(text);
+    let text = text.strip_suffix('%').unwrap_or(text);
+    text.contains('.')
+        && text
+            .split('.')
+            .all(|component| !component.is_empty() && component.bytes().all(|c| c.is_ascii_digit()))
+}
+
 struct BoundaryEvidence {
     tone_switch: bool,
     switch_cost: f64,
@@ -912,6 +926,7 @@ pub(crate) fn diagnose(
         physical_keys: diversity,
         tone_switch: diversity,
         numbers: diversity,
+        roman_dotted_numbers: diversity,
         english_frequency: diversity,
         ..Policy::default()
     };
@@ -954,6 +969,7 @@ pub(crate) fn experiment(
             physical_keys: false,
             tone_switch: false,
             numbers: false,
+            roman_dotted_numbers: false,
             english_frequency: false,
             ..Policy::default()
         }
@@ -977,6 +993,7 @@ pub(crate) fn experiment(
             "numbers" => policy.numbers = true,
             "no-numbers" => policy.numbers = false,
             "no-numeric-prefix" => policy.numeric_prefix = false,
+            "no-roman-dotted-numbers" => policy.roman_dotted_numbers = false,
             "no-english-frequency" => policy.english_frequency = false,
             "en-freq-16-005" => {
                 policy.english_offset = 1.6;
@@ -1101,12 +1118,21 @@ fn decode_lattice_planned(
         }
         // Token analysis depends on keys/dictionary, not candidate history.
         // Compute it once per offset, then reuse it across the bounded beam.
-        let number = if dictionary.expanded && policy.numbers && options.english {
+        let numeric_token = if dictionary.expanded && policy.numbers && options.english {
             let end = raw[i..]
                 .iter()
                 .position(|&unit| unit == b' ' as u16)
                 .map_or(raw.len(), |length| i + length);
             let text = roman(&segment(&raw, i, end));
+            Some((end, text))
+        } else {
+            None
+        };
+        let roman_dotted_number = numeric_token
+            .as_ref()
+            .filter(|(_, text)| policy.roman_dotted_numbers && dotted_number_shape(text))
+            .map(|(end, text)| (*end, text.clone(), number_token_score(text), false));
+        let number = if let Some((end, text)) = numeric_token {
             let phonetic_end = if raw.get(end) == Some(&(b' ' as u16)) {
                 end + 1
             } else {
@@ -1209,7 +1235,25 @@ fn decode_lattice_planned(
             } else {
                 0.0
             };
-            let number_boundary = tone_switch
+            let previous_language = state
+                .parts
+                .iter()
+                .rev()
+                .find(|p| p.lang != "space" && p.lang != "punct")
+                .map(|p| p.lang.as_str());
+            // A literal separator after EN/JP licenses the whole dotted token.
+            // In particular, 1.03 must not gain Chinese evidence by replacing
+            // the final slot. Digit-only homographs retain their numeric edge.
+            let roman_dotted_boundary = roman_dotted_number.is_some()
+                && state.parts.last().is_some_and(|p| p.lang == "space")
+                && matches!(previous_language, Some("EN" | "JP"));
+            let number = if roman_dotted_boundary {
+                &roman_dotted_number
+            } else {
+                &number
+            };
+            let number_boundary = roman_dotted_boundary
+                || tone_switch
                 || state.parts.is_empty()
                 || (state.parts.last().is_some_and(|p| p.lang == "space")
                     && state
@@ -1250,7 +1294,7 @@ fn decode_lattice_planned(
                 continue;
             }
 
-            if let Some((end, text, score, pending)) = &number
+            if let Some((end, text, score, pending)) = number
                 && number_boundary
                 && (state.lang.is_none() || state.lang.as_deref() == Some("EN"))
             {
@@ -1264,6 +1308,8 @@ fn decode_lattice_planned(
                         lang: "EN".into(),
                         note: if *pending {
                             "Numeric / identifier alternative while waiting for a Chinese tone"
+                        } else if roman_dotted_boundary {
+                            "Roman-context decimal / dotted-version evidence"
                         } else {
                             "Numeric / identifier evidence without a clean Chinese reading"
                         }
@@ -1377,7 +1423,13 @@ fn decode_lattice_planned(
                     None,
                 );
             }
-            if options.zhuyin && (state.lang.is_none() || state.lang.as_deref() == Some("TW")) {
+            // Do not silently reinterpret a recognized Roman dotted number as
+            // Chinese, even with high-scoring custom words. Explicit Chinese
+            // locks were handled above; Chinese-only menus retain that choice.
+            if options.zhuyin
+                && !roman_dotted_boundary
+                && (state.lang.is_none() || state.lang.as_deref() == Some("TW"))
+            {
                 let mut at = i;
                 let mut keys = Vec::new();
                 let mut length = 0;
@@ -1557,12 +1609,6 @@ fn decode_lattice_planned(
             };
             let suffix = &roman[spelling.len()..];
             let spelling_len = utf16_len(spelling) as f64;
-            let previous_language = state
-                .parts
-                .iter()
-                .rev()
-                .find(|p| p.lang != "space" && p.lang != "punct")
-                .map(|p| p.lang.as_str());
             let transition = |lang: &str| {
                 if dictionary.expanded && previous_language == Some(lang) {
                     0.75
