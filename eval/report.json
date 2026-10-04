@@ -4,7 +4,7 @@
   "mixedTextNotes": "User-supplied input, one sentence per case. Targets are provisional developer annotations, not user-confirmed gold. Convert Japanese romaji to hiragana, preserve spaces/punctuation and Latin technical terms/names (including Tanaka / tanaka). No kanji conversion or grammatical respelling is required.",
   "japaneseWordNotes": "The first 100 long-unit words (LUWBILabel=B) tagged NOUN, PROPN, VERB, ADJ or ADV in the test file, taken in sentence order (32 sentences), whose surface form equals the long-unit lemma, whose UniDic lemma reading is katakana, and whose lemma contains kanji or katakana. Pure-hiragana lemmas need no conversion and are skipped. Duplicate reading/lemma pairs are skipped. Selection is mechanical and was fixed before evaluating the imported dictionary; this is a word-conversion diagnostic, not sentence conversion or a representative accuracy estimate.",
   "notes": "Exact output matching, including variants and spaces. Reading-level matching additionally accepts imported Japanese conversions whose kana reading equals the target span, so kana-annotated targets are not counted as errors when a kanji conversion is offered instead. Readings are supplied, not inferred by the tested dictionary. Corpus overlap with upstream frequency training is unknown. CER includes insertions and can exceed 100%. Timing is omitted for reproducibility; use bazelisk run //:measure_evaluation for host-dependent latency measurements.",
-  "corpusSha256": "3d6c1f7d1955fe9828b0b216bca15648d0b9be69f5cff606d34b8e82a0c62767",
+  "corpusSha256": "ad35566c00fa778f52f962250b23d2b1496b043378a6bfa4cd68ce129527384f",
   "profiles": {
     "prototype": {
       "dictionary": {
@@ -9922,10 +9922,10 @@
           "reachable": null,
           "candidates": [
             "for (int i = 0; i < 100; i++)",
+            "for (int i = 0; i < 100; i++）",
             "for (int i = 0; i ， 100; i++)",
-            "for (int i = 0; い < 100; i++)",
-            "for (int い = 0; i < 100; i++)",
-            "for (int i = 0; い ， 100; i++)"
+            "for （int i = 0; i < 100; i++)",
+            "for (int i = 0; i ， 100; i++）"
           ]
         },
         {
@@ -10023,9 +10023,9 @@
           "reachable": null,
           "candidates": [
             "I think 注音's priority is too high  (this is also a good test sentence)",
-            "I think 著因's priority is too high  (this is also a good test sentence)",
-            "I think 注音's priority is too high  (this is also あ good test sentence)",
-            "I think 助因's priority is too high  (this is also a good test sentence)",
+            "I think 注音's priority is too high  (this is also a good test sentence）",
+            "I think 注音's priority is too high  （this is also a good test sentence)",
+            "I think 注音's priority is too high  （this is also a good test sentence）",
             "I think 5n4l; 's priority is too high  (this is also a good test sentence)"
           ]
         },
@@ -10160,7 +10160,7 @@
         {
           "id": "mixed-02-colemak-all",
           "group": "mixed-colemak-all",
-          "raw": "adhlfaj; dfajgir ha 10:00 nasa Z;;m gk, atkjga ha no;ioiizimlgkdi.",
+          "raw": "adhlfaj; dfajgir ha 10P00 nasa Z;;m gk, atkjga ha no;ioiizimlgkdi.",
           "options": {
             "layout": "colemak",
             "english": true,
@@ -10192,7 +10192,7 @@
         {
           "id": "mixed-02-colemak-en-jp",
           "group": "mixed-colemak-en-jp",
-          "raw": "adhlfaj; dfajgir ha 10:00 nasa Z;;m gk, atkjga ha no;ioiizimlgkdi.",
+          "raw": "adhlfaj; dfajgir ha 10P00 nasa Z;;m gk, atkjga ha no;ioiizimlgkdi.",
           "options": {
             "layout": "colemak",
             "english": true,

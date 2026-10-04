@@ -1,5 +1,19 @@
 # Polytype handoff
 
+## Punctuation stack integrated with frequency scoring
+
+PT-006, parentheses and bare Zhuyin are rebased onto frequency-scoring main
+`fe52faef`. Ranking markers follow `+freq-v1` in this order:
+`+physical-keys-v2+zh-parens-v1+bare-zhuyin-v1`. All six Bazel targets pass
+(85 Node passes, three existing TODOs). Chinese excerpts retain 17/20 top one
+and 19/20 top five; English guards retain 192/200 in each layout. Both generated
+Markdown summaries are unchanged. Bare fallback removes unsupported first-tone
+marks from ten incorrect mixed top outputs, with unchanged scores; these remain
+language-boundary errors. Five alternating WASM rounds over 6,321 prefixes give
+median p95 ratio 0.9956 against that main snapshot (budget 1.15). The sections
+below retain their earlier, pre-scoring measurements. Browser smoke still needs
+the coordinator's Chrome environment.
+
 ## Bare Zhuyin chat initials (bare-zhuyin-v1)
 
 Space-completed unsupported lone initials now omit the implicit first-tone
