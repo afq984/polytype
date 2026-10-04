@@ -67,8 +67,11 @@ see [chat input and spacing](docs/ZHUYIN-CHAT.md).
 The current ranking build includes 101,191 SCOWL English spellings, context-gated
 Japanese particles, and case/small-kana cues. Import provenance and all upstream
 notices live in `data/english-source.json` and `data/sources/scowl/Copyright` and
-are bundled in both demos. `bazelisk run //:import_english` explicitly fetches
-the pinned archive; builds and tests use checked-in data offline.
+are bundled in both demos. Expanded lexical evidence now joins pinned ECDICT
+frequency ranks onto this same vocabulary; see [English scoring](docs/ENGLISH-SCORING.md).
+`bazelisk run //:import_english` fetches the pinned SCOWL archive;
+`bazelisk run //:import_english_frequency` fetches the pinned ECDICT inputs.
+Builds and tests use checked-in data offline.
 
 Candidate lists now favor distinct interpretations over near-duplicate kana-script
 permutations when space is tight. Single-token katakana selection remains available;

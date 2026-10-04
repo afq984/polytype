@@ -43,24 +43,59 @@ static JAPANESE_READINGS: LazyLock<HashMap<String, Vec<String>>> = LazyLock::new
 
 // SCOWL coverage tiers, not probabilities; pinned source and notices accompany
 // data/english.tsv. The frozen prototype does not consult this table.
-static ENGLISH: LazyLock<HashMap<&'static str, u8>> = LazyLock::new(|| {
-    include_str!("../../../data/english.tsv")
+struct EnglishEvidence {
+    tier: u8,
+    log_rank: f64,
+}
+
+static ENGLISH: LazyLock<HashMap<&'static str, EnglishEvidence>> = LazyLock::new(|| {
+    let data = include_bytes!("../../../data/english-frequency.bin");
+    assert_eq!(&data[..4], b"EFR1");
+    let words = u32::from_le_bytes(data[4..8].try_into().unwrap()) as usize;
+    let ranked = u32::from_le_bytes(data[8..12].try_into().unwrap()) as usize;
+    assert_eq!(data[12], 17);
+    assert_eq!(&data[13..16], &[0, 0, 0]);
+    let rank_start = 16 + words.div_ceil(8);
+    assert_eq!(data.len(), rank_start + (ranked * 17).div_ceil(8));
+    let mut rank_index = 0;
+    let entries: HashMap<_, _> = include_str!("../../../data/english.tsv")
         .lines()
-        .map(|line| {
+        .enumerate()
+        .map(|(index, line)| {
             let (word, tier) = line.split_once('\t').expect("word and tier");
-            (word, tier.parse().expect("valid SCOWL tier"))
+            let rank = if data[16 + index / 8] & (1 << (index % 8)) == 0 {
+                200_000
+            } else {
+                let bit = rank_index * 17;
+                rank_index += 1;
+                let start = rank_start + bit / 8;
+                let packed = u32::from(data[start])
+                    | (u32::from(data[start + 1]) << 8)
+                    | (u32::from(data[start + 2]) << 16);
+                (packed >> (bit % 8)) & 0x1ffff
+            };
+            (
+                word,
+                EnglishEvidence {
+                    tier: tier.parse().expect("valid SCOWL tier"),
+                    log_rank: (1000.0 / f64::from(rank)).ln(),
+                },
+            )
         })
-        .collect()
+        .collect();
+    assert_eq!(entries.len(), words);
+    assert_eq!(rank_index, ranked);
+    entries
 });
 
 pub(crate) fn english_tier(word: &str) -> Option<u8> {
-    ENGLISH.get(word).copied().or_else(|| {
+    ENGLISH.get(word).map(|entry| entry.tier).or_else(|| {
         // Productive English prefixes supply weak evidence, not new entries.
         ["re", "un", "pre"].iter().find_map(|prefix| {
             word.strip_prefix(prefix)
                 .filter(|stem| stem.len() >= 3)
                 .and_then(|stem| ENGLISH.get(stem))
-                .filter(|tier| **tier <= 35)
+                .filter(|entry| entry.tier <= 35)
                 .map(|_| 60)
         })
     })
@@ -68,6 +103,15 @@ pub(crate) fn english_tier(word: &str) -> Option<u8> {
 
 pub(crate) fn english_size() -> usize {
     ENGLISH.len()
+}
+
+// Lossless ECDICT ranks share the SCOWL spelling index. Logs are cached once;
+// search rounds adjustments so native/WASM logarithms cannot decide ties.
+pub(crate) fn english_log_rank(word: &str) -> f64 {
+    ENGLISH
+        .get(word)
+        .map(|entry| entry.log_rank)
+        .unwrap_or_else(|| (1000.0_f64 / 200000.0).ln())
 }
 
 // Generated from pinned upstream inputs; see data/japanese-source.json. Rows

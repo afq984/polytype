@@ -43,8 +43,8 @@ test('English islands survive frequency ranking and converted first-tone switchi
         :row.candidates[0]?.text;
       if(row.chinese||row.id.startsWith('probe-')||row.id.startsWith('abbreviation-'))assert.ok(texts[0]===expected||readings[0]===expected,`${row.id}: ${texts[0]}`);
       // Imported Japanese, frequency-aware Chinese and numeric evidence change
-      // their own scores; the remaining Roman evidence stays byte-identical.
-      for(const old of row.candidates){const same=candidates.find(c=>e.commitCandidate(c)===old.text);if(same&&!same.parts.some(p=>p.lang==='JP'||p.lang==='TW'||p.note.startsWith('Numeric /')))assert.ok(Math.abs(same.score-old.score)<1e-9,row.id+' score')}
+      // their own scores, including English frequency; raw-only evidence stays byte-identical.
+      for(const old of row.candidates){const same=candidates.find(c=>e.commitCandidate(c)===old.text);if(same&&!same.parts.some(p=>p.lang==='JP'||p.lang==='TW'||p.lang==='EN'||p.note.startsWith('Numeric /')))assert.ok(Math.abs(same.score-old.score)<1e-9,row.id+' score')}
     }
     for(const english of [false,true])for(const japanese of [false,true])for(const zhuyin of [false,true]){
       const c=e.decode(captureA,{layout:'colemak',english,japanese,zhuyin});

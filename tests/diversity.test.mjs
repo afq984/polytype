@@ -26,8 +26,8 @@ test('frozen controls and existing correct candidates survive family retention',
       if(row.id!=='gsd-04'&&before.rank)assert.ok(texts.some((t,i)=>accepted.includes(t)||accepted.includes(readings[i])),row.id);
       for(const old of before.candidates){
         const same=after.find(c=>engine.commitCandidate(c)===old.text);
-        // Imported Japanese and frequency-aware Chinese change their own path scores; Roman-only evidence stays byte-identical.
-        if(same&&!same.parts.some(p=>p.lang==='JP'||p.lang==='TW'))assert.ok(Math.abs(same.score-old.score)<1e-10,`${row.id}: unchanged path score`);
+        // Imported Japanese and Chinese/English frequency evidence change path scores; raw/punctuation-only paths retain their scores.
+        if(same&&!same.parts.some(p=>p.lang==='JP'||p.lang==='TW'||p.lang==='EN'))assert.ok(Math.abs(same.score-old.score)<1e-10,`${row.id}: unchanged path score`);
       }
     }
   }finally{engine.dispose()}

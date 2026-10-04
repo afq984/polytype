@@ -1,7 +1,7 @@
 use crate::{
     DecodeOptions, Layout,
     correction::{Plan, Resolved},
-    dictionary::{ChineseWord, Dictionary, LEXICON, english_tier},
+    dictionary::{ChineseWord, Dictionary, LEXICON, english_log_rank, english_tier},
     japanese::{compose_with_convention, to_katakana},
     phonetic::{read_units, utf16_len, zhuyin},
 };
@@ -75,6 +75,9 @@ struct Policy {
     physical_keys: bool,
     numbers: bool,
     numeric_prefix: bool,
+    english_frequency: bool,
+    english_offset: f64,
+    english_weight: f64,
 }
 
 impl Default for Policy {
@@ -94,6 +97,9 @@ impl Default for Policy {
             physical_keys: true,
             numbers: true,
             numeric_prefix: true,
+            english_frequency: true,
+            english_offset: 1.8,
+            english_weight: 0.05,
         }
     }
 }
@@ -906,6 +912,7 @@ pub(crate) fn diagnose(
         physical_keys: diversity,
         tone_switch: diversity,
         numbers: diversity,
+        english_frequency: diversity,
         ..Policy::default()
     };
     let candidates = decode_configured(input, dictionary, options, width, 5, policy);
@@ -947,6 +954,7 @@ pub(crate) fn experiment(
             physical_keys: false,
             tone_switch: false,
             numbers: false,
+            english_frequency: false,
             ..Policy::default()
         }
     };
@@ -969,6 +977,31 @@ pub(crate) fn experiment(
             "numbers" => policy.numbers = true,
             "no-numbers" => policy.numbers = false,
             "no-numeric-prefix" => policy.numeric_prefix = false,
+            "no-english-frequency" => policy.english_frequency = false,
+            "en-freq-16-005" => {
+                policy.english_offset = 1.6;
+                policy.english_weight = 0.05;
+            }
+            "en-freq-16-010" => {
+                policy.english_offset = 1.6;
+                policy.english_weight = 0.1;
+            }
+            "en-freq-17-005" => {
+                policy.english_offset = 1.7;
+                policy.english_weight = 0.05;
+            }
+            "en-freq-17-010" => {
+                policy.english_offset = 1.7;
+                policy.english_weight = 0.1;
+            }
+            "en-freq-18-005" => {
+                policy.english_offset = 1.8;
+                policy.english_weight = 0.05;
+            }
+            "en-freq-18-010" => {
+                policy.english_offset = 1.8;
+                policy.english_weight = 0.1;
+            }
             "current" => {}
             "no-frequency" => policy.frequency = false,
             "frequency" => policy.frequency = true,
@@ -1603,7 +1636,7 @@ fn decode_lattice_planned(
                         .map(|c| c.kana.as_str())
                         .unwrap_or_default();
                     // Imported evidence stays below common English spelling
-                    // evidence (1.8 per character through SCOWL tier 35) and
+                    // evidence (frequency rates up to 2.0 per character) and
                     // above rule kana (1.2), so a large dictionary cannot claim
                     // ordinary English words; context bonuses decide the rest.
                     // Capitalization is Latin-script evidence: a capitalized
@@ -1713,7 +1746,12 @@ fn decode_lattice_planned(
                                 Layout::Colemak => "Colemak",
                                 Layout::Qwerty => "QWERTY",
                             },
-                            if known {
+                            if dictionary.expanded
+                                && policy.english_frequency
+                                && (known || imported.is_some())
+                            {
+                                "SCOWL / ECDICT frequency evidence"
+                            } else if known {
                                 "English dictionary"
                             } else if imported.is_some() {
                                 "SCOWL / productive-prefix evidence"
@@ -1723,7 +1761,24 @@ fn decode_lattice_planned(
                         ),
                         ..Part::default()
                     },
-                    if known {
+                    if dictionary.expanded
+                        && policy.english_frequency
+                        && (known || imported.is_some())
+                    {
+                        // Non-pronoun/article single letters are symbols, not
+                        // lexical headwords. ECDICT's abbreviation ranks must
+                        // not strengthen a split O + letter over an unknown
+                        // uppercase word (Colemak O also occupies raw ':').
+                        let rate = if spelling.len() == 1 && !matches!(spelling, "a" | "i") {
+                            1.5
+                        } else {
+                            (policy.english_offset
+                                + policy.english_weight * english_log_rank(spelling))
+                            .clamp(1.3, 2.0)
+                        };
+                        let rate = (rate * 1e9).round() / 1e9;
+                        spelling_len * rate + transition("EN") + if has_case { 2.0 } else { 0.0 }
+                    } else if known {
                         token_len * 2.0 + transition("EN")
                     } else if let Some(tier) = imported {
                         spelling_len

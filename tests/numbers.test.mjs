@@ -30,7 +30,7 @@ const decode=(raw,options,constraints)=>{
 const roman=(text,layout)=>layout==='qwerty'?text:encode(text);
 
 test('numbers and identifiers survive literal and converted first-tone boundaries',()=>{
-  assert.ok(rankingId.endsWith('+numbers-v2'));
+  assert.ok(rankingId.includes('+numbers-v2'));
   for(const layout of ['qwerty','colemak'])for(const japanese of [false,true]){
     const options={layout,japanese};
     for(const token of ['15','17','2025','5090','x3','v3','Q3','M2','3.8-27B','+0.3','-2.5','70%','11:25','1/2','v1.5','NT$120','11/']){
