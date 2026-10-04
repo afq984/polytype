@@ -46,6 +46,7 @@ node_command(name = "numbers_diagnostics", runtime = ":demo", mode = "numbers-di
 node_command(name = "diagnose", runtime = ":demo", mode = "diagnose")
 node_command(name = "import_chinese", runtime = ":demo", mode = "import-chinese")
 node_command(name = "import_english", runtime = ":demo", mode = "import-english")
+node_command(name = "import_english_frequency", runtime = ":demo", mode = "import-english-frequency")
 node_command(name = "import_japanese", runtime = ":demo", mode = "import-japanese")
 node_command(name = "baseline_zh_en", runtime = ":demo", mode = "baseline-zh-en")
 node_command(name = "import_zh_en", runtime = ":demo", mode = "import-zh-en")

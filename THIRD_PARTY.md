@@ -15,6 +15,10 @@ in LICENSE. This does not replace the following third-party terms:
   data/sources/scowl/Copyright. See data/english-source.json for its sources and
   transformations. These include permissive licenses and public-domain material;
   they are not all covered by Polytype's MIT grant.
+- English frequency ranks derived from ECDICT retain Linwei's MIT license in
+  data/sources/ecdict/LICENSE. data/english-frequency-source.json pins the
+  revision, input hashes and SCOWL-only rank/morphology join. ECDICT definitions,
+  translations and examples are excluded. Both demos bundle its license.
 - Sourced evaluation text and adapted annotations retain their attribution and
   CC BY-SA terms, documented in eval/README.md and eval/sources/. The project MIT
   license does not relicense this material. It is not compiled into the demo.

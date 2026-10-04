@@ -1,0 +1,52 @@
+{
+  "source": "ECDICT — skywind3000 / Linwei and contributors",
+  "revision": "bc015ed2e24a7abef49fc6dbbb7fe32c1dadaf8b",
+  "repository": "https://github.com/skywind3000/ECDICT",
+  "license": "MIT",
+  "inputs": [
+    {
+      "path": "ecdict.csv",
+      "url": "https://raw.githubusercontent.com/skywind3000/ECDICT/bc015ed2e24a7abef49fc6dbbb7fe32c1dadaf8b/ecdict.csv",
+      "sha256": "1a6947e04785db63613a92e14903cdae7954f7e84860b10e68e5c7cbb3f9c3cf"
+    },
+    {
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/skywind3000/ECDICT/bc015ed2e24a7abef49fc6dbbb7fe32c1dadaf8b/LICENSE",
+      "sha256": "f8552dd246f61a4e064569eae6194a01c6b3d63b03bf27c6ca863593c549ed0f"
+    },
+    {
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/skywind3000/ECDICT/bc015ed2e24a7abef49fc6dbbb7fe32c1dadaf8b/README.md",
+      "sha256": "0c3f95fc7e15f7eccf65feedb58ba3ebace1fe7b7cbdd1af60c9ace4cef9094b"
+    }
+  ],
+  "vocabulary": {
+    "path": "data/english.tsv",
+    "entries": 101191,
+    "sha256": "09e77d6d84a6476e63d596c85514a4a948171015a4733fff149b61a6950a2440"
+  },
+  "selection": "Exact lowercase join onto SCOWL only; minimum positive rank for duplicate headwords. Prefer direct contemporary frq, then one-hop inferred frq (2x lemma rank), then direct bnc, then inferred bnc. Morphology uses only SCOWL lemmas and ECDICT exchange 0/p/d/i/3/r/t/s; no recursive propagation. No definitions, translations, examples or evaluation input.",
+  "format": {
+    "magic": "EFR1",
+    "headerBytes": 16,
+    "order": "data/english.tsv file order",
+    "presence": "one bit per spelling, least-significant bit first; 1 = ranked, 0 = fallback",
+    "ranks": "positive integers packed least-significant bit first, only for present spellings",
+    "rankBits": 17,
+    "reserved": "header bytes 13..15 zero",
+    "maxRank": 99992,
+    "lossless": true
+  },
+  "ranksSha256": "ba664b6ae7640c466e73f8861dde3640e5e63e3dd951530eac6c5519e86a42b2",
+  "fallbackRank": 200000,
+  "entries": 61883,
+  "bytes": 144167,
+  "counts": {
+    "directFrq": 35653,
+    "inferredFrq": 23714,
+    "directBnc": 1640,
+    "inferredBnc": 876,
+    "unranked": 39308
+  },
+  "sha256": "bc90126e319406e6119fc944c990de497b8f23d96a5c6c63e6783ef1f3693c64"
+}

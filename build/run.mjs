@@ -98,6 +98,7 @@ if (mode === 'test') {
       const commands = {
         'import-chinese': ['import-chinese.mjs', ['data/chinese.tsv', 'data/chinese-source.json', 'data/sources/mcbopomofo/LICENSE.txt']],
         'import-english': ['import-english.mjs', ['data/english.tsv', 'data/english-source.json', 'data/sources/scowl/Copyright']],
+        'import-english-frequency': ['import-english-frequency.mjs', ['data/english-frequency.bin', 'data/english-frequency-source.json', 'data/sources/ecdict/LICENSE']],
         'baseline-zh-en': ['baseline-zh-en.mjs', ['eval/zh-en/REPORT.md']],
         'import-zh-en': ['import-zh-en.mjs', ['eval/zh-en', 'eval/sources/ASCEND-README.md', 'eval/sources/UD_English-EWT-README.md', 'eval/sources/UD_English-EWT-LICENSE.txt', 'eval/sources/OpenCC-LICENSE.txt', 'eval/sources/CC-CEDICT-NOTICE.txt']],
         'verify-zh-en': ['import-zh-en.mjs', []],
@@ -109,13 +110,13 @@ if (mode === 'test') {
       const command = commands[mode];
       if (!command || !workspace) throw new Error(`Unknown command: ${mode}`);
       if (args.includes('--freeze')) throw new Error('Frozen migration evidence must not be overwritten.');
-      const commandArgs = mode === 'import-chinese' ? args.map(arg=>{
+      const commandArgs = ['import-chinese','import-english-frequency'].includes(mode) ? args.map(arg=>{
         for (const flag of ['--from-dir=', '--output-dir=']) if (arg.startsWith(flag)) return flag+resolve(caller,arg.slice(flag.length));
         return arg;
       }) : mode === 'verify-zh-en' ? ['--verify', ...args] : args;
       run('scripts/' + command[0], commandArgs, work);
       // An experimental cut must not publish dictionary files into the checkout.
-      if (!(mode === 'import-chinese' && args.some(arg=>arg.startsWith('--output-dir=')))) {
+      if (!(['import-chinese','import-english-frequency'].includes(mode) && args.some(arg=>arg.startsWith('--output-dir=')))) {
         for (const name of command[1]) await publish(join(work, name), join(workspace, name));
       }
     }
