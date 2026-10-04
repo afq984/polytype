@@ -1,6 +1,6 @@
 use crate::{
     DecodeOptions, Layout,
-    dictionary::{Dictionary, LEXICON, english_tier},
+    dictionary::{ChineseWord, Dictionary, LEXICON, english_tier},
     japanese::{compose_with_convention, to_katakana},
     phonetic::{read_units, utf16_len, zhuyin},
 };
@@ -67,6 +67,7 @@ struct Policy {
     first_tone: bool,
     legacy_romaji: bool,
     chinese_punctuation: bool,
+    frequency: bool,
 }
 
 impl Default for Policy {
@@ -79,6 +80,7 @@ impl Default for Policy {
             first_tone: false,
             legacy_romaji: false,
             chinese_punctuation: true,
+            frequency: true,
         }
     }
 }
@@ -108,6 +110,34 @@ fn discard_cost(count: usize, stronger: bool) -> f64 {
         } else {
             0
         }) as f64
+}
+
+// Expanded Chinese unigram evidence: 2 * normalized key units + 5.2 * syllables
+// + 0.7 * ln(count / 40,000,000), then the existing discard penalty.
+// The key/syllable evidence is independent of segmentation; summing the log
+// terms scores phrase vs single-character paths as a unigram lattice. The
+// fixed reference mass keeps coverage cuts comparable and adds a conservative
+// word cost to the original reading-count mass (29,948,651), discouraging
+// over-segmentation into common characters. The 5.2-point syllable offset
+// centers a single with count ~24k on the old key evidence, preserving common
+// Chinese/Latin competition while penalizing rare readings (count 23: -4.86).
+// Logs are cached at dictionary construction. Uncounted prototype fallbacks
+// use count 1; custom entries omit the prior and retain their local rank cost.
+fn chinese_frequency(word: &ChineseWord, syllables: usize, rank: usize) -> f64 {
+    let score = syllables as f64 * 5.2
+        + word.log_frequency.map_or(-(rank as f64) * 0.8, |log| {
+            0.7 * (log - 40_000_000_f64.ln())
+        });
+    // Native and WASM logarithms can differ in their final bits. Quantize each
+    // edge before accumulation so equal reordered Chinese paths keep the same
+    // stable tie order on both targets. This retains nine decimal score places.
+    (score * 1e9).round() / 1e9
+}
+
+#[cfg(feature = "diagnostics")]
+fn historical_dictionary(dictionary: &Dictionary) -> Option<Dictionary> {
+    (dictionary.expanded && !dictionary.custom.is_empty())
+        .then(|| Dictionary::with_phrase_limit(dictionary.custom.clone(), true, 20_000))
 }
 
 impl Deref for BeamEntry {
@@ -295,7 +325,7 @@ fn converted_chinese(part: &Part, dictionary: &Dictionary) -> bool {
         dictionary
             .singles
             .get(&syllable.key)
-            .is_some_and(|values| values.contains(&part.text))
+            .is_some_and(|values| values.iter().any(|word| word.text == part.text))
     })
 }
 
@@ -397,11 +427,22 @@ pub(crate) fn diagnose(
     width: usize,
     diversity: bool,
 ) -> serde_json::Value {
+    let historical = (!diversity)
+        .then(|| historical_dictionary(dictionary))
+        .flatten();
+    let dictionary = if !diversity && dictionary.expanded {
+        historical
+            .as_ref()
+            .unwrap_or(&crate::dictionary::HISTORICAL)
+    } else {
+        dictionary
+    };
     let policy = Policy {
         diversity,
         floor: diversity,
         legacy_romaji: !diversity,
         chinese_punctuation: diversity,
+        frequency: diversity,
         ..Policy::default()
     };
     let candidates = decode_configured(input, dictionary, options, width, 5, policy);
@@ -426,26 +467,46 @@ pub(crate) fn experiment(
     options: &DecodeOptions,
     name: &str,
 ) -> Result<Vec<Candidate>, String> {
-    let mut policy = Policy {
-        floor: false,
-        // These named ablations reproduce the frozen family-v1 experiment.
-        legacy_romaji: true,
-        chinese_punctuation: false,
-        ..Policy::default()
+    let current = name
+        .split('+')
+        .any(|flag| matches!(flag, "current" | "no-frequency"));
+    let mut policy = if current {
+        Policy::default()
+    } else {
+        Policy {
+            floor: false,
+            // These named ablations reproduce the frozen family-v1 experiment.
+            legacy_romaji: true,
+            chinese_punctuation: false,
+            frequency: false,
+            ..Policy::default()
+        }
     };
     for flag in name.split('+') {
         match flag {
             "baseline" => {}
             "floor" => policy.floor = true,
             "punctuation" => policy.chinese_punctuation = true,
-            "current" => policy = Policy::default(),
             "no-punctuation" => policy.chinese_punctuation = false,
             "discards" => policy.discards = true,
             "identifiers" => policy.identifiers = true,
             "first-tone" => policy.first_tone = true,
+            "current" => {}
+            "no-frequency" => policy.frequency = false,
+            "frequency" => policy.frequency = true,
             _ => return Err("Unknown search experiment".into()),
         }
     }
+    let historical = (!current)
+        .then(|| historical_dictionary(dictionary))
+        .flatten();
+    let dictionary = if !current && dictionary.expanded {
+        historical
+            .as_ref()
+            .unwrap_or(&crate::dictionary::HISTORICAL)
+    } else {
+        dictionary
+    };
     Ok(decode_configured(input, dictionary, options, 12, 5, policy))
 }
 
@@ -615,24 +676,28 @@ fn decode_lattice(
                     }
                 }
                 for (at, length, syllables, reading, texts, discard_penalty) in matches {
-                    // Scores decrease with n. Values beyond this beam width
+                    // Imported counts decrease with n. Values beyond this beam width
                     // from the same state cannot survive at this offset.
-                    for (n, text) in texts.iter().take(width).enumerate() {
+                    for (n, word) in texts.iter().take(width).enumerate() {
                         push(
                             &mut beams,
                             at,
                             &state,
                             Part {
                                 raw: segment(&raw, i, at),
-                                text: text.clone(),
+                                text: word.text.clone(),
                                 lang: "TW".into(),
                                 note: format!("{reading} · phrase dictionary"),
                                 changes: Some(changes.clone()),
                                 complete: Some(true),
                                 ..Part::default()
                             },
-                            (length * 2 + syllables) as f64
-                                - n as f64 * 0.8
+                            (length * 2) as f64
+                                + if dictionary.expanded && policy.frequency {
+                                    chinese_frequency(word, syllables, n)
+                                } else {
+                                    syllables as f64 - n as f64 * 0.8
+                                }
                                 - if dictionary.expanded {
                                     discard_penalty
                                 } else {
@@ -659,10 +724,18 @@ fn decode_lattice(
                     if syllable.complete && values.is_none() {
                         note.push_str(" · outside demo dictionary");
                     }
-                    let fallback = vec![zhuyin(&syllable.key)];
-                    for (n, text) in values.unwrap_or(&fallback).iter().take(width).enumerate() {
+                    let fallback = vec![ChineseWord {
+                        text: zhuyin(&syllable.key),
+                        log_frequency: Some(0.0),
+                    }];
+                    for (n, word) in values.unwrap_or(&fallback).iter().take(width).enumerate() {
                         let score = if values.is_some() {
-                            syllable.key.len() as f64 * 2.0 - n as f64 * 0.8
+                            syllable.key.len() as f64 * 2.0
+                                + if dictionary.expanded && policy.frequency {
+                                    chinese_frequency(word, 1, n)
+                                } else {
+                                    -(n as f64) * 0.8
+                                }
                         } else {
                             syllable.slots.iter().filter(|s| !s.is_empty()).count() as f64 * 0.3
                         };
@@ -672,7 +745,7 @@ fn decode_lattice(
                             &state,
                             Part {
                                 raw: segment(&raw, i, syllable.end),
-                                text: text.clone(),
+                                text: word.text.clone(),
                                 lang: "TW".into(),
                                 note: note.clone(),
                                 slots: Some(syllable.slots.iter().map(|s| zhuyin(s)).collect()),

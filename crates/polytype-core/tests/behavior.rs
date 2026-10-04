@@ -119,6 +119,60 @@ fn custom_dictionary_is_atomic_and_per_engine() {
 }
 
 #[test]
+fn chinese_frequency_ranks_segmentations_and_preserves_rare_custom_choices() {
+    let mut engine = Engine::default();
+    for layout in [Layout::Colemak, Layout::Qwerty] {
+        let options = DecodeOptions {
+            layout,
+            ..DecodeOptions::default()
+        };
+        let raw = reading_keys("ㄨㄛˇ ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ ㄧㄠˋ")
+            .unwrap()
+            .join("");
+        assert_eq!(
+            engine.decode_with_options(&raw, &options)[0].text,
+            "我等一下要"
+        );
+        assert_eq!(
+            engine.experiment(&raw, &options, "floor").unwrap()[0].text,
+            "我等一下藥"
+        );
+        assert_eq!(
+            engine
+                .experiment(&raw, &options, "floor+frequency")
+                .unwrap()[0]
+                .text,
+            "我等一下要"
+        );
+    }
+    // The diagnostic boundary relaxation stays off; rare 尻 must also lose
+    // when it is explicitly enabled, rather than fragmenting common English.
+    let phrase = reading_keys("ㄗㄞˋ ㄕㄨㄛ").unwrap().join("");
+    assert_eq!(engine.decode(&phrase)[0].text, "再說");
+    let raw = "Fhld ld a bit.";
+    assert_eq!(engine.decode(raw)[0].text, "This is a bug.");
+    assert_eq!(
+        engine
+            .experiment(raw, &DecodeOptions::default(), "current+first-tone")
+            .unwrap()[0]
+            .text,
+        "This is a bug."
+    );
+    let rare = reading_keys("ㄎㄠ").unwrap().join("");
+    let ordinary = engine.decode(&rare)[0].text.clone();
+    assert_ne!(ordinary, "尻");
+    engine
+        .set_custom_entries(vec![Entry {
+            reading: "ㄎㄠ".into(),
+            text: "尻".into(),
+        }])
+        .unwrap();
+    assert_eq!(engine.decode(&rare)[0].text, "尻");
+    engine.set_custom_entries(Vec::new()).unwrap();
+    assert_eq!(engine.decode(&rare)[0].text, ordinary);
+}
+
+#[test]
 fn unordered_zhuyin_and_selected_commit() {
     let engine = Engine::default();
     for raw in ["5j/ ", "5/j ", "j5/ ", "j/5 ", "/5j ", "/j5 "] {

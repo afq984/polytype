@@ -5,7 +5,32 @@ import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {createEngine,readingKeys} from '../web/engine.mjs';
-import {cases,feedbackCases,guardCases,kanaLevel,expandedTarget} from '../eval/cases.mjs';
+import {cases,feedbackCases,guardCases,kanaLevel,expandedTarget,encodeMixedInput} from '../eval/cases.mjs';
+
+const frequencyCases=['colemak','qwerty'].flatMap(layout=>[
+  {id:`frequency-segmentation-${layout}`,raw:readingKeys('ㄨㄛˇ ㄉㄥˇ ㄧˊ ㄒㄧㄚˋ ㄧㄠˋ').join(''),text:'我等一下要',options:{layout}},
+  {id:`frequency-word-cost-${layout}`,raw:readingKeys('ㄗㄞˋ ㄕㄨㄛ').join(''),text:'再說',options:{layout}},
+  // Repeated phrase/single paths exposed native/WASM logarithm tie differences.
+  {id:`frequency-repeated-path-${layout}`,raw:readingKeys('ㄐㄧㄡˋ ㄕˋ ㄐㄧㄡˋ ㄕˋ ㄨㄛˇ ㄇㄣ˙ ㄉㄜ˙').join('')+' '+(layout==='colemak'?encodeMixedInput('senior'):'senior'),text:'就是就是我們的 senior',options:{layout}},
+]);
+
+test('frequency evidence preserves useful phrases and explicit rare custom words',()=>{
+  const engine=createEngine();
+  try{
+    for(const row of frequencyCases)assert.equal(engine.decode(row.raw,row.options)[0].text,row.text,row.id);
+    const raw=readingKeys('ㄎㄠ').join(''),ordinary=engine.decode(raw)[0].text;
+    assert.notEqual(ordinary,'尻');
+    engine.setCustomEntries([{reading:'ㄎㄠ',text:'尻'}]);
+    assert.equal(engine.decode(raw)[0].text,'尻');
+    assert.throws(()=>engine.setCustomEntries([{reading:'bad',text:'bad'}]));
+    assert.equal(engine.decode(raw)[0].text,'尻');
+    engine.setCustomEntries([]);
+    assert.equal(engine.decode(raw)[0].text,ordinary);
+    const entries=[...'甲乙丙丁戊'].map(c=>({reading:'ㄉㄜ˙',text:'自訂'+c}));
+    engine.setCustomEntries(entries);
+    assert.deepEqual(engine.decode(readingKeys('ㄉㄜ˙').join(''),{english:false,japanese:false}).map(c=>c.text),entries.map(e=>e.text),'all custom choices precede common imported 的');
+  }finally{engine.dispose()}
+});
 
 test('user ranking feedback and language guards retain their intended top output',()=>{
   const engine=createEngine();
@@ -35,15 +60,16 @@ test('expanded data matches pinned manifest and remains independent of evaluatio
 test('expanded native and WASM candidates agree on real text and language guards',()=>{
   const engine=createEngine();
   try{
-    const requests=cases.map(row=>({version:1,op:'decode',input:row.raw,options:row.options}));
+    const rows=[...cases,...frequencyCases];
+    const requests=rows.map(row=>({version:1,op:'decode',input:row.raw,options:row.options}));
     const child=spawnSync(fileURLToPath(new URL('../target/debug/polytype-json'+(process.platform==='win32'?'.exe':''),import.meta.url)),[],{
       input:requests.map(row=>JSON.stringify(row)).join('\n')+'\n',encoding:'utf8',maxBuffer:16*1024*1024,
     });
     assert.equal(child.status,0,child.stderr);
     const results=child.stdout.trim().split('\n').map(line=>JSON.parse(line).ok);
     const normalized=value=>JSON.parse(JSON.stringify(value,(key,val)=>key==='score'?Math.round(val*1e10)/1e10:val));
-    assert.equal(results.length,cases.length);
-    cases.forEach((row,i)=>assert.deepEqual(normalized(engine.decode(row.raw,row.options)),normalized(results[i]),row.id));
+    assert.equal(results.length,rows.length);
+    rows.forEach((row,i)=>assert.deepEqual(normalized(engine.decode(row.raw,row.options)),normalized(results[i]),row.id));
     assert.equal(engine.dictionarySize().imported,28184);
   }finally{engine.dispose()}
 });

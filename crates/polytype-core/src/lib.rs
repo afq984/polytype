@@ -213,6 +213,10 @@ mod diagnostic_tests {
                 "identifiers",
                 "first-tone",
                 "floor+discards+identifiers+first-tone",
+                "frequency",
+                "current",
+                "current+no-frequency",
+                "current+first-tone",
             ] {
                 assert_eq!(
                     json!(engine.experiment(raw, &options, policy).unwrap()),

@@ -104,7 +104,7 @@ pub(crate) fn japanese_size() -> usize {
 }
 
 // Generated from pinned upstream inputs; see data/chinese-source.json.
-static EXPANDED: LazyLock<Vec<(String, String)>> = LazyLock::new(|| {
+static EXPANDED: LazyLock<Vec<(String, String, f64)>> = LazyLock::new(|| {
     include_str!("../../../data/chinese.tsv")
         .lines()
         .map(|line| {
@@ -112,6 +112,12 @@ static EXPANDED: LazyLock<Vec<(String, String)>> = LazyLock::new(|| {
             (
                 fields.next().unwrap().to_owned(),
                 fields.next().unwrap().to_owned(),
+                fields
+                    .next()
+                    .unwrap()
+                    .parse::<f64>()
+                    .expect("positive occurrence count")
+                    .ln(),
             )
         })
         .collect()
@@ -127,11 +133,24 @@ pub struct Entry {
     pub text: String,
 }
 
+pub(crate) struct ChineseWord {
+    pub text: String,
+    // None denotes explicit user evidence, not a fabricated occurrence count.
+    // Imported logs include a local offset when custom alternatives precede them.
+    pub log_frequency: Option<f64>,
+}
+
+// Historical native ablations used the original 20k cut. Enlarging the default
+// vocabulary must not silently change their frozen migration evidence.
+#[cfg(feature = "diagnostics")]
+pub(crate) static HISTORICAL: LazyLock<Dictionary> =
+    LazyLock::new(|| Dictionary::with_phrase_limit(Vec::new(), true, 20_000));
+
 pub(crate) struct Dictionary {
     pub expanded: bool,
     pub custom: Vec<Entry>,
-    pub singles: HashMap<String, Vec<String>>,
-    pub phrases: HashMap<String, Vec<String>>,
+    pub singles: HashMap<String, Vec<ChineseWord>>,
+    pub phrases: HashMap<String, Vec<ChineseWord>>,
     pub prefixes: HashSet<String>,
 }
 
@@ -153,6 +172,10 @@ impl Dictionary {
     }
 
     pub fn new(custom: Vec<Entry>, expanded: bool) -> Self {
+        Self::with_phrase_limit(custom, expanded, usize::MAX)
+    }
+
+    pub(crate) fn with_phrase_limit(custom: Vec<Entry>, expanded: bool, limit: usize) -> Self {
         let mut dict = Self {
             expanded,
             custom,
@@ -160,13 +183,29 @@ impl Dictionary {
             phrases: HashMap::new(),
             prefixes: HashSet::new(),
         };
+        let mut phrases = 0;
         let rows = dict
             .custom
             .iter()
-            .map(|e| (&e.reading, &e.text))
-            .chain(EXPANDED.iter().filter(|_| expanded).map(|(r, t)| (r, t)))
-            .chain(LEXICON.chinese.iter().map(|(r, t)| (r, t)));
-        for (reading, text) in rows {
+            .map(|e| (&e.reading, &e.text, None))
+            .chain(
+                EXPANDED
+                    .iter()
+                    .filter(|(r, _, _)| {
+                        if !expanded {
+                            return false;
+                        }
+                        if r.contains(' ') {
+                            phrases += 1;
+                            phrases <= limit
+                        } else {
+                            true
+                        }
+                    })
+                    .map(|(r, t, f)| (r, t, Some(*f))),
+            )
+            .chain(LEXICON.chinese.iter().map(|(r, t)| (r, t, Some(0.0))));
+        for (reading, text, log_frequency) in rows {
             let keys = reading_keys(reading).expect("validated dictionary reading");
             let values = if keys.len() == 1 {
                 dict.singles.entry(keys[0].clone()).or_default()
@@ -176,8 +215,22 @@ impl Dictionary {
                 }
                 dict.phrases.entry(keys.join("|")).or_default()
             };
-            if !values.contains(text) {
-                values.push(text.clone());
+            if !values.iter().any(|word| word.text == *text) {
+                // Keep every custom alternative ahead of imported homophones,
+                // including a common single after five or more custom choices.
+                // Express the old 0.8-per-custom rank offset in log units once;
+                // the immutable source counts and ordinary engines are unchanged.
+                let log_frequency = log_frequency.map(|log| {
+                    let custom_count = values
+                        .iter()
+                        .take_while(|word| word.log_frequency.is_none())
+                        .count();
+                    log - custom_count as f64 * 0.8 / 0.7
+                });
+                values.push(ChineseWord {
+                    text: text.clone(),
+                    log_frequency,
+                });
             }
         }
         dict

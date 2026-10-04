@@ -8,11 +8,11 @@ import {kanaLevel,expandedTarget} from '../eval/cases.mjs';
 const baseline=JSON.parse(readFileSync(new URL('../eval/island-baseline.json',import.meta.url)));
 const normalize=v=>JSON.parse(JSON.stringify(v,(k,x)=>k==='score'?Math.round(x*1e9)/1e9:x));
 
-test('English islands survive with unchanged scores and tone boundaries',()=>{
+test('English islands survive frequency ranking with unchanged tone boundaries',()=>{
   const e=createEngine();
   try{
     const a=e.decode(captureA,{layout:'colemak'});
-    assert.equal(e.commitCandidate(a[0]),'量到的 p95 latency 曾加了 11.6% 還在範圍之內');
+    assert.equal(e.commitCandidate(a[0]),'量到的 p95 latency 增加了 11.6% 還在範圍之內');
     assert.ok(a.slice(0,2).some(c=>e.commitCandidate(c)==='量到的 p95 latency 增加了 11.6% 還在範圍之內'));
     assert.ok(a.some(c=>e.commitCandidate(c)===e.colemak(captureA)));
     for(const raw of [captureA,captureB])for(let i=1;i<=raw.length;i++){
@@ -35,8 +35,8 @@ test('English islands survive with unchanged scores and tone boundaries',()=>{
         :row.id==='chinese-qwerty-2-prefix-2'?'う' // Newly supported Mozc wu alias; completed Chinese is unchanged.
         :row.candidates[0]?.text;
       if(row.chinese||row.id.startsWith('probe-')||row.id.startsWith('abbreviation-'))assert.ok(texts[0]===expected||readings[0]===expected,`${row.id}: ${texts[0]}`);
-      // Japanese scores changed with the imported dictionary; every path without a Japanese part keeps its exact score.
-      for(const old of row.candidates){const same=candidates.find(c=>e.commitCandidate(c)===old.text);if(same&&!same.parts.some(p=>p.lang==='JP'))assert.ok(Math.abs(same.score-old.score)<1e-9,row.id+' score')}
+      // Imported Japanese and frequency-aware Chinese change their own path scores; Roman-only evidence stays byte-identical.
+      for(const old of row.candidates){const same=candidates.find(c=>e.commitCandidate(c)===old.text);if(same&&!same.parts.some(p=>p.lang==='JP'||p.lang==='TW'))assert.ok(Math.abs(same.score-old.score)<1e-9,row.id+' score')}
     }
     for(const english of [false,true])for(const japanese of [false,true])for(const zhuyin of [false,true]){
       const c=e.decode(captureA,{layout:'colemak',english,japanese,zhuyin});
@@ -53,6 +53,18 @@ test('native and WASM match island cases and Chinese typing prefixes',()=>{
   const results=p.stdout.trim().split('\n').map(s=>JSON.parse(s).ok),e=createEngine();
   try{requests.forEach((r,i)=>assert.deepEqual(normalize(e.decode(r.input,r.options)),normalize(results[i]),rows[i].id))}finally{e.dispose()}
   assert.ok(islandCases.length>60);
+});
+
+test('historical native ablations retain the original Chinese cut and scores',()=>{
+  const rows=baseline.rows;
+  const input=rows.map(r=>JSON.stringify({raw:r.raw,options:r.options,width:12})).join('\n')+'\n';
+  const result=spawnSync('target/release/polytype-search',['--experiment=baseline'],{input,encoding:'utf8',maxBuffer:64e6});
+  assert.equal(result.status,0,result.stderr);
+  const actual=result.stdout.trim().split('\n').map(line=>{
+    const response=JSON.parse(line);assert.ok(!response.error,response.error);
+    return response.ok.candidates.map(c=>({text:c.parts.map(p=>p.commitText??p.text).join(''),score:c.score}));
+  });
+  assert.deepEqual(normalize(actual),normalize(rows.map(r=>r.candidates)));
 });
 
 test('doubled n before y: Colemak dljjo;i commits しんよう',()=>{

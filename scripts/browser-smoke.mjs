@@ -249,7 +249,7 @@ try {
     await evaluate("[...document.querySelectorAll('#candidates button')].find(b=>b.textContent.slice(1)==='しんよう').click(); document.getElementById('commit').click()");
     assert.ok(await evaluate("document.getElementById('committed').textContent.endsWith('しんよう')"));
     await evaluate(`document.getElementById('raw').value=${JSON.stringify(captureA)}; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
-    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'量到的 p95 latency 曾加了 11.6% 還在範圍之內');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'量到的 p95 latency 增加了 11.6% 還在範圍之內');
     const islandTarget='量到的 p95 latency 增加了 11.6% 還在範圍之內';
     await evaluate(`[...document.querySelectorAll('#candidates button')].find(b=>b.textContent.slice(1)===${JSON.stringify(islandTarget)}).click(); document.getElementById('commit').click()`);
     assert.ok(await evaluate(`document.getElementById('committed').textContent.endsWith(${JSON.stringify(islandTarget)})`));
