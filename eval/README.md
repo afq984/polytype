@@ -4,8 +4,9 @@ Expanded Chinese now uses [log-frequency unigram scoring](../docs/CHINESE-SCORIN
 and a 40k phrase cut: 17/20 top one, 19/20 top five, 1.3% CER on the Chinese
 development excerpts. At the original 20k cut, scoring alone gives 14/20 and
 18/20; all 104,221 positive-frequency phrases give the same accuracy as 40k.
-English/Japanese controls and prior correct targets are retained. First-tone
-switching remains diagnostic-only. Older milestone results below are historical.
+English/Japanese controls and prior correct targets are retained.
+[Converted first-tone switching](../docs/TONE-SWITCH.md) now permits another
+language with the completion Space. Older milestone results below are historical.
 
 For the next benchmark, see [the external collection and review protocol](COLLECTION.md).
 `bazelisk run //:corpus -- init /absolute/private/polytype-corpus` prepares an
@@ -403,7 +404,8 @@ internal spaces and Han/Han spaces.
 
 The `current` contract types a separator at each language change, in addition to
 any first-tone completion Space. The `target` contract uses the first-tone Space
-as the only switch Space after such a syllable. Expected output follows literal
+as the only switch Space after such a syllable; the expanded decoder now supports
+that contract. The group names retain the original experiment labels. Expected output follows literal
 spaces exactly: `剛␣call` for current, `剛call` for target. A single transcript
 space at a language boundary supplies the required separator, rather than adding
 a duplicate; extra transcript spaces remain literal. Whitespace/punctuation-only

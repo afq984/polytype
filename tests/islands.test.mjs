@@ -9,7 +9,7 @@ import {currentRaw} from '../eval/physical-keys.mjs';
 const baseline=JSON.parse(readFileSync(new URL('../eval/island-baseline.json',import.meta.url)));
 const normalize=v=>JSON.parse(JSON.stringify(v,(k,x)=>k==='score'?Math.round(x*1e9)/1e9:x));
 
-test('English islands survive frequency ranking with unchanged tone boundaries',()=>{
+test('English islands survive frequency ranking and converted first-tone switching',()=>{
   const e=createEngine();
   try{
     const a=e.decode(captureA,{layout:'colemak'});
@@ -20,7 +20,7 @@ test('English islands survive frequency ranking with unchanged tone boundaries',
       const prefix=raw.slice(0,i);
       assert.ok(e.decode(prefix,{layout:'colemak'}).some(c=>e.commitCandidate(c)===e.colemak(prefix)),`literal prefix ${i}`);
     }
-    assert.ok(!e.decode(captureB,{layout:'colemak'}).some(c=>e.commitCandidate(c).includes('跟claude')),'first-tone experiment must not ship');
+    assert.ok(e.decode(captureB,{layout:'colemak'}).some(c=>e.commitCandidate(c).includes('跟claude')),'converted first-tone switch preserves typed spacing');
     assert.ok(e.commitCandidate(e.decode(captureB.replace('ep cuaigk','ep  cuaigk'),{layout:'colemak'})[0]).includes('跟 claude 討論'));
     for(const row of baseline.rows){
       const candidates=e.decode(currentRaw(row),row.options),texts=candidates.map(c=>e.commitCandidate(c)),readings=candidates.map(kanaLevel);
@@ -34,6 +34,10 @@ test('English islands survive frequency ranking with unchanged tone boundaries',
       const expected=/^probe-(colemak|qwerty)-5$/.test(row.id)?'しんよう'
         :/^probe-(colemak|qwerty)-7$/.test(row.id)?'へっぉさくら' // Mozc ll permits a full kana path; ranking limitation, not a target.
         :row.id==='chinese-qwerty-2-prefix-2'?'う' // Newly supported Mozc wu alias; completed Chinese is unchanged.
+        :row.id==='chinese-qwerty-0-prefix-6'?'中so' // Completed 中 opens a temporary English prefix.
+        :row.id==='chinese-qwerty-2-prefix-6'?'天不' // fu temporarily imports Japanese 不.
+        :row.id==='chinese-qwerty-3-prefix-5'?'跟す' // su temporarily composes Japanese す.
+        :row.id==='chinese-qwerty-4-prefix-4'?'資ぅ' // xu temporarily composes small kana.
         :row.candidates[0]?.text;
       if(row.chinese||row.id.startsWith('probe-')||row.id.startsWith('abbreviation-'))assert.ok(texts[0]===expected||readings[0]===expected,`${row.id}: ${texts[0]}`);
       // Imported Japanese and frequency-aware Chinese change their own path scores; Roman-only evidence stays byte-identical.

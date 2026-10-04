@@ -34,8 +34,8 @@ and imported alternatives get the corresponding offset for preceding custom
 choices, so every custom alternative takes precedence. Atomic replacement, per-engine
 isolation and selected-candidate commit remain the same. Incomplete or unknown
 Zhuyin stays on the existing phonetic fallback score; the model applies only to
-dictionary entries. First-tone Space still completes Chinese and needs another
-Space before a language switch.
+dictionary entries. [Converted first-tone switching](TONE-SWITCH.md) now uses
+that same Space for a language change; another Space prints a separator.
 
 The source counts belong to surfaces, not pronunciation-conditioned readings.
 Every imported reading of a surface shares its count. There is no contextual
@@ -51,7 +51,8 @@ After `bazelisk build //:polytype-search`, send one request per line with fields
 | --- | --- |
 | `--experiment=current` | Current expanded dictionary and default policy |
 | `--experiment=current+no-frequency` | Same dictionary, old Chinese scores |
-| `--experiment=current+first-tone` | Current scoring plus diagnostic first-tone switching |
+| `--experiment=current+no-tone-switch` | Phase 1 dictionary/scoring with the former Space boundary |
+| `--experiment=current+no-tone-switch+first-tone` | Former unrestricted first-tone diagnostic |
 | `--experiment=baseline` | Frozen family-v1 policy and original 20k Chinese cut |
 | `--experiment=frequency` | Frozen family-v1 policy and 20k cut, frequency scoring enabled |
 | `--experiment=frequency+first-tone` | Same scoring ablation plus diagnostic switching |

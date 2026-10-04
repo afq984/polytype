@@ -159,6 +159,18 @@ try {
     assert.equal(await evaluate("document.getElementById('preedit').textContent"),'還可以ㄅ');
     await key(' ','Space');
     assert.equal(await evaluate("document.getElementById('preedit').textContent"),'還可以ㄅ ');
+    // One physical Space completes ㄍㄤ and opens call; a second stays visible.
+    for(const layout of ['qwerty','colemak'])for(const spaces of [1,2]){
+      await evaluate(`document.getElementById('keyboard-layout').value=${JSON.stringify(layout)}; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true})); document.getElementById('raw').value=''; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true})); document.getElementById('raw').focus()`);
+      await key(layout==='qwerty'?'e':'f','KeyE');
+      await key(layout==='qwerty'?';':'o','Semicolon');
+      for(let i=0;i<spaces;i++)await key(' ','Space',32);
+      if(layout==='colemak')await typeRoman('call');
+      else for(const letter of 'call')await key(letter,'Key'+letter.toUpperCase());
+      assert.equal(await evaluate("document.getElementById('preedit').textContent"),spaces===1?'剛call':'剛 call',layout);
+      assert.equal(await evaluate("document.getElementById('raw').value"),'e;'+' '.repeat(spaces)+(layout==='qwerty'?'call':'cauu'));
+    }
+    await evaluate("document.getElementById('keyboard-layout').value='colemak'; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
     // Browser storage remains outside the core; rehydrate it into a fresh WASM instance.
     await evaluate("document.getElementById('entry-reading').value='ㄎㄜ ㄐㄧˋ'; document.getElementById('entry-text').value='科技'; document.getElementById('dictionary-form').requestSubmit()");
     await evaluate("document.getElementById('raw').value='kd ur4'; document.getElementById('raw').dispatchEvent(new Event('input', {bubbles:true}))");

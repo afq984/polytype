@@ -1,5 +1,27 @@
 # Polytype handoff
 
+## Converted first-tone language switching (tone-switch-v1)
+
+Expanded search now permits English, numbers/identifiers, ASCII punctuation and
+Japanese after a dictionary-converted first-tone syllable with that same Space.
+`ㄍㄤ␣call` produces `剛call`; a second Space produces `剛 call`.
+Unsupported phonetic fallback cannot open the switch. Prototype and no-Space
+switching remain unchanged. Policy/ablations, ambiguity costs and typing-prefix
+limits are in [docs/TONE-SWITCH.md](docs/TONE-SWITCH.md). Ranking gains
+`+tone-switch-v1` after `+bare-zhuyin-v1` through the shared engine export.
+
+Development QWERTY en-zh target top one improves 157→174/300, matching the
+explicit-separator contract. Colemak improves 154→169/300 versus 171/300 with
+explicit separators. Every current-contract aggregate, Chinese-only guard and
+English-only guard is unchanged, with no individual target top-one/top-five
+loss. The old GSD, feedback, mixed and Japanese targets are retained. Short
+Chinese typing prefixes can still temporarily favor Roman interpretations;
+these are measured costs, documented rather than treated as corrected targets.
+Browser smoke covers physical single/double Space in both layouts for the
+coordinator to run. This is a local expanded-prototype change.
+
+The sections below retain the earlier milestones and their original evidence.
+
 ## Punctuation stack integrated with frequency scoring
 
 PT-006, parentheses and bare Zhuyin are rebased onto frequency-scoring main

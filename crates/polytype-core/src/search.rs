@@ -65,6 +65,7 @@ struct Policy {
     discards: bool,
     identifiers: bool,
     first_tone: bool,
+    tone_switch: bool,
     legacy_romaji: bool,
     chinese_punctuation: bool,
     frequency: bool,
@@ -81,6 +82,7 @@ impl Default for Policy {
             discards: false,
             identifiers: false,
             first_tone: false,
+            tone_switch: true,
             legacy_romaji: false,
             chinese_punctuation: true,
             frequency: true,
@@ -456,6 +458,7 @@ pub(crate) fn diagnose(
         chinese_parentheses: diversity,
         bare_zhuyin: diversity,
         physical_keys: diversity,
+        tone_switch: diversity,
         ..Policy::default()
     };
     let candidates = decode_configured(input, dictionary, options, width, 5, policy);
@@ -495,6 +498,7 @@ pub(crate) fn experiment(
             chinese_parentheses: false,
             bare_zhuyin: false,
             physical_keys: false,
+            tone_switch: false,
             ..Policy::default()
         }
     };
@@ -512,6 +516,8 @@ pub(crate) fn experiment(
             "discards" => policy.discards = true,
             "identifiers" => policy.identifiers = true,
             "first-tone" => policy.first_tone = true,
+            "tone-switch" => policy.tone_switch = true,
+            "no-tone-switch" => policy.tone_switch = false,
             "current" => {}
             "no-frequency" => policy.frequency = false,
             "frequency" => policy.frequency = true,
@@ -587,18 +593,58 @@ fn decode_lattice(
     beams.states[0].push(BeamEntry::default());
     for i in 0..raw.len() {
         for mut state in beams.states[i].clone() {
-            // Diagnostic-only: consume first-tone Space once, without inserting
-            // a literal output space or modifying the completed Chinese part.
-            if policy.first_tone
-                && dictionary.expanded
+            // A first-tone Space also permits the next Roman interpretation;
+            // it emits no separator. Require a dictionary conversion so an
+            // unsupported reading (e.g. / = ㄥ) cannot escape into English.
+            // The old unrestricted relaxation remains a native-only ablation.
+            let tone_switch = dictionary.expanded
+                && policy.tone_switch
                 && state.lang.as_deref() == Some("TW")
                 && state
                     .parts
                     .last()
-                    .is_some_and(|p| p.complete == Some(true) && p.raw.ends_with(' '))
+                    .is_some_and(|p| p.raw.ends_with(' ') && converted_chinese(p, dictionary));
+            if tone_switch
+                || (policy.first_tone
+                    && dictionary.expanded
+                    && state.lang.as_deref() == Some("TW")
+                    && state
+                        .parts
+                        .last()
+                        .is_some_and(|p| p.complete == Some(true) && p.raw.ends_with(' ')))
             {
                 state.candidate.lang = None;
             }
+            // Opening another language without a literal separator is weaker
+            // evidence than continuing it. Charge only the newly opened Roman
+            // edge; Chinese continuation and explicit separators keep their scores.
+            let switch_cost = if tone_switch {
+                // Count trailing first-tone syllables independently of whether
+                // they were composed as phrases or singles. Otherwise several
+                // English words ("i i mean") can become Chinese before escaping.
+                let mut keys: Vec<u16> = state
+                    .parts
+                    .iter()
+                    .rev()
+                    .take_while(|p| p.lang == "TW")
+                    .flat_map(|p| p.raw.bytes().rev())
+                    .take_while(|c| !matches!(c, b'6' | b'3' | b'4' | b'7'))
+                    .map(u16::from)
+                    .collect();
+                keys.reverse();
+                let tones = keys.iter().filter(|&&c| c == b' ' as u16).count();
+                // A spelling such as p95 can only become a Chinese reading by
+                // replacing keys. Do not let the new boundary reward that detour.
+                let mut discarded = 0;
+                let mut at = 0;
+                while let Some(syllable) = read_units(&keys, at) {
+                    discarded += (syllable.end - at).saturating_sub(syllable.key.len());
+                    at = syllable.end;
+                }
+                2.0 * tones as f64 + discard_cost(discarded, false)
+            } else {
+                0.0
+            };
             let full = mapped_punctuation
                 .then(|| {
                     chinese_punctuation(
@@ -624,12 +670,26 @@ fn decode_lattice(
                     .get(i + 1)
                     .is_some_and(|&c| roman(&segment(&[c], 0, 1)) == "s")
                 && (i + 2 == raw.len() || raw[i + 2] == b' ' as u16 || is_punctuation(raw[i + 2]));
-            if is_punctuation(raw[i])
-                || (mapped_punctuation
-                    && ("、「」『』".contains(char::from_u32(raw[i] as u32).unwrap_or_default())
-                        || (policy.chinese_parentheses
-                            && "（）".contains(char::from_u32(raw[i] as u32).unwrap_or_default()))))
-                || (chinese_context && full.is_some() && !possessive)
+            // Physical ':' is uppercase O in Colemak Roman text. Once the
+            // first-tone switch opens, following letters establish that word
+            // interpretation; a standalone key retains the Chinese colon path.
+            let starts_roman_word = roman_colon
+                && raw[i] == b':' as u16
+                && raw.get(i + 1).is_some_and(|&unit| {
+                    !is_punctuation(unit)
+                        && (unit == b':' as u16
+                            || unit == b'\'' as u16
+                            || char::from_u32(unit as u32).is_some_and(|c| c.is_ascii_alphabetic()))
+                });
+            if !(tone_switch && starts_roman_word)
+                && (is_punctuation(raw[i])
+                    || (mapped_punctuation
+                        && ("、「」『』"
+                            .contains(char::from_u32(raw[i] as u32).unwrap_or_default())
+                            || (policy.chinese_parentheses
+                                && "（）"
+                                    .contains(char::from_u32(raw[i] as u32).unwrap_or_default()))))
+                    || (chinese_context && full.is_some() && !possessive))
             {
                 // Raw ':' still has the physical Zhuyin colon interpretation
                 // after Chinese; its literal punctuation alternative stays ':'.
@@ -667,15 +727,6 @@ fn decode_lattice(
                 // A standalone physical colon after Chinese keeps its default.
                 // Following Roman letters may instead form an uppercase-O word
                 // after a literal-space language boundary (e.g. Chinese + OK).
-                let starts_roman_word = roman_colon
-                    && raw[i] == b':' as u16
-                    && raw.get(i + 1).is_some_and(|&unit| {
-                        !is_punctuation(unit)
-                            && (unit == b':' as u16
-                                || unit == b'\'' as u16
-                                || char::from_u32(unit as u32)
-                                    .is_some_and(|c| c.is_ascii_alphabetic()))
-                    });
                 if !starts_roman_word {
                     continue;
                 }
@@ -854,6 +905,28 @@ fn decode_lattice(
             let roman_text = roman(&token);
             let roman = roman_text.to_lowercase();
             let token_len = (end - i) as f64;
+            if tone_switch
+                && (options.english || options.japanese)
+                && !token.is_empty()
+                && roman_text.chars().all(|c| c.is_ascii_punctuation())
+            {
+                // Unmapped ASCII punctuation (e.g. /) is also a Roman token.
+                // Mapped Chinese marks already took the punctuation path above.
+                push(
+                    &mut beams,
+                    end,
+                    &state,
+                    Part {
+                        raw: token.clone(),
+                        text: roman_text.clone(),
+                        lang: "punct".into(),
+                        note: "ASCII punctuation after first tone".into(),
+                        ..Part::default()
+                    },
+                    token_len,
+                    None,
+                );
+            }
             // Period/comma/semicolon are also Zhuyin positions. Strip them
             // only inside Roman interpretations, never from the shared input.
             let spelling = if dictionary.expanded {
@@ -974,7 +1047,8 @@ fn decode_lattice(
                                 ..Part::default()
                             },
                             spelling_len * rate - n as f64 * 0.7 + transition("JP")
-                                - if has_case { 2.0 } else { 0.0 },
+                                - if has_case { 2.0 } else { 0.0 }
+                                - switch_cost,
                             "JP",
                         );
                     }
@@ -1030,7 +1104,8 @@ fn decode_lattice(
                                     composition.explicit_small_kana as f64 * 1.5
                                 } else {
                                     0.0
-                                },
+                                }
+                                - switch_cost,
                             "JP",
                         );
                     }
@@ -1091,6 +1166,20 @@ fn decode_lattice(
                         // Standalone and Chinese-context tone keys keep their
                         // normal competition.
                         spelling_len * 2.5
+                    } else if tone_switch
+                        && spelling.chars().any(|c| c.is_ascii_digit())
+                        && spelling
+                            .chars()
+                            .all(|c| c.is_ascii_alphanumeric() || "_./-".contains(c))
+                    {
+                        // At the newly opened Roman boundary, numbers and code
+                        // identifiers are evidence too; retain the spelling.
+                        spelling_len
+                            * if spelling.chars().any(|c| c.is_ascii_alphabetic()) {
+                                1.8
+                            } else {
+                                2.5
+                            }
                     } else if policy.identifiers
                         && dictionary.expanded
                         && spelling.chars().any(|c| c.is_ascii_alphabetic())
@@ -1111,7 +1200,7 @@ fn decode_lattice(
                         spelling_len * 0.9 + transition("EN") + if has_case { 2.0 } else { 0.0 }
                     } else {
                         token_len * 0.1 - 2.0
-                    },
+                    } - switch_cost,
                     "EN",
                 );
             }

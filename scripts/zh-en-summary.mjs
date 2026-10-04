@@ -29,7 +29,7 @@ export function renderZhEnSummary(summary,{skippedUnmapped=0}={}) {
     lines.push(`| ${group} | ${stratum} | ${metrics.cases} | ${metrics.top1} / ${metrics.top5} | ${metrics.spaceNormalizedTop1} / ${metrics.spaceNormalizedTop5} | ${rate(metrics.englishExact,metrics.englishMatches,metrics.englishTokens)} | ${rate(metrics.hanCER,metrics.hanEdits,metrics.hanCharacters)} | ${rate(metrics.wrongLanguage,metrics.wrongLanguageCases,metrics.singleLanguageCases)} |`);
   }
   lines.push('',
-    'The current and target Space contracts are scored separately on the same decoder. Scores for the future target contract describe its current limitations. Review status, layout and enabled languages remain visible in every group; aggregate differences alone do not establish a decoder improvement.',
+    'The current (explicit separator) and target (one Space) input contracts are scored separately on the same decoder. First-tone completion emits no space; extra literal spaces remain visible. Review status, layout and enabled languages remain visible in every group; aggregate differences alone do not establish a decoder improvement.',
     'Sourced text and adapted annotations retain CC BY-SA 4.0; the offline OpenCC conversion resources retain Apache-2.0. This summary does not add source text to the runtime dictionaries.','');
   return lines.join('\n');
 }

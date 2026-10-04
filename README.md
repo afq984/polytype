@@ -15,8 +15,9 @@ following Mozc's table: `shinnyou` → `しんよう`, `konna` → `こんあ`,
 
 The [English-island sprint](eval/ISLANDS.md) preserves alternative language paths
 within the existing search budget. It recovers `p95 latency` inside Chinese
-without changing scores or dictionaries. First-tone Space still completes a
-Chinese syllable; press Space again for a separator before another language.
+without changing scores or dictionaries. A converted first-tone syllable now uses
+that same Space to permit another language: `ㄍㄤ␣call` → `剛call`;
+`ㄍㄤ␣␣call` → `剛 call`. See [the boundary behavior](docs/TONE-SWITCH.md).
 
 ## Build and run
 
@@ -114,7 +115,9 @@ After completed Chinese, punctuation prefers the standard Chinese forms with
 ASCII alternatives still selectable; see [the key map and numeric limitations](docs/PUNCTUATION.md).
 
 Literal spaces permit language changes. A Zhuyin first-tone space completes a
-syllable instead of inserting a separator. Candidate selection and commit operate
+syllable without printing a separator and permits another language after Chinese
+conversion. Every other Space stays visible; no-Space switching is unsupported.
+Candidate selection and commit operate
 on the whole composition. Other unfinished consonants can still commit literally.
 
 Chinese includes 48,184 imported reading/output pairs (45,471 unique outputs)
