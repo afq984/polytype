@@ -117,8 +117,13 @@ ASCII alternatives still selectable; see [the key map and numeric limitations](d
 Literal spaces permit language changes. A Zhuyin first-tone space completes a
 syllable without printing a separator and permits another language after Chinese
 conversion. Every other Space stays visible; no-Space switching is unsupported.
-Candidate selection and commit operate
-on the whole composition. Other unfinished consonants can still commit literally.
+Click a segment or press ArrowDown to correct one part without retyping the
+sentence. Local English/kana/raw choices, paired punctuation and Chinese
+syllable/phrase selection lock that span while the rest is re-decoded. Enter in
+the menu applies; Enter in the editor commits the selected whole candidate.
+Space keeps typing. See [segment correction](docs/CORRECTION.md) for keys,
+edit behavior and the native/WASM API. Other unfinished consonants can still
+commit literally.
 
 Chinese includes 48,184 imported reading/output pairs (45,471 unique outputs)
 from a pinned McBopomofo subset, plus prototype fallback and custom entries.

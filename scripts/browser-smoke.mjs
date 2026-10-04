@@ -301,6 +301,75 @@ try {
     assert.ok((await evaluate("document.getElementById('preedit').textContent")).includes('跟 claude 討論'));
     const islandReport=await evaluate("(async()=>{await document.getElementById('copy-debug').onclick();return JSON.parse(document.getElementById('debug-report').value)})()");
     assert.equal(islandReport.ranking,rankingId);
+    // Local correction uses exact raw spans, independent of whole-sentence rank.
+    await evaluate("document.getElementById('keyboard-layout').value='qwerty';document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('clear').click();document.getElementById('raw').value='y94 y94 hello';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('raw').setSelectionRange(3,3);document.getElementById('raw').focus()");
+    await key('ArrowDown','ArrowDown',40);
+    assert.equal(await evaluate("document.getElementById('segment-menu').hidden"),false);
+    await key('2','Digit2');
+    assert.equal(await evaluate("document.getElementById('raw').value"),'y94 y94 hello');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'再 在 hello');
+    await evaluate("document.querySelector('#preedit [data-start=\"4\"]').click();[...document.querySelectorAll('#segment-choices button')].find(b=>b.dataset.text==='再').click()");
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'再 再 hello');
+    assert.equal(await evaluate("document.querySelectorAll('#preedit .locked').length"),2);
+    const correctedReport=await evaluate("(async()=>{await document.getElementById('copy-debug').onclick();return JSON.parse(document.getElementById('debug-report').value)})()");
+    assert.deepEqual(correctedReport.constraints,[{start:0,end:3,text:'再',lang:'TW'},{start:4,end:7,text:'再',lang:'TW'}]);
+    assert.equal(correctedReport.ranking,rankingId+'+segment-v1');
+    assert.equal(correctedReport.rawEncodingVersion,rawEncodingVersion);
+    await evaluate("document.getElementById('raw').focus();document.getElementById('raw').setSelectionRange(7,7)");
+    await key('ArrowDown','ArrowDown',40);await key('Escape','Escape',27);
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'再 再 hello');
+    await key('ArrowDown','ArrowDown',40);await key('Tab','Tab',9);
+    assert.equal(await evaluate("document.getElementById('segment-menu').hidden"),true);
+    assert.equal(await evaluate("document.getElementById('raw').value"),'y94 y94 hello');
+    await evaluate("document.getElementById('raw').focus();document.getElementById('raw').setSelectionRange(7,7)");
+    await key('ArrowDown','ArrowDown',40);await key('Backspace','Backspace',8);
+    assert.equal(await evaluate("document.getElementById('raw').value"),'y94 y9 hello');
+    assert.equal(await evaluate("document.querySelectorAll('#preedit .locked').length"),1);
+    await evaluate("document.getElementById('unlock-all').click()");
+    assert.equal(await evaluate("document.querySelectorAll('#preedit .locked').length"),0);
+    await evaluate("document.getElementById('clear').click();document.getElementById('raw').value='/j5';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('raw').setSelectionRange(3,3);document.getElementById('raw').focus()");
+    await key('ArrowDown','ArrowDown',40);await key(' ','Space');
+    assert.equal(await evaluate("document.getElementById('raw').value"),'/j5 ');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'中');
+    assert.equal(await evaluate("document.getElementById('segment-menu').hidden"),true);
+    await key(' ','Space');assert.equal(await evaluate("document.getElementById('preedit').textContent"),'中 ');
+    await evaluate("document.getElementById('clear').click();document.getElementById('raw').value='us3lc3 hello';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#preedit [data-start=\"0\"]').click();document.querySelector('#segment-splits button').click();[...document.querySelectorAll('#segment-choices button')].find(b=>b.dataset.text==='妳').click()");
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'妳好 hello');
+    await evaluate("document.getElementById('clear').click();document.getElementById('raw').value='y/ ru8 xk7';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('raw').setSelectionRange(3,3);document.getElementById('raw').focus()");
+    await key('ArrowDown','ArrowDown',40);await key('ArrowRight','ArrowRight',39,8);
+    await evaluate("[...document.querySelectorAll('#segment-choices button')].find(b=>b.dataset.text==='增加').click()");
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'增加了');
+    await evaluate("document.querySelector('.unlock-segment').click()");
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'增加了');
+    await evaluate("document.getElementById('clear').click();document.getElementById('raw').value='gakkou tanaka hello';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#preedit [data-start=\"7\"]').click();document.querySelector('#segment-choices [data-kind=\"english\"]').click()");
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'学校 tanaka hello');
+    await key('Enter','Enter',13);
+    assert.ok(await evaluate("document.getElementById('committed').textContent.endsWith('学校 tanaka hello')"));
+    await evaluate("document.getElementById('raw').value='hello kan';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#preedit [data-start=\"6\"]').click();document.querySelector('#segment-choices [data-kind=\"katakana\"]').focus()");
+    await key('Enter','Enter',13);
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'hello カン');
+    await key('Enter','Enter',13);
+    assert.ok(await evaluate("document.getElementById('committed').textContent.endsWith('hello カン')"));
+    for(const layout of ['qwerty','colemak']) {
+      const pairs=[['<','，'],['>','。'],['?','？'],['!','！'],[':','：'],["'",'、'],['"','；'],['[','「'],[']','」'],['{','『'],['}','』'],['(','（'],[')','）']];
+      if(layout==='colemak')pairs.push(['P','：']);
+      for(const [rawKey,full]of pairs) {
+        const raw='y94'+rawKey,ascii=rawKey==='P'?':':rawKey;
+        await evaluate(`document.getElementById('keyboard-layout').value=${JSON.stringify(layout)};document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('clear').click();document.getElementById('raw').value=${JSON.stringify(raw)};document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#preedit [data-start="3"]').click()`);
+        assert.deepEqual(await evaluate("[...document.querySelectorAll('#segment-choices button')].map(b=>b.dataset.text)"),[full,ascii]);
+        await evaluate(`[...document.querySelectorAll('#segment-choices button')].find(b=>b.dataset.text===${JSON.stringify(ascii)}).click()`);
+        assert.equal(await evaluate("document.getElementById('raw').value"),raw);
+        assert.equal(await evaluate("document.querySelector('#preedit [data-start=\"3\"]').textContent"),ascii);
+        await evaluate("document.querySelector('#preedit [data-start=\"3\"]').click()");
+        await key('1','Digit1');
+        assert.equal(await evaluate("document.querySelector('#preedit [data-start=\"3\"]').textContent"),full);
+      }
+    }
+    await evaluate("document.getElementById('clear').click();document.getElementById('raw').value='%';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))");
+    assert.equal(await evaluate("document.getElementById('correct-segment').disabled"),true);
+    await evaluate("document.getElementById('enable-english').checked=false;document.getElementById('enable-japanese').checked=false;document.getElementById('enable-english').dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('clear').click();document.getElementById('raw').value='1 ?';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#preedit [data-start=\"0\"]').click();[...document.querySelectorAll('#segment-choices button')].find(b=>b.dataset.text==='ㄅ').click()");
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'ㄅ?');
+    await evaluate("document.getElementById('enable-english').checked=true;document.getElementById('enable-japanese').checked=true;document.getElementById('enable-english').dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('clear').click()");
     // Reading-based conversion and identical-preedit commit recovery.
     await evaluate("document.getElementById('keyboard-layout').value='qwerty'; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
     for(const [raw,target] of [['toukyou','東京'],['nihonngo','日本語']]){
@@ -427,6 +496,19 @@ try {
     for(const char of 'hello')await key(char,'Key'+char.toUpperCase());
     assert.equal(await evaluate("document.getElementById('preedit').textContent"),'hello');
     assert.match(await evaluate("document.getElementById('settings-status').textContent"),/session only/);
+    // Explicit captures retain correction constraints, even when storage fails.
+    await evaluate("document.getElementById('keyboard-layout').value='qwerty';document.getElementById('enable-japanese').checked=true;document.getElementById('enable-zhuyin').checked=true;document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('clear').click();document.getElementById('raw').value='y94 hello';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#preedit [data-start=\"0\"]').click();[...document.querySelectorAll('#segment-choices button')].find(b=>b.dataset.text==='再').click();document.getElementById('capture-case').click();document.getElementById('case-form').requestSubmit()");
+    const correctedCapture=await evaluate(`(async()=>{
+      const create=URL.createObjectURL,click=HTMLAnchorElement.prototype.click;let blob;
+      URL.createObjectURL=value=>{blob=value;return create(value)};HTMLAnchorElement.prototype.click=()=>{};
+      try{document.getElementById('export-cases').click();return (await blob.text()).trim().split('\\n').map(JSON.parse).at(-1)}
+      finally{URL.createObjectURL=create;HTMLAnchorElement.prototype.click=click}
+    })()`);
+    assert.deepEqual(correctedCapture.constraints,[{start:0,end:3,text:'再',lang:'TW'}]);
+    assert.equal(correctedCapture.text,'再 hello');assert.ok(correctedCapture.ranking.endsWith('+segment-v1'));
+    await evaluate("document.getElementById('blind-capture').click()");
+    assert.equal(await evaluate("document.getElementById('correction-tools').hidden"),true);
+    assert.equal(await evaluate("document.getElementById('segment-menu').hidden"),true);
     assert.deepEqual(browserErrors, []);
     console.log('Browser passed:', url);
   }
