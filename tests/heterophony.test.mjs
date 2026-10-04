@@ -31,7 +31,7 @@ test('imported reading counts distinguish common and rare pronunciations',()=>{
 });
 
 test('quick feedback converts in both layouts while custom readings retain precedence',()=>{
-  assert.ok(rankingId.endsWith('+heterophony-v1'));
+  assert.ok(rankingId.includes('+heterophony-v1'));
   const engine=createEngine();
   try {
     for(const layout of ['qwerty','colemak'])for(const japanese of [false,true]) {

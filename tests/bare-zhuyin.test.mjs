@@ -64,12 +64,15 @@ test('dictionary readings and ordinary English retain precedence over bare initi
  }finally{custom.dispose()}
 });
 
-test('a bare fallback remains unconverted and cannot create a Chinese quote boundary',()=>{
+test('bare fallbacks and numeric literals cannot create a Chinese quote boundary',()=>{
  for(const layout of ['qwerty','colemak']){
   const text='a "hello"',raw=layout==='colemak'?engine.encode(text):text;
   assert.equal(decode(raw,{layout})[0].text,text);
-  const parts=decode('1  <',{layout,japanese:false})[0].parts;
-  assert.equal(parts.map(p=>p.text).join(''),'ㄅ <');
+  // With English enabled this unsupported digit-only reading now has numeric
+  // evidence; every Space belongs to the literal numeric interpretation.
+  assert.equal(decode('1  <',{layout,japanese:false})[0].text,'1  <');
+  const parts=decode('1  ?',{layout,english:false,japanese:false})[0].parts;
+  assert.equal(parts.map(p=>p.text).join(''),'ㄅ ?');
  }
 });
 

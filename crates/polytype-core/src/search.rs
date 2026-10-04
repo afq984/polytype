@@ -73,6 +73,7 @@ struct Policy {
     chinese_parentheses: bool,
     bare_zhuyin: bool,
     physical_keys: bool,
+    numbers: bool,
 }
 
 impl Default for Policy {
@@ -90,6 +91,7 @@ impl Default for Policy {
             chinese_parentheses: true,
             bare_zhuyin: true,
             physical_keys: true,
+            numbers: true,
         }
     }
 }
@@ -421,19 +423,128 @@ fn english_boundary_number_score(spelling: &str, tone_switch: bool) -> Option<f6
     })
 }
 
+// Numeric/identifier evidence is available at an existing language boundary,
+// never by splitting a Chinese syllable. Keep a clean dictionary reading ahead
+// of the literal interpretation, including phrases composed from digit keys.
+// Comparing raw length also catches repeated slots that do not record a change.
+fn clean_chinese_token(raw: &[u16], dictionary: &Dictionary) -> bool {
+    let mut at = 0;
+    let mut keys = Vec::new();
+    while at < raw.len() {
+        let Some(syllable) = read_units(raw, at) else {
+            return false;
+        };
+        if !syllable.complete || syllable.end - at != syllable.key.len() {
+            return false;
+        }
+        at = syllable.end;
+        keys.push(syllable.key);
+    }
+    let mut reachable = vec![false; keys.len() + 1];
+    reachable[0] = true;
+    for start in 0..keys.len() {
+        if !reachable[start] {
+            continue;
+        }
+        if dictionary.singles.contains_key(&keys[start]) {
+            reachable[start + 1] = true;
+        }
+        let mut phrase = keys[start].clone();
+        for end in start + 1..keys.len().min(start + 12) {
+            phrase.push('|');
+            phrase.push_str(&keys[end]);
+            if dictionary.phrases.contains_key(&phrase) {
+                reachable[end + 1] = true;
+            }
+            if !dictionary.prefixes.contains(&phrase) {
+                break;
+            }
+        }
+    }
+    !keys.is_empty() && reachable[keys.len()]
+}
+
+// A whole, space-delimited ASCII numeric span. Internal marks must connect
+// alphanumeric units; percent is terminal, and currency/signs are prefixes.
+// This keeps Chinese ':' punctuation separate from the ':' inside 11:25.
+fn number_shape(text: &str) -> bool {
+    let text = text.trim_end_matches(['.', ',', ';']);
+    let text = text
+        .strip_prefix("NT$")
+        .or_else(|| text.strip_prefix('$'))
+        .unwrap_or(text);
+    let text = text.strip_prefix(['+', '-']).unwrap_or(text);
+    let text = text.strip_suffix('%').unwrap_or(text);
+    let bytes = text.as_bytes();
+    let Some(first_digit) = bytes.iter().position(u8::is_ascii_digit) else {
+        return false;
+    };
+    // An identifier starts with a contiguous letter prefix, not an arbitrary
+    // phonetic spelling followed by a slash and tone key (sujo/5 is a real
+    // unordered/replaced-key input). Lowercase prefixes are deliberately short.
+    let prefix = &bytes[..first_digit];
+    if !prefix.iter().all(u8::is_ascii_alphabetic)
+        || (prefix.len() > 3 && !prefix.iter().any(u8::is_ascii_uppercase))
+    {
+        return false;
+    }
+    // Within a component, letters may prefix or suffix one digit run. Another
+    // digit run needs a real separator (R2-D2). Raw Chinese such as us3lc3 or
+    // 2u04wj6 has interleaved tone keys and letters, not this identifier shape.
+    for component in text.split(['.', '_', '/', ':', '-']) {
+        let mut digits = false;
+        let mut suffix = false;
+        for c in component.bytes() {
+            if c.is_ascii_digit() {
+                if suffix {
+                    return false;
+                }
+                digits = true;
+            } else if c.is_ascii_alphabetic() && digits {
+                suffix = true;
+            }
+        }
+    }
+    bytes.iter().enumerate().all(|(i, c)| {
+        c.is_ascii_alphanumeric()
+            || (b"._/:-".contains(c)
+                && i > 0
+                && bytes[i - 1].is_ascii_alphanumeric()
+                && ((i + 1 < bytes.len() && bytes[i + 1].is_ascii_alphanumeric())
+                    || (i + 1 == bytes.len() && b"/-".contains(c))))
+    })
+}
+
+fn number_token_score(text: &str) -> f64 {
+    text.chars()
+        .filter(|c| c.is_ascii_alphanumeric())
+        .map(|c| if c.is_ascii_digit() { 2.5 } else { 1.8 })
+        .sum()
+}
+
+struct BoundaryEvidence {
+    tone_switch: bool,
+    switch_cost: f64,
+    numbers: bool,
+    number_score: Option<f64>,
+}
+
 fn push_lock(
     beams: &mut Lattice,
     state: &BeamEntry,
     lock: &Resolved,
     dictionary: &Dictionary,
     options: &DecodeOptions,
-    tone_boundary: (bool, f64),
+    evidence: BoundaryEvidence,
 ) {
     let first = lock.parts.first().unwrap();
     let raw = lock.constraint.lang == "RAW";
     let mut score = lock.score;
-    if tone_boundary.0 && matches!(first.lang.as_str(), "EN" | "JP") {
-        if first.lang == "EN" && lock.parts.len() == 1 {
+    if first.lang == "EN" && lock.parts.len() == 1 {
+        score = evidence.number_score.unwrap_or(score);
+    }
+    if evidence.tone_switch && matches!(first.lang.as_str(), "EN" | "JP") {
+        if !evidence.numbers && first.lang == "EN" && lock.parts.len() == 1 {
             let roman = options
                 .roman(&first.raw, dictionary.expanded)
                 .to_lowercase();
@@ -442,7 +553,7 @@ fn push_lock(
                 score = english_boundary_number_score(spelling, true).unwrap_or(score);
             }
         }
-        score -= tone_boundary.1;
+        score -= evidence.switch_cost;
     }
     if first.lang == "punct" {
         let unit = first.raw.encode_utf16().next().unwrap();
@@ -774,6 +885,7 @@ pub(crate) fn diagnose(
         bare_zhuyin: diversity,
         physical_keys: diversity,
         tone_switch: diversity,
+        numbers: diversity,
         ..Policy::default()
     };
     let candidates = decode_configured(input, dictionary, options, width, 5, policy);
@@ -814,6 +926,7 @@ pub(crate) fn experiment(
             bare_zhuyin: false,
             physical_keys: false,
             tone_switch: false,
+            numbers: false,
             ..Policy::default()
         }
     };
@@ -833,6 +946,8 @@ pub(crate) fn experiment(
             "first-tone" => policy.first_tone = true,
             "tone-switch" => policy.tone_switch = true,
             "no-tone-switch" => policy.tone_switch = false,
+            "numbers" => policy.numbers = true,
+            "no-numbers" => policy.numbers = false,
             "current" => {}
             "no-frequency" => policy.frequency = false,
             "frequency" => policy.frequency = true,
@@ -914,6 +1029,55 @@ fn decode_lattice_planned(
     };
     beams.states[0].push(BeamEntry::default());
     for i in 0..raw.len() {
+        if beams.states[i].is_empty() {
+            continue;
+        }
+        // Token analysis depends on keys/dictionary, not candidate history.
+        // Compute it once per offset, then reuse it across the bounded beam.
+        let number = if dictionary.expanded && policy.numbers && options.english {
+            let end = raw[i..]
+                .iter()
+                .position(|&unit| unit == b' ' as u16)
+                .map_or(raw.len(), |length| i + length);
+            let text = roman(&segment(&raw, i, end));
+            let phonetic_end = if raw.get(end) == Some(&(b' ' as u16)) {
+                end + 1
+            } else {
+                end
+            };
+            let numeric_shape = number_shape(&text);
+            let chinese_mark = numeric_shape
+                && text.bytes().any(|c| c.is_ascii_alphabetic())
+                && raw[i..end].iter().enumerate().any(|(offset, &unit)| {
+                    chinese_punctuation(unit, policy.chinese_parentheses).is_some()
+                        && clean_chinese_token(&raw[i..i + offset], dictionary)
+                });
+            // A trailing Space may be the next Chinese syllable's first tone.
+            // Try the token alone as well when its last tone was explicit.
+            if !numeric_shape
+                || chinese_mark
+                // A completed Chinese syllable followed without a Space by a
+                // pending syllable is still Chinese typing (us3l = 你ㄠ).
+                // Do not reinterpret the entire unfinished word as an ID.
+                || (raw[i] <= 127
+                    && (raw[i] as u8).is_ascii_alphabetic()
+                    && read_units(&raw[i..end], 0).is_some_and(|p| {
+                        p.complete
+                            && p.end < end - i
+                            && p.end == p.key.len()
+                            && dictionary.singles.contains_key(&p.key)
+                    }))
+                || clean_chinese_token(&raw[i..end], dictionary)
+                || clean_chinese_token(&raw[i..phonetic_end], dictionary)
+            {
+                None
+            } else {
+                let score = number_token_score(&text);
+                Some((end, text, score))
+            }
+        } else {
+            None
+        };
         for mut state in beams.states[i].clone() {
             // A first-tone Space also permits the next Roman interpretation;
             // it emits no separator. Require a dictionary conversion so an
@@ -967,6 +1131,15 @@ fn decode_lattice_planned(
             } else {
                 0.0
             };
+            let number_boundary = tone_switch
+                || state.parts.is_empty()
+                || (state.parts.last().is_some_and(|p| p.lang == "space")
+                    && state
+                        .parts
+                        .iter()
+                        .rev()
+                        .find(|p| p.lang != "space")
+                        .is_some_and(|p| converted_chinese(p, dictionary)));
             if let Some(lock) = plan.and_then(|p| p.at(i)) {
                 push_lock(
                     &mut beams,
@@ -974,9 +1147,37 @@ fn decode_lattice_planned(
                     lock,
                     dictionary,
                     options,
-                    (tone_switch, switch_cost),
+                    BoundaryEvidence {
+                        tone_switch,
+                        switch_cost,
+                        numbers: policy.numbers,
+                        number_score: number.as_ref().and_then(|(end, _, score)| {
+                            (number_boundary && *end == lock.constraint.end).then_some(*score)
+                        }),
+                    },
                 );
                 continue;
+            }
+
+            if let Some((end, text, score)) = &number
+                && number_boundary
+                && (state.lang.is_none() || state.lang.as_deref() == Some("EN"))
+            {
+                push(
+                    &mut beams,
+                    *end,
+                    &state,
+                    Part {
+                        raw: segment(&raw, i, *end),
+                        text: text.clone(),
+                        lang: "EN".into(),
+                        note: "Numeric / identifier evidence without a clean Chinese reading"
+                            .into(),
+                        ..Part::default()
+                    },
+                    score - switch_cost,
+                    Some("EN"),
+                );
             }
 
             let full = mapped_punctuation
@@ -1479,7 +1680,8 @@ fn decode_lattice_planned(
                         // Standalone and Chinese-context tone keys keep their
                         // normal competition.
                         spelling_len * 2.5
-                    } else if let Some(score) = english_boundary_number_score(spelling, tone_switch)
+                    } else if let Some(score) =
+                        english_boundary_number_score(spelling, tone_switch && !policy.numbers)
                     {
                         score
                     } else if policy.identifiers

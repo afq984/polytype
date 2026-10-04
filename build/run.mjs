@@ -75,6 +75,8 @@ if (mode === 'test') {
 
 } else if (mode === 'benchmark') {
   run('scripts/benchmark-search.mjs', args.map(arg => resolve(caller, arg)));
+} else if (mode === 'numbers-diagnostics') {
+  run('scripts/numbers-diagnostics.mjs', args.map(arg => resolve(caller, arg)));
 } else if (mode === 'diagnose') {
   run('scripts/search-diagnostics.mjs', args.map(arg => arg.startsWith('--') ? arg : resolve(caller, arg)));
 } else {

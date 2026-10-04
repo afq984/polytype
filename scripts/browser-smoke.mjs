@@ -185,6 +185,17 @@ try {
       assert.equal(await evaluate("document.getElementById('preedit').textContent"),spaces===1?'剛call':'剛 call',layout);
       assert.equal(await evaluate("document.getElementById('raw').value"),'e;'+' '.repeat(spaces)+(layout==='qwerty'?'call':'cauu'));
     }
+    // Numeric spans use the same physical first-tone switch and exact Spaces.
+    for(const layout of ['qwerty','colemak'])for(const spaces of [1,2]){
+      await evaluate(`document.getElementById('keyboard-layout').value=${JSON.stringify(layout)};document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('clear').click();document.getElementById('raw').focus()`);
+      await key(layout==='qwerty'?'e':'f','KeyE');
+      await key(layout==='qwerty'?';':'o','Semicolon');
+      for(let i=0;i<spaces;i++)await key(' ','Space',32);
+      await key('1','Digit1');await key('7','Digit7');
+      assert.equal(await evaluate("document.getElementById('preedit').textContent"),'剛'+' '.repeat(spaces-1)+'17');
+      await key('Enter','Enter',13);
+      assert.ok(await evaluate("document.getElementById('committed').textContent").then(text=>text.endsWith('剛'+' '.repeat(spaces-1)+'17')));
+    }
     await evaluate("document.getElementById('keyboard-layout').value='colemak'; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
     // Browser storage remains outside the core; rehydrate it into a fresh WASM instance.
     await evaluate("document.getElementById('entry-reading').value='ㄎㄜ ㄐㄧˋ'; document.getElementById('entry-text').value='科技'; document.getElementById('dictionary-form').requestSubmit()");

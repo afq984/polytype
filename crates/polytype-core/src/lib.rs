@@ -335,6 +335,8 @@ mod diagnostic_tests {
                 "current+first-tone",
                 "tone-switch",
                 "current+no-tone-switch",
+                "numbers",
+                "current+no-numbers",
             ] {
                 assert_eq!(
                     json!(engine.experiment(raw, &options, policy).unwrap()),

@@ -41,6 +41,7 @@ node_command(name = "measure_evaluation", runtime = ":demo", mode = "measure-eva
 node_command(name = "evaluate_local", runtime = ":demo", mode = "evaluate-local")
 node_command(name = "corpus", runtime = ":demo", mode = "corpus")
 node_command(name = "benchmark", runtime = ":demo", mode = "benchmark")
+node_command(name = "numbers_diagnostics", runtime = ":demo", mode = "numbers-diagnostics")
 node_command(name = "diagnose", runtime = ":demo", mode = "diagnose")
 node_command(name = "import_chinese", runtime = ":demo", mode = "import-chinese")
 node_command(name = "import_english", runtime = ":demo", mode = "import-english")

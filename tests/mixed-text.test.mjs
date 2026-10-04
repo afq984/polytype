@@ -24,8 +24,10 @@ test('Japanese punctuation and numbers retain their spelling in both layouts',()
    assert.equal(engine.commitCandidate(candidates.find(c=>c.text==='サクラ.')),'サクラ.');
    assert.ok(engine.decode(raw('kan.'),{layout}).some(c=>engine.commitCandidate(c)==='かん.'));
    assert.equal(engine.commitCandidate(engine.decode(raw('kak.'),{layout,english:false,zhuyin:false})[0]),'かk.');
-   // Numeric evidence is contextual, not a global reassignment of tone keys.
-   assert.equal(engine.decode('16',{layout})[0].text,'ㄅˊ');
+   // Unsupported digit-only readings now have numeric evidence at sentence
+   // start too. Disabling English retains the phonetic interpretation.
+   assert.equal(engine.decode('16',{layout})[0].text,'16');
+   assert.equal(engine.decode('16',{layout,english:false})[0].text,'ㄅˊ');
    assert.equal(engine.decode('us3lc3',{layout})[0].text,'你好');
    for(const input of ['.6',',6','p6']) {
     assert.ok(engine.decode(input,{layout,english:false,japanese:false})[0].parts.every(p=>p.lang==='TW'));
