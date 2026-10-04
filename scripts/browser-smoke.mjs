@@ -63,7 +63,7 @@ try {
     // Prevent a still-live old document from satisfying readiness after reload.
     await evaluate("document.getElementById('raw').disabled=true");
     await send('Page.reload');
-    for(let attempt=0;attempt<100;attempt++){
+    for(let attempt=0;attempt<400;attempt++){
       if(await evaluate("!!document.getElementById('raw') && !document.getElementById('raw').disabled"))return;
       await new Promise(resolve=>setTimeout(resolve,50));
     }
@@ -94,6 +94,21 @@ try {
     assert.equal(await evaluate("document.getElementById('preedit').textContent"), '小さい 的英文是 small');
     assert.deepEqual(await readOptions(),{layout:'qwerty',english:true,japanese:true,zhuyin:true});
     assert.ok(await evaluate("document.getElementById('raw').value.startsWith('tiisai ')"));
+    assert.equal(await evaluate("document.activeElement.id==='raw'"),false);
+    assert.equal(await evaluate("document.getElementById('more-tools').open"),false);
+    assert.equal(await evaluate("document.getElementById('candidates').getAttribute('role')"),'group');
+    assert.equal(await evaluate("document.getElementById('preedit').getAttribute('aria-labelledby')"),'preedit-label');
+    assert.equal(await evaluate("getComputedStyle(document.getElementById('examples')).flexWrap"),'nowrap');
+    assert.equal(await evaluate("document.getElementById('examples').closest('.compose')!==null"),true);
+    await evaluate("document.getElementById('more-tools').open=true");
+    await new Promise(resolve=>setTimeout(resolve,100));
+    await reloadReady();
+    assert.equal(await evaluate("document.getElementById('more-tools').open"),true);
+    await evaluate("document.getElementById('more-tools').open=false");
+    await new Promise(resolve=>setTimeout(resolve,100));
+    await reloadReady();
+    assert.equal(await evaluate("document.getElementById('more-tools').open"),false);
+
     // Persist layout and disabled languages before any other typing tests.
     await evaluate("document.getElementById('keyboard-layout').value='colemak'; document.getElementById('enable-english').checked=false; document.getElementById('enable-zhuyin').checked=false; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
     await reloadReady();
@@ -182,6 +197,7 @@ try {
     }
     await evaluate("document.getElementById('raw').value='kd ur4'; document.getElementById('raw').dispatchEvent(new Event('input', {bubbles:true}))");
     assert.equal(await evaluate("document.getElementById('preedit').textContent"), '科技');
+    await evaluate("document.getElementById('more-tools').open=true");
     // Exercise both clipboard outcomes deterministically, without touching the
     // host clipboard. The report must preserve selection and omit user history.
     const snapshot=await evaluate(`(async()=>{
@@ -326,6 +342,7 @@ try {
     }
     assert.equal(await evaluate("document.getElementById('case-count').textContent"),'1 / 100 saved locally');
     // Blind mode starts fresh and never offers predictions or a prefilled target.
+    await evaluate("document.getElementById('more-tools').open=true");
     await evaluate("document.getElementById('blind-capture').click()");
     assert.equal(await evaluate("document.getElementById('raw').value"),'');
     await typeRoman('hello  ');
@@ -336,7 +353,8 @@ try {
     assert.equal(await evaluate("document.getElementById('commit').disabled"),true);
     await evaluate("document.getElementById('capture-case').click()");
     assert.equal(await evaluate("document.getElementById('case-expected').value"),'');
-    await evaluate("document.getElementById('raw').focus()"); await key('Enter','Enter',13);
+    await evaluate("document.getElementById('more-tools').open=false;document.getElementById('raw').focus()"); await key('Enter','Enter',13);
+    assert.equal(await evaluate("document.getElementById('more-tools').open"),true);
     assert.equal(await evaluate("document.activeElement.id"),'case-expected');
     await evaluate("document.getElementById('case-expected').value='hello  ';document.getElementById('case-form').requestSubmit()");
     const blindSaved=await evaluate("JSON.parse(localStorage.getItem('polytype-test-cases-v1')).at(-1)");
@@ -402,6 +420,8 @@ try {
     await reloadReady();
     await send('Page.removeScriptToEvaluateOnNewDocument',{identifier:blockedStorage.identifier});
     assert.deepEqual(await readOptions(),defaults);
+    assert.equal(await evaluate("document.getElementById('more-tools').open"),false);
+    await evaluate("document.getElementById('more-tools').open=true");
     assert.match(await evaluate("document.getElementById('settings-status').textContent"),/could not be loaded/);
     await evaluate("document.getElementById('enable-japanese').click(); document.getElementById('enable-zhuyin').click(); document.getElementById('clear').click()");
     for(const char of 'hello')await key(char,'Key'+char.toUpperCase());

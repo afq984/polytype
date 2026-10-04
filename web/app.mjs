@@ -2,6 +2,9 @@ import{rankingId,rawEncodingVersion,decode,commitCandidate,examplesForLayout,phy
 const $=id=>document.getElementById(id);let candidates=[],selected=0,committed='',timer=null;
 const blind=()=>$('blind-capture').checked;
 const options=()=>({layout:$('keyboard-layout').value,english:$('enable-english').checked,japanese:$('enable-japanese').checked,zhuyin:$('enable-zhuyin').checked});
+const toolsKey='polytype-tools-open-v1';
+try{$('more-tools').open=localStorage.getItem(toolsKey)==='true'}catch{}
+$('more-tools').addEventListener('toggle',()=>{try{localStorage.setItem(toolsKey,String($('more-tools').open))}catch{}});
 const optionsKey='polytype-input-options-v1';
 const defaultOptions={layout:'qwerty',english:true,japanese:true,zhuyin:true};
 let initialOptions=defaultOptions;
@@ -97,7 +100,7 @@ $('capture-case').onclick=()=>{
  caseSnapshot={...(blind()?{blind:true}:{}),raw:$('raw').value,rawEncodingVersion,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),ranking:rankingId};
  $('case-expected-label').textContent=blind()?'Intended text · type with your OS IME':'Expected output · edit if the selected candidate is wrong';
  $('case-raw').value=caseSnapshot.raw;$('case-expected').value=!blind()&&candidates[selected]?commitCandidate(candidates[selected]):'';
- $('case-editor').hidden=false;$('case-editor').open=true;$('case-expected').focus();
+ $('more-tools').open=true;$('case-editor').hidden=false;$('case-editor').open=true;$('case-expected').focus();
  $('case-status').textContent=blind()?'Enter the intended text with your OS IME, then save locally. Predictions remain hidden.':'Review or correct the expected output, then save. This is a snapshot; later typing does not change it.';
 };
 $('case-form').addEventListener('submit',event=>{
@@ -139,3 +142,16 @@ document.getElementById('input-options').disabled=false;
 updateLayoutLabels();
 setRaw(examples[0].raw);
 if(document.modelContext?.registerTool){try{Promise.resolve(document.modelContext.registerTool({name:'stage_keystrokes',description:'Replace the demo preedit with QWERTY-encoded keystrokes and return candidate interpretations. Does not commit text.',inputSchema:{type:'object',properties:{keystrokes:{type:'string',maxLength:400}},required:['keystrokes'],additionalProperties:false},annotations:{readOnlyHint:false},execute(input){if(!input||typeof input.keystrokes!=='string'||input.keystrokes.length>400)throw new Error('Provide at most 400 keystrokes');setRaw(input.keystrokes);return{candidates:candidates.map(x=>x.text)}}})).catch(()=>{})}catch{}}
+
+// Keep the typing loop visible when focus or a virtual keyboard changes the viewport.
+const compose=document.querySelector('.compose');
+function keepComposeInView(){
+ if(document.activeElement!==$('raw')||getComputedStyle(compose).position==='sticky')return;
+ const vv=window.visualViewport,top=vv?vv.offsetTop:0,height=vv?vv.height:innerHeight,r=compose.getBoundingClientRect();
+ if(r.top<top||r.bottom>top+height)window.scrollBy({top:r.top-top-8,behavior:'instant'});
+}
+$('raw').addEventListener('focus',()=>requestAnimationFrame(keepComposeInView));
+window.visualViewport?.addEventListener('resize',keepComposeInView);
+
+// Leave room above secondary controls when the compose card is sticky.
+new ResizeObserver(()=>{compose.parentElement.style.setProperty('--compose-height',compose.getBoundingClientRect().height+'px')}).observe(compose);
