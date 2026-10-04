@@ -2,7 +2,11 @@
 
 Click a preedit segment, or press ArrowDown with the raw editor focused, to open
 its alternatives. A chosen alternative locks its original raw span and re-decodes
-the rest. The full preview shows neighboring changes before applying. Enter then
+the rest. The full preview shows neighboring changes before applying.
+The menu replaces sentence candidates in the compose card. Its compact preview
+scrolls horizontally for long text; long menus scroll inside the candidate slot.
+Opening the menu preserves the page scroll position and the raw caret.
+Correction controls sit in the status line; key help is in Typing tips. Enter then
 commits the selected whole candidate, including every lock. Choices are local to
 this composition; they are not learned or stored automatically.
 

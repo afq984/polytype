@@ -90,7 +90,7 @@ function correctionSignature(){return JSON.stringify([$('raw').value,options(),c
 function closeSegment(restore=true){
  const saved=segmentMenu?.selection;segmentMenu=null;$('segment-menu').hidden=true;
  document.querySelectorAll('.correction-focus').forEach(element=>element.classList.remove('correction-focus'));
- if(restore&&saved){const field=$('raw');field.focus();field.setSelectionRange(saved.start,saved.end,saved.direction)}
+ if(restore&&saved){const field=$('raw');field.focus({preventScroll:true});field.setSelectionRange(saved.start,saved.end,saved.direction)}
 }
 function menuConstraints(choice){return [...constraints.filter(c=>c.start!==choice.constraint.start||c.end!==choice.constraint.end),choice.constraint].sort((a,b)=>a.start-b.start)}
 function previewChoice(index){
@@ -133,7 +133,14 @@ function openSegment(span,selection,anchor){
  document.querySelectorAll('#preedit [data-start],#segments [data-start]').forEach(element=>element.classList.toggle('correction-focus',Number(element.dataset.start)<span.end&&Number(element.dataset.end)>span.start));
  const current=segmentView.segments.find(s=>s.start===span.start&&s.end===span.end);
  const initial=segmentMenu.choices.findIndex(choice=>choice.lang===current?.lang&&choice.commitText===current?.text);
- previewChoice(initial<0?0:initial);$('segment-menu').focus();
+ previewChoice(initial<0?0:initial);fitSegmentMenu();$('segment-menu').focus({preventScroll:true});
+}
+// Scroll long menus inside the slot, leaving the raw field and preedit in view.
+function fitSegmentMenu(){
+ if(!segmentMenu)return;
+ const viewport=window.visualViewport,top=viewport?.offsetTop??0,height=viewport?.height??innerHeight;
+ const slot=$('choice-slot').getBoundingClientRect();
+ $('segment-menu').style.maxHeight=Math.max(24,top+height-slot.top-8)+'px';
 }
 function openCaretSegment(){
  const caret=$('raw').selectionStart,units=segmentView?.units??[];
@@ -278,7 +285,7 @@ function keepComposeInView(){
  if(r.top<top||r.bottom>top+height)window.scrollBy({top:r.top-top-8,behavior:'instant'});
 }
 $('raw').addEventListener('focus',()=>requestAnimationFrame(keepComposeInView));
-window.visualViewport?.addEventListener('resize',keepComposeInView);
+window.visualViewport?.addEventListener('resize',()=>{fitSegmentMenu();keepComposeInView()});
 
 // Leave room above secondary controls when the compose card is sticky.
-new ResizeObserver(()=>{compose.parentElement.style.setProperty('--compose-height',compose.getBoundingClientRect().height+'px')}).observe(compose);
+new ResizeObserver(()=>{compose.parentElement.style.setProperty('--compose-height',compose.getBoundingClientRect().height+'px');fitSegmentMenu()}).observe(compose);

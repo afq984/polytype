@@ -303,9 +303,25 @@ try {
     assert.equal(islandReport.ranking,rankingId);
     // Local correction uses exact raw spans, independent of whole-sentence rank.
     await evaluate("document.getElementById('keyboard-layout').value='qwerty';document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('clear').click();document.getElementById('raw').value='y94 y94 hello';document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('raw').setSelectionRange(3,3);document.getElementById('raw').focus()");
+    await new Promise(resolve=>setTimeout(resolve,50));
+    const beforeMenuScroll=await evaluate('scrollY');
     await key('ArrowDown','ArrowDown',40);
     assert.equal(await evaluate("document.getElementById('segment-menu').hidden"),false);
+    assert.equal(await evaluate("document.getElementById('segment-menu').closest('#choice-slot')!==null"),true);
+    assert.equal(await evaluate("getComputedStyle(document.getElementById('candidates')).display"),'none');
+    assert.equal(await evaluate('scrollY'),beforeMenuScroll);
+    assert.equal(await evaluate("document.activeElement.id"),'segment-menu');
+    // A short viewport must clip the menu internally, even when it resizes
+    // after opening and the raw editor no longer owns focus.
+    await send('Emulation.setDeviceMetricsOverride',{width:844,height:390,deviceScaleFactor:1,mobile:false});
+    await new Promise(resolve=>setTimeout(resolve,100));
+    const correctionBoxes=await evaluate("['raw','preedit','segment-menu','segment-preview'].map(id=>{const r=document.getElementById(id).getBoundingClientRect();return {id,top:r.top,bottom:r.bottom,height:innerHeight}})");
+    for(const box of correctionBoxes)assert.ok(box.top>=0&&box.bottom<=box.height,JSON.stringify(box));
+    await send('Emulation.clearDeviceMetricsOverride');
+    await new Promise(resolve=>setTimeout(resolve,100));
     await key('2','Digit2');
+    assert.equal(await evaluate("getComputedStyle(document.getElementById('candidates')).display"),'flex');
+    assert.deepEqual(await evaluate("[document.getElementById('raw').selectionStart,document.getElementById('raw').selectionEnd]"),[3,3]);
     assert.equal(await evaluate("document.getElementById('raw').value"),'y94 y94 hello');
     assert.equal(await evaluate("document.getElementById('preedit').textContent"),'再 在 hello');
     await evaluate("document.querySelector('#preedit [data-start=\"4\"]').click();[...document.querySelectorAll('#segment-choices button')].find(b=>b.dataset.text==='再').click()");
