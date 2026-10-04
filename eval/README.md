@@ -378,6 +378,23 @@ its documented Taiwan citation ㄧㄚˋ, so its 亞熱帶 target remains a visib
 limitation for the reading-conditioned dictionary. Import and verification
 reproduce both the citation evidence and these typed-reading decisions.
 
+Round 2 (2026-10-04) adds word-scoped owner conventions: conjunction 和
+(`word: "和"`) uses ㄏㄢˋ and 差 in 差不多 (`word: "差不多"`) uses ㄔㄚ.
+The selected source has one occurrence of each; other 和/差 compounds keep their
+readings. The owner confirms neutral 得 in 覺得/記得, 嗎 and 子 suffixes;
+呢 and 嘛 retain their neutral readings without an owner preference. These
+keep decisions are recorded in `conventions.neutralTone` and do not rewrite
+positions or source evidence.
+
+Separate `positionalReadings` correct 中 and 都 in 0378 and 得 in 0713, with
+reviewer `coordinator` and reason `utterance word boundary`. Import guards the
+case, character, segment/offset, contextual word/offset and previous reading.
+It applies model decisions, then coordinator decisions, then owner conventions.
+Changed coordinator segments retain `modelReading`, word evidence retains
+`coordinatorReading`, and each case retains its `positionalAdjudications`.
+The original 852 issue decisions and whole-utterance review strata remain intact;
+these three contextual fixes do not imply exhaustive human review.
+
 
 ASCEND English is mostly lowercase, with capitalized names, `I`, acronyms and
 spelled-out letters (e.g. `G P A`); 44 selected mixed utterances contain capitals.

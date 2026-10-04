@@ -1,6 +1,23 @@
 # Polytype handoff
 
-## Owner-confirmed ASCEND typing conventions
+## ASCEND typing and word-boundary review, round 2
+
+On main `10a5a21a`, corpus-only adjudication adds the owner's conjunction 和
+ㄏㄢˋ and 差不多 ㄔㄚ (one selected occurrence each, scoped by annotated word).
+Neutral 得 in 覺得/記得, 嗎 and 子 suffixes are confirmed; 呢/嘛 keep their
+existing neutral readings. Separate coordinator decisions correct 中/都 in
+0378 and 得 in 0713, guarded by utterance word boundaries and prior readings.
+All decisions are dated 2026-10-04. Model, coordinator and typing evidence remain
+separate; source selection, the 852-item queue and review strata are unchanged.
+
+All eight mixed groups gain two top-one and two top-five configurations, with
+zero losses (16 of each across configurations). Han edits fall by three per
+group. English-only candidate arrays, English token sequences, Chinese-only
+results and 272 existing evaluation controls remain identical. Engine binaries,
+WASM and dictionaries are byte-identical to main; this measures changed typing
+annotations on development data. See [eval/README.md](eval/README.md).
+
+## Owner-confirmed ASCEND typing conventions, round 1
 
 ASCEND development readings now use the owner's confirmed 多 ㄉㄨㄛ,
 玩 ㄨㄢˊ and 亞 ㄧㄚˇ. Adjudication/import applies these after citation review,
@@ -15,7 +32,7 @@ Paired development results against main `d166dba5` gain 80 top-one and 112
 top-five configurations, with zero losses. Each mixed group gains nine top-one
 and thirteen top-five targets; each Chinese-only group gains one of each.
 English-only candidates and all English token sequences remain unchanged.
-The audit retains 132 non-primary annotated positions: 59 contextual readings
+The round 1 audit retained 132 non-primary annotated positions: 59 contextual readings
 (including three flagged segmentation/context mismatches) and 73 typing-habit
 candidates for owner follow-up. Counts reuse development source text; these are
 annotation/input changes, not a decoder accuracy improvement.

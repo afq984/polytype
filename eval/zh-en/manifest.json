@@ -3,8 +3,8 @@
   "files": [
     {
       "path": "eval/zh-en/ascend.json",
-      "sha256": "8c48d091b5dfcff37893c5257e9a9e66a41f43525df6da8951c31177536ef92d",
-      "bytes": 711973
+      "sha256": "a0a03bb226f5766c91cffae046e7d85ca68a6dd525b04491e7d17928c223b175",
+      "bytes": 714973
     },
     {
       "path": "eval/zh-en/english-only.json",
@@ -43,8 +43,8 @@
     },
     {
       "path": "eval/zh-en/adjudications.json",
-      "sha256": "5f67b2b8891f10ee01dc59e32645af0f487caf678361725c54c7dc41be0424de",
-      "bytes": 261805
+      "sha256": "75252c7fe32f0f9f7f159fad72d883f9b6e74bbe6148fc9ddc91fb02e34ca013",
+      "bytes": 263270
     }
   ]
 }

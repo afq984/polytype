@@ -4,7 +4,7 @@
   "date": "2026-10-04",
   "conventions": {
     "sandhi": "citation-only",
-    "neutralTone": "Taiwan particles and conventional suffixes; full-tone 起來 時候 學生 還是 東西 不是 個",
+    "neutralTone": "Taiwan particles and conventional suffixes; full-tone 起來 時候 學生 還是 東西 不是 個. Owner user, 2026-10-04: retain neutral 得 in 覺得/記得, 嗎 and 子 suffixes; no preference for 呢/嘛, retain current neutral readings.",
     "thirdTone": "citation-no-sandhi"
   },
   "typingConventions": [
@@ -31,8 +31,35 @@
       "reviewer": "user",
       "date": "2026-10-04",
       "reason": "Owner types 亞 as ㄧㄚˇ in 亞洲 and 亞熱帶; apply to ASCEND typing annotations while preserving the separate GSD citation set."
+    },
+    {
+      "character": "和",
+      "word": "和",
+      "from": "ㄏㄜˊ",
+      "reading": "ㄏㄢˋ",
+      "reviewer": "user",
+      "date": "2026-10-04",
+      "reason": "Owner types conjunction 和 as ㄏㄢˋ; the selected corpus's bare 和 occurrence is the conjunction, while compound words retain their readings."
+    },
+    {
+      "character": "差",
+      "word": "差不多",
+      "from": "ㄔㄚˋ",
+      "reading": "ㄔㄚ",
+      "reviewer": "user",
+      "date": "2026-10-04",
+      "reason": "Owner types 差 in 差不多 as ㄔㄚ; restrict this typing convention to that word."
     }
   ],
+  "positionalReadings": {
+    "ascend-test-0378": [
+      {"character":"中","segment":1,"offset":10,"word":"說中文","wordOffset":9,"from":"ㄓㄨㄥˋ","reading":"ㄓㄨㄥ","reviewer":"coordinator","date":"2026-10-04","reason":"utterance word boundary"},
+      {"character":"都","segment":1,"offset":7,"word":"都會說中文","wordOffset":7,"from":"ㄉㄨ","reading":"ㄉㄡ","reviewer":"coordinator","date":"2026-10-04","reason":"utterance word boundary"}
+    ],
+    "ascend-test-0713": [
+      {"character":"得","segment":4,"offset":6,"word":"去得分","wordOffset":5,"from":"ㄉㄜ˙","reading":"ㄉㄜˊ","reviewer":"coordinator","date":"2026-10-04","reason":"utterance word boundary"}
+    ]
+  },
   "cases": {
     "ascend-test-0001": [
       {

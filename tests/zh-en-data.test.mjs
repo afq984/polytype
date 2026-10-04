@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {createEngine,colemak} from '../web/engine.mjs';
 import {zhEnCorpus,englishOnlyCorpus,zhEnCases,englishOnlyCases,zhEnSkipped,generateZhEnCases} from '../eval/zh-en-cases.mjs';
 import {summarizeZhEnCases,renderZhEnSummary} from '../scripts/zh-en-summary.mjs';
-import {validateAdjudications,applyAdjudications,applyTypingConventions,conventionIssues} from '../scripts/zh-en-adjudication.mjs';
+import {validateAdjudications,applyAdjudications,applyPositionalReadings,applyTypingConventions,conventionIssues} from '../scripts/zh-en-adjudication.mjs';
 import {parseCsv,maximalMatch,taiwanConverter,cedictDictionary,annotate,pinyinToZhuyin} from '../scripts/zh-en-annotation.mjs';
 const root=new URL('../',import.meta.url);
 
@@ -87,9 +87,9 @@ test('positional adjudications reproduce all reviewed annotations and reject sta
   let applied=0;
   for(const entry of zhEnCorpus.cases) {
     const issues=queue.filter(i=>i.id===entry.id).map(({id,adjudication,...issue})=>issue);
-    const segments=entry.segments.map(({provisionalText,provisionalReading,citationReading,...s})=>({...s,
-      text:provisionalText??s.text,...(s.lang==='zh'?{reading:provisionalReading??citationReading??s.reading}:{}),
-      ...(s.evidence?{evidence:s.evidence.map(({adjudicatedReading,typingReading,provisionalText,...e})=>({...e,text:provisionalText??e.text}))}:{}),
+    const segments=entry.segments.map(({provisionalText,provisionalReading,modelReading,citationReading,...s})=>({...s,
+      text:provisionalText??s.text,...(s.lang==='zh'?{reading:provisionalReading??modelReading??citationReading??s.reading}:{}),
+      ...(s.evidence?{evidence:s.evidence.map(({adjudicatedReading,coordinatorReading,typingReading,provisionalText,...e})=>({...e,text:provisionalText??e.text}))}:{}),
     }));
     const provisional={id:entry.id,text:segments.map(s=>s.text).join(''),segments,review:issues.length?'pending':'automatic'};
     const actual=applyAdjudications(provisional,issues,data);
@@ -99,6 +99,7 @@ test('positional adjudications reproduce all reviewed annotations and reject sta
     assert.equal(actual.entry.review,entry.review,entry.id);
     assert.deepEqual(actual.entry.reviewedBy,entry.reviewedBy,entry.id);
     assert.deepEqual(actual.entry.typingAdjudications,entry.typingAdjudications,entry.id);
+    assert.deepEqual(actual.entry.positionalAdjudications,entry.positionalAdjudications,entry.id);
     assert.equal(actual.issues.filter(i=>i.adjudication).length,issues.length,entry.id);
     applied+=issues.length;
     if(issues.length) {
@@ -149,7 +150,7 @@ test('owner typing conventions preserve citation evidence and record every corre
     [2,3,'亞','ㄧㄚˋ','ㄧㄚˇ','user','2026-10-04'],
   ]);
   assert.deepEqual(applyTypingConventions(after,conventions),after);
-  const counts={多:0,玩:0,亞:0};
+  const counts={多:0,玩:0,亞:0,和:0,差:0};
   for(const row of zhEnCorpus.cases)for(const decision of row.typingAdjudications??[]) {
     const s=row.segments[decision.segment];
     assert.equal([...s.text][decision.offset],decision.character,row.id);
@@ -158,9 +159,10 @@ test('owner typing conventions preserve citation evidence and record every corre
     assert.equal(decision.reviewer,'user');assert.equal(decision.date,'2026-10-04');
     assert.ok(decision.reason.trim());counts[decision.character]++;
   }
-  assert.deepEqual(counts,{多:20,玩:4,亞:1});
+  assert.deepEqual(counts,{多:20,玩:4,亞:1,和:1,差:1});
   for(const row of zhEnCorpus.cases)for(const s of row.segments.filter(s=>s.lang==='zh'))for(const [i,c] of [...s.text].entries()) {
-    const convention=conventions.find(convention=>convention.character===c);
+    const evidence=s.evidence.find(e=>e.offset<=i&&e.offset+[...e.text].length>i);
+    const convention=conventions.find(convention=>convention.character===c&&(!convention.word||convention.word===evidence?.text));
     if(convention)assert.notEqual(s.reading.split(' ')[i],convention.from,row.id);
   }
   for(const mutation of [c=>c.reviewer='model',c=>c.date='2026-10-00',c=>c.reason='',c=>c.reading=c.from,c=>c.extra=true]) {
@@ -169,6 +171,50 @@ test('owner typing conventions preserve citation evidence and record every corre
   }
   const duplicate=structuredClone(data);duplicate.typingConventions.push(duplicate.typingConventions[0]);
   assert.throws(()=>validateAdjudications(duplicate,new Set(zhEnCorpus.cases.map(c=>c.id))),/Duplicate typing/);
+});
+
+test('owner word scopes preserve other 和 and 差 compounds',()=>{
+  const data=JSON.parse(readFileSync(new URL('eval/zh-en/adjudications.json',root)));
+  const entry={id:'scopes',segments:[{lang:'zh',text:'和平和差不多差異',reading:'ㄏㄜˊ ㄆㄧㄥˊ ㄏㄜˊ ㄔㄚˋ ㄅㄨˋ ㄉㄨㄛ ㄔㄚˋ ㄧˋ',evidence:[{text:'和平',offset:0},{text:'和',offset:2},{text:'差不多',offset:3},{text:'差異',offset:6}]}]};
+  const after=applyTypingConventions(entry,data.typingConventions);
+  assert.equal(after.segments[0].reading,'ㄏㄜˊ ㄆㄧㄥˊ ㄏㄢˋ ㄔㄚ ㄅㄨˋ ㄉㄨㄛ ㄔㄚˋ ㄧˋ');
+  assert.deepEqual(after.typingAdjudications.map(d=>d.offset),[2,3]);
+  assert.equal(entry.segments[0].reading,'ㄏㄜˊ ㄆㄧㄥˊ ㄏㄜˊ ㄔㄚˋ ㄅㄨˋ ㄉㄨㄛ ㄔㄚˋ ㄧˋ');
+  const invalid=structuredClone(data);invalid.typingConventions.at(-1).word='其他';
+  assert.throws(()=>validateAdjudications(invalid,new Set(zhEnCorpus.cases.map(c=>c.id))),/word scope/);
+});
+
+test('coordinator word-boundary decisions retain model evidence and reject stale positions',()=>{
+  const data=JSON.parse(readFileSync(new URL('eval/zh-en/adjudications.json',root))),ids=new Set(zhEnCorpus.cases.map(c=>c.id));
+  let count=0;
+  for(const [id,decisions] of Object.entries(data.positionalReadings)) {
+    const entry=zhEnCorpus.cases.find(c=>c.id===id),before=structuredClone(entry);
+    delete before.positionalAdjudications;
+    for(const s of before.segments)if(s.modelReading) {
+      s.reading=s.modelReading;delete s.modelReading;
+      for(const e of s.evidence)delete e.coordinatorReading;
+    }
+    const original=structuredClone(before),after=applyPositionalReadings(before,decisions);
+    assert.deepEqual(before,original);assert.deepEqual(after,entry);
+    assert.throws(()=>applyPositionalReadings(after,decisions),/Stale positional reading/);
+    for(const d of after.positionalAdjudications) {
+      assert.equal(d.reviewer,'coordinator');assert.equal(d.date,'2026-10-04');assert.equal(d.reason,'utterance word boundary');
+      assert.equal(after.segments[d.segment].modelReading.split(' ')[d.offset],d.from);
+      assert.equal(after.segments[d.segment].reading.split(' ')[d.offset],d.reading);count++;
+    }
+    const stale=structuredClone(decisions);stale[0].word+='字';
+    assert.throws(()=>applyPositionalReadings(before,stale),/Stale positional word/);
+    const reading=structuredClone(decisions);reading[0].from='ㄅㄚ';
+    assert.throws(()=>applyPositionalReadings(before,reading),/Stale positional reading/);
+  }
+  assert.equal(count,3);
+  for(const mutate of [d=>d.reviewer='user',d=>d.offset=-1,d=>d.reason='',d=>d.reading=d.from,d=>d.extra=true]) {
+    const invalid=structuredClone(data);mutate(invalid.positionalReadings['ascend-test-0378'][0]);assert.throws(()=>validateAdjudications(invalid,ids));
+  }
+  const unknown=structuredClone(data);unknown.positionalReadings.unknown=unknown.positionalReadings['ascend-test-0378'];
+  assert.throws(()=>validateAdjudications(unknown,ids),/Unknown positional case/);
+  const duplicate=structuredClone(data);duplicate.positionalReadings['ascend-test-0378'].push(duplicate.positionalReadings['ascend-test-0378'][0]);
+  assert.throws(()=>validateAdjudications(duplicate,ids),/Duplicate positional/);
 });
 
 test('review enforces conversion positions, consistent overlapping readings and full-tone compound flags',()=>{

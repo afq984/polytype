@@ -4,7 +4,7 @@ function keys(value,allowed,label) {
   for(const key of Object.keys(value))if(!allowed.includes(key))throw new Error(`Unknown ${label} key: ${key}`);
 }
 export function validateAdjudications(data,caseIds) {
-  keys(data,['version','reviewer','date','conventions','typingConventions','cases'],'adjudication');
+  keys(data,['version','reviewer','date','conventions','typingConventions','positionalReadings','cases'],'adjudication');
   if(data.version!==1||data.reviewer!=='codex-gpt-6.1-sol'||!/^\d{4}-\d{2}-\d{2}$/.test(data.date)||new Date(data.date).toISOString().slice(0,10)!==data.date)throw new Error('Invalid review provenance');
   keys(data.conventions,['sandhi','neutralTone','thirdTone'],'convention');
   if(data.conventions.sandhi!=='citation-only'||data.conventions.thirdTone!=='citation-no-sandhi'||typeof data.conventions.neutralTone!=='string')throw new Error('Unknown reading convention');
@@ -12,13 +12,30 @@ export function validateAdjudications(data,caseIds) {
     if(!Array.isArray(data.typingConventions))throw new Error('Invalid typing conventions');
     const seen=new Set();
     for(const convention of data.typingConventions) {
-      keys(convention,['character','from','reading','reviewer','date','reason'],'typing convention');
+      keys(convention,['character','word','from','reading','reviewer','date','reason'],'typing convention');
       const {character,from,reading,reviewer,date,reason}=convention;
       if(!/^\p{Script=Han}$/u.test(character)||!/^([ㄅ-ㄩ]+[ˊˇˋ˙]?)$/u.test(from)||!/^([ㄅ-ㄩ]+[ˊˇˋ˙]?)$/u.test(reading)||from===reading)throw new Error('Invalid typing reading');
+      if(convention.word!==undefined&&(!/^\p{Script=Han}+$/u.test(convention.word)||!convention.word.includes(character)))throw new Error('Invalid typing word scope');
       if(reviewer!=='user'||!/^\d{4}-\d{2}-\d{2}$/.test(date)||new Date(date).toISOString().slice(0,10)!==date||typeof reason!=='string'||!reason.trim())throw new Error('Invalid typing provenance');
       const key=`${character}/${from}`;
       if(seen.has(key))throw new Error('Duplicate typing convention');
       seen.add(key);
+    }
+  }
+  if(data.positionalReadings!==undefined) {
+    keys(data.positionalReadings,[...caseIds],'positional case');
+    for(const [id,decisions] of Object.entries(data.positionalReadings)) {
+      if(!Array.isArray(decisions)||!decisions.length)throw new Error(`Invalid positional decisions: ${id}`);
+      const seen=new Set();
+      for(const d of decisions) {
+        keys(d,['character','segment','offset','word','wordOffset','from','reading','reviewer','date','reason'],'positional decision');
+        if(!/^\p{Script=Han}$/u.test(d.character)||!/^\p{Script=Han}+$/u.test(d.word)||!/^([ㄅ-ㄩ]+[ˊˇˋ˙]?)$/u.test(d.from)||!/^([ㄅ-ㄩ]+[ˊˇˋ˙]?)$/u.test(d.reading)||d.from===d.reading)throw new Error('Invalid positional reading');
+        if(![d.segment,d.offset,d.wordOffset].every(n=>Number.isInteger(n)&&n>=0)||[...d.word][d.offset-d.wordOffset]!==d.character)throw new Error('Invalid positional offset');
+        if(d.reviewer!=='coordinator'||!/^\d{4}-\d{2}-\d{2}$/.test(d.date)||new Date(d.date).toISOString().slice(0,10)!==d.date||typeof d.reason!=='string'||!d.reason.trim())throw new Error('Invalid positional provenance');
+        const key=`${d.segment}/${d.offset}`;
+        if(seen.has(key))throw new Error('Duplicate positional decision');
+        seen.add(key);
+      }
     }
   }
   keys(data.cases,[...caseIds],'case');
@@ -33,12 +50,34 @@ export function validateAdjudications(data,caseIds) {
     }
   }
 }
+export function applyPositionalReadings(entry,decisions=[]) {
+  const result=structuredClone(entry),edits=new Map(),seen=new Set();
+  for(const d of decisions) {
+    const s=result.segments[d.segment],chars=[...s?.text??''];
+    if(s?.lang!=='zh'||chars[d.offset]!==d.character||chars.slice(d.wordOffset,d.wordOffset+[...d.word].length).join('')!==d.word)throw new Error(`Stale positional word/offset: ${entry.id}`);
+    const key=`${d.segment}/${d.offset}`;
+    if(seen.has(key))throw new Error('Duplicate positional decision');
+    seen.add(key);
+    if(!edits.has(d.segment))edits.set(d.segment,{readings:s.reading.split(' '),changed:new Set()});
+    const edit=edits.get(d.segment);
+    if(edit.readings[d.offset]!==d.from)throw new Error(`Stale positional reading: ${entry.id}`);
+    edit.readings[d.offset]=d.reading;edit.changed.add(d.offset);
+  }
+  for(const [segment,{readings,changed}] of edits) {
+    const s=result.segments[segment];
+    s.modelReading=s.reading;s.reading=readings.join(' ');
+    for(const evidence of s.evidence)if([...evidence.text].some((_,i)=>changed.has(evidence.offset+i)))evidence.coordinatorReading=readings.slice(evidence.offset,evidence.offset+[...evidence.text].length).join(' ');
+  }
+  if(decisions.length)result.positionalAdjudications=structuredClone(decisions);
+  return result;
+}
 export function applyTypingConventions(entry,conventions=[]) {
   const result=structuredClone(entry),decisions=[];
   for(const [segment,s] of result.segments.entries())if(s.lang==='zh'&&s.reading) {
     const citationReading=s.reading,readings=s.reading.split(' '),changed=new Set();
     for(const [offset,character] of [...s.text].entries()) {
-      const convention=conventions.find(c=>c.character===character&&c.from===readings[offset]);
+      const evidence=s.evidence.find(e=>e.offset<=offset&&e.offset+[...e.text].length>offset);
+      const convention=conventions.find(c=>c.character===character&&c.from===readings[offset]&&(!c.word||c.word===evidence?.text));
       if(!convention)continue;
       readings[offset]=convention.reading;changed.add(offset);
       decisions.push({...convention,segment,offset});
@@ -126,5 +165,6 @@ export function applyAdjudications(entry,issues,data) {
   result.text=result.segments.map(s=>s.text).join('');
   result.review=issues.length?(resolved.size===issues.length?'model-reviewed':'pending'):'automatic';
   if(result.review==='model-reviewed')result.reviewedBy={reviewer:data.reviewer,date:data.date};
-  return {entry:applyTypingConventions(result,data.typingConventions),issues:issues.map((issue,index)=>({...issue,...(resolved.has(index)?{adjudication:resolved.get(index)}:{})}))};
+  const positioned=applyPositionalReadings(result,data.positionalReadings?.[entry.id]);
+  return {entry:applyTypingConventions(positioned,data.typingConventions),issues:issues.map((issue,index)=>({...issue,...(resolved.has(index)?{adjudication:resolved.get(index)}:{})}))};
 }
