@@ -36,7 +36,7 @@ Optional `options` fields select layout and enabled languages. The demo's
 Save test case / Export cases workflow creates compatible JSONL, after the user
 reviews or corrects the expected output. Exports do not contain custom dictionary
 entries; restore those separately when reproducing custom-dependent cases.
-Current browser exports include `rawEncodingVersion: 2` and ranking suffix
+Current browser exports include `rawEncodingVersion: 2` and ranking marker
 `+physical-keys-v2`. The loader does not migrate supplied files: review older
 Colemak colon captures using the [collection instructions](COLLECTION.md)
 before evaluating them with the expanded profile.

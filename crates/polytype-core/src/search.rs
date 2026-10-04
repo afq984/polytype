@@ -68,6 +68,7 @@ struct Policy {
     legacy_romaji: bool,
     chinese_punctuation: bool,
     frequency: bool,
+    chinese_parentheses: bool,
     physical_keys: bool,
 }
 
@@ -82,6 +83,7 @@ impl Default for Policy {
             legacy_romaji: false,
             chinese_punctuation: true,
             frequency: true,
+            chinese_parentheses: true,
             physical_keys: true,
         }
     }
@@ -199,6 +201,7 @@ struct Lattice {
     floor: u8,
     commit_identity: bool,
     mapped_punctuation: bool,
+    chinese_parentheses: bool,
 }
 
 // A soft family cap: keep spare script variants when capacity permits, but
@@ -294,7 +297,7 @@ fn punctuation(unit: u16, expanded: bool) -> bool {
 // McBopomofo BPMFPunctuations.txt at the revision in chinese-source.json.
 // Standard overrides win over generic entries: apostrophe is 、, quote is ；.
 // See docs/PUNCTUATION.md for source lines and the deliberately limited subset.
-fn chinese_punctuation(unit: u16) -> Option<&'static str> {
+fn chinese_punctuation(unit: u16, parentheses: bool) -> Option<&'static str> {
     match char::from_u32(unit as u32)? {
         '<' => Some("，"),
         '>' => Some("。"),
@@ -307,6 +310,8 @@ fn chinese_punctuation(unit: u16) -> Option<&'static str> {
         ']' => Some("」"),
         '{' => Some("『"),
         '}' => Some("』"),
+        '(' if parentheses => Some("（"),
+        ')' if parentheses => Some("）"),
         _ => None,
     }
 }
@@ -344,7 +349,8 @@ fn push_roman(
 ) {
     let alternative = if beams.mapped_punctuation {
         part.raw.chars().last().and_then(|key| {
-            let full = chinese_punctuation(u16::try_from(key as u32).ok()?)?;
+            let full =
+                chinese_punctuation(u16::try_from(key as u32).ok()?, beams.chinese_parentheses)?;
             part.text.strip_suffix(key)?;
             let mut alternative = part.clone();
             alternative.text = format!("{}{full}", part.text.strip_suffix(key)?);
@@ -445,6 +451,7 @@ pub(crate) fn diagnose(
         legacy_romaji: !diversity,
         chinese_punctuation: diversity,
         frequency: diversity,
+        chinese_parentheses: diversity,
         physical_keys: diversity,
         ..Policy::default()
     };
@@ -482,6 +489,7 @@ pub(crate) fn experiment(
             legacy_romaji: true,
             chinese_punctuation: false,
             frequency: false,
+            chinese_parentheses: false,
             physical_keys: false,
             ..Policy::default()
         }
@@ -491,7 +499,9 @@ pub(crate) fn experiment(
             "baseline" => {}
             "floor" => policy.floor = true,
             "punctuation" => policy.chinese_punctuation = true,
+            "parentheses" => policy.chinese_parentheses = true,
             "no-punctuation" => policy.chinese_punctuation = false,
+            "no-parentheses" => policy.chinese_parentheses = false,
             "no-physical-keys" => policy.physical_keys = false,
             "discards" => policy.discards = true,
             "identifiers" => policy.identifiers = true,
@@ -558,6 +568,7 @@ fn decode_lattice(
         width,
         commit_identity: modern_romaji,
         mapped_punctuation,
+        chinese_parentheses: policy.chinese_parentheses,
         families: (policy.diversity && dictionary.expanded && options.japanese).then(HashMap::new),
         floor: if policy.floor && dictionary.expanded {
             u8::from(options.english)
@@ -584,11 +595,14 @@ fn decode_lattice(
             }
             let full = mapped_punctuation
                 .then(|| {
-                    chinese_punctuation(if roman_colon && raw[i] == b'P' as u16 {
-                        b':' as u16
-                    } else {
-                        raw[i]
-                    })
+                    chinese_punctuation(
+                        if roman_colon && raw[i] == b'P' as u16 {
+                            b':' as u16
+                        } else {
+                            raw[i]
+                        },
+                        policy.chinese_parentheses,
+                    )
                 })
                 .flatten();
             let chinese_context = full.is_some()
@@ -606,7 +620,9 @@ fn decode_lattice(
                 && (i + 2 == raw.len() || raw[i + 2] == b' ' as u16 || is_punctuation(raw[i + 2]));
             if is_punctuation(raw[i])
                 || (mapped_punctuation
-                    && "、「」『』".contains(char::from_u32(raw[i] as u32).unwrap_or_default()))
+                    && ("、「」『』".contains(char::from_u32(raw[i] as u32).unwrap_or_default())
+                        || (policy.chinese_parentheses
+                            && "（）".contains(char::from_u32(raw[i] as u32).unwrap_or_default()))))
                 || (chinese_context && full.is_some() && !possessive)
             {
                 // Raw ':' still has the physical Zhuyin colon interpretation

@@ -1,6 +1,6 @@
 # Contextual Chinese punctuation
 
-Expanded ranking `scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1+zh-punct-v1+freq-v1+physical-keys-v2`
+Expanded ranking `scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1+zh-punct-v1+freq-v1+physical-keys-v2+zh-parens-v1`
 uses the following subset of McBopomofo's standard-layout punctuation. Prototype
 engines and the frozen reference retain their previous behavior.
 
@@ -22,6 +22,8 @@ The upstream MIT notice is already retained in `data/sources/mcbopomofo/`.
 | Right bracket without Shift | `]` | `」` | 188 (generic) |
 | Shift+Left bracket | `{` | `『` | 208–214 (generic) |
 | Shift+Right bracket | `}` | `』` | 215–221 (generic) |
+| Shift+9 | `(` | `（` | 201 (generic; Standard inherits this mapping) |
+| Shift+0 | `)` | `）` | 202 (generic; Standard inherits this mapping) |
 
 `:` is Roman uppercase O in Colemak encoding version 2, so it is not a Roman
 token boundary there. A standalone mark after converted Chinese retains the
@@ -48,6 +50,12 @@ preference, with the mapped alternative 0.25 points lower. Existing Japanese
 Mozc punctuation choices are preserved. Both branches
 remain selectable in the bounded candidate list for the focused single-mark
 cases. Multiple marks and homophones still compete for five displayed slots.
+ASCII parentheses stay preferred in English, Japanese and code. After Chinese,
+parentheses follow the same +0.25 preference and keep ASCII selectable. Context
+skips punctuation parts, including pasted `（`/`）`, so `了(?` and `了（?`
+both prefer `了（？`. The source has no Standard-specific parenthesis override;
+its generic `_punctuation_(` and `_punctuation_)` rows apply to Standard.
+
 Explicitly pasted Chinese marks remain literal. Punctuation clears the current
 continuation language as before; literal spaces are preserved and first-tone
 spaces still only complete a syllable. The existing attached English possessive
@@ -63,7 +71,8 @@ composer is unchanged.
 `web/keyboard.mjs` already produces every required raw key, so it is unchanged.
 
 For an ablation with current dictionaries/romaji/beam policy, pass
-`--experiment=current+no-punctuation` to the native diagnostic runner. The
+`--experiment=current+no-parentheses` to disable only this parenthesis extension,
+or `--experiment=current+no-punctuation` to disable the full map in the native runner. The
 historical `--baseline` and named family-v1 experiments remain unchanged;
 `punctuation` enables the new flag within those diagnostic combinations.
 No setting or diagnostic flag is added to the web UI/protocol.

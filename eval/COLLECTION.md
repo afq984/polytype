@@ -111,7 +111,7 @@ representable: physical Shift+Semicolon produces raw `:`, interpreted as Roman
 case or drop a character to make a test pass.
 
 Browser captures and debug reports carry `rawEncodingVersion: 2` and ranking
-suffix `+physical-keys-v2`. The corpus importer preserves both fields. Existing
+marker `+physical-keys-v2`. The corpus importer preserves both fields. Existing
 local storage and imported rows are not converted or relabeled; absent encoding
 metadata denotes historical or unverified input. Exporting a saved older row
 preserves its original metadata. Before current evaluation, review a separate

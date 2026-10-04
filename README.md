@@ -56,7 +56,7 @@ before clearing browser data. Custom dictionary contents are not exported.
 For independent targets, enable **Blind capture · hide predictions** before typing;
 Enter finishes the buffer and opens a blank intended-text field for your OS IME.
 Blind exports retain `blind: true` for the external review workflow.
-New captures carry `rawEncodingVersion: 2` and ranking suffix `+physical-keys-v2`.
+New captures carry `rawEncodingVersion: 2` and ranking marker `+physical-keys-v2`.
 Older saved captures remain unchanged; review their Colemak Roman colon spans
 before evaluating with this build. See [encoding migration](eval/COLLECTION.md).
 

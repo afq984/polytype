@@ -7,7 +7,7 @@ import {encodeMixedInput,kanaLevel} from '../eval/cases.mjs';
 test('physical Colemak uppercase O and colon round trip with native/WASM parity',()=>{
  const engine=createEngine(),requests=[];
  try{
-  assert.equal(rawEncodingVersion,2);assert.ok(rankingId.endsWith('+physical-keys-v2'));
+  assert.equal(rawEncodingVersion,2);assert.ok(rankingId.includes('+physical-keys-v2'));
   const rawO=physicalKey({code:'Semicolon',shiftKey:true},'colemak');
   const rawColon=physicalKey({code:'KeyP',shiftKey:true},'colemak');
   assert.equal(rawO,':');assert.equal(rawColon,'P');

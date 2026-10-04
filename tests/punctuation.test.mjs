@@ -5,7 +5,7 @@ import {createEngine,physicalKey} from '../web/engine.mjs';
 import {numericProbes} from '../eval/punctuation-cases.mjs';
 import {encodeMixedInput} from '../eval/cases.mjs';
 
-const map=[['<','，'],['>','。'],['?','？'],['!','！'],[':','：'],["'",'、'],['"','；'],['[','「'],[']','」'],['{','『'],['}','』']];
+const map=[['<','，'],['>','。'],['?','？'],['!','！'],[':','：'],["'",'、'],['"','；'],['[','「'],[']','」'],['{','『'],['}','』'],['(','（'],[')','）']];
 const requests=[];
 const engine=createEngine();
 const decode=(raw,options)=>{
@@ -29,6 +29,14 @@ test('Chinese punctuation prefers the standard map and keeps ASCII in both layou
   }
   assert.equal(decode('us3lc3[us3lc3]',{layout:'qwerty'})[0].text,'你好「你好」');
   assert.equal(decode('us3lc3{us3lc3}',{layout:'qwerty'})[0].text,'你好『你好』');
+});
+
+test('Chinese punctuation context survives consecutive physical and pasted full-width marks',()=>{
+  const stem=engine.readingKeys('ㄌㄜ˙').join('');
+  for(const layout of ['qwerty','colemak'])for(const tail of ['(?','（?','（？','?)','？)','？）']){
+    const expected='了'+tail.replaceAll('(','（').replaceAll(')','）').replaceAll('?','？');
+    assert.equal(decode(stem+tail,{layout})[0].text,expected,`${layout}: ${tail}`);
+  }
 });
 
 test('existing Roman punctuation preferences remain, with mapped alternatives',()=>{
@@ -102,14 +110,15 @@ test('non-BMP literal text cannot alias a punctuation key through truncation',()
 });
 
 test('physical keys already produce every mapped punctuation key in both layouts',()=>{
-  const positions=[['Comma','<',true],['Period','>',true],['Slash','?',true],['Digit1','!',true],['Semicolon',':',true],['Quote',"'",false],['Quote','"',true],['BracketLeft','[',false],['BracketRight',']',false],['BracketLeft','{',true],['BracketRight','}',true]];
+  const positions=[['Comma','<',true],['Period','>',true],['Slash','?',true],['Digit1','!',true],['Digit9','(',true],['Digit0',')',true],['Semicolon',':',true],['Quote',"'",false],['Quote','"',true],['BracketLeft','[',false],['BracketRight',']',false],['BracketLeft','{',true],['BracketRight','}',true]];
   for(const layout of ['qwerty','colemak'])for(const [code,key,shiftKey] of positions)assert.equal(physicalKey({code,shiftKey},layout),key);
   assert.equal(physicalKey({code:'KeyP',shiftKey:true},'colemak'),'P');
 });
 
 test('the policy ablation reproduces pre-punctuation behavior with current dictionaries',()=>{
-  const raw='us3lc3?',options={layout:'qwerty'},request=JSON.stringify({raw,options,width:12})+'\n';
-  const run=name=>{
+  const raw='us3lc3?',options={layout:'qwerty'};
+  const run=(name,input=raw)=>{
+    const request=JSON.stringify({raw:input,options,width:12})+'\n';
     const p=spawnSync('target/release/polytype-search',['--experiment='+name],{input:request,encoding:'utf8'});
     assert.equal(p.status,0,p.stderr);
     return JSON.parse(p.stdout).ok.candidates;
@@ -119,6 +128,9 @@ test('the policy ablation reproduces pre-punctuation behavior with current dicti
   const legacy=run('current+no-punctuation');
   assert.equal(legacy[0].text,'你好?');
   assert.ok(!legacy.some(c=>c.text==='你好？'));
+  const oldParentheses=run('current+no-parentheses','us3lc3(');
+  assert.equal(oldParentheses[0].text,'你好(');
+  assert.ok(!oldParentheses.some(c=>c.text==='你好（'));
 });
 
 test('native and WASM match punctuation, numbers and every code prefix in both layouts',()=>{

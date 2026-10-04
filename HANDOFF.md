@@ -1,5 +1,16 @@
 # Polytype handoff
 
+## Chinese full-width parentheses (zh-parens-v1)
+
+Physical Shift+9/Shift+0 prefer `（`/`）` after converted Chinese while keeping
+ASCII selectable. English, Japanese and code retain their ASCII preference.
+Context skips consecutive punctuation, including pasted full-width parentheses;
+`了(?` and `了（?` both prefer `了（？`. McBopomofo's pinned generic rows 201–202
+apply to Standard layout (no Standard-specific override); see docs/PUNCTUATION.md.
+Ranking suffix: `+zh-parens-v1`. `current+no-parentheses` reproduces the previous
+map. Prototype/reference and physical key encoding are unchanged. Added physical
+parenthesis smoke assertions for coordinator validation.
+
 ## Physical Colemak uppercase O (PT-006)
 
 Expanded raw encoding version 2 preserves QWERTY physical positions: Shift+P
