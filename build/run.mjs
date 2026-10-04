@@ -72,6 +72,8 @@ if (mode === 'test') {
   if (argv[0] === 'import' && argv[2]) argv[2] = resolve(caller, argv[2]);
   try {run('scripts/corpus.mjs', argv);}
   catch (error) {process.exitCode = error.status || 1;} // The tool already prints a text-free diagnostic.
+} else if (mode === 'baseline-zh-en') {
+  run('scripts/baseline-zh-en.mjs');
 } else if (mode === 'benchmark') {
   run('scripts/benchmark-search.mjs', args.map(arg => resolve(caller, arg)));
 } else if (mode === 'diagnose') {
@@ -93,6 +95,8 @@ if (mode === 'test') {
       const commands = {
         'import-chinese': ['import-chinese.mjs', ['data/chinese.tsv', 'data/chinese-source.json', 'data/sources/mcbopomofo/LICENSE.txt']],
         'import-english': ['import-english.mjs', ['data/english.tsv', 'data/english-source.json', 'data/sources/scowl/Copyright']],
+        'import-zh-en': ['import-zh-en.mjs', ['eval/zh-en', 'eval/sources/ASCEND-README.md', 'eval/sources/UD_English-EWT-README.md', 'eval/sources/UD_English-EWT-LICENSE.txt', 'eval/sources/OpenCC-LICENSE.txt', 'eval/sources/CC-CEDICT-NOTICE.txt']],
+        'verify-zh-en': ['import-zh-en.mjs', []],
         'import-japanese': ['import-japanese.mjs', ['data/japanese.tsv', 'data/japanese-source.json', 'data/sources/mozc/README.txt']],
         'verify-corpus': ['verify-corpus.mjs', ['eval/sources']],
         'experiment-islands': ['experiment-islands.mjs', ['eval/island-experiments.json']],
@@ -101,7 +105,7 @@ if (mode === 'test') {
       const command = commands[mode];
       if (!command || !workspace) throw new Error(`Unknown command: ${mode}`);
       if (args.includes('--freeze')) throw new Error('Frozen migration evidence must not be overwritten.');
-      run('scripts/' + command[0], args, work);
+      run('scripts/' + command[0], mode === 'verify-zh-en' ? ['--verify', ...args] : args, work);
       for (const name of command[1]) await publish(join(work, name), join(workspace, name));
     }
   } finally {

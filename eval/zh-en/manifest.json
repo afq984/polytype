@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "files": [
+    {
+      "path": "eval/zh-en/ascend.json",
+      "sha256": "4c51964b754b7aaaafc774e36586b310e03333c990403220d7701d7ce9981da7",
+      "bytes": 623985
+    },
+    {
+      "path": "eval/zh-en/english-only.json",
+      "sha256": "aafa6ad6315b2758a807305147369bada70c2afced0dc0e2b9b4fbf068326d6a",
+      "bytes": 42417
+    },
+    {
+      "path": "eval/zh-en/review.json",
+      "sha256": "7d8c1754b8609e529f45c5922e3117c1e7a96b76f8bf545122a6e77a0f00d5cb",
+      "bytes": 216404
+    },
+    {
+      "path": "eval/sources/ASCEND-README.md",
+      "sha256": "93e4b299266be73d265667e87ee780c6ff9e08cdb46df60302cb8d2cc91bfc47",
+      "bytes": 3675
+    },
+    {
+      "path": "eval/sources/UD_English-EWT-README.md",
+      "sha256": "c2dc7edaf5937d18cb3ff142410fde7460e32faa69b2bd0a041abc3f957da281",
+      "bytes": 24522
+    },
+    {
+      "path": "eval/sources/UD_English-EWT-LICENSE.txt",
+      "sha256": "b3d1b0f4c6ae151f7eb78738f46ebd5ee140f8a7f76501ba26af123140d35ae7",
+      "bytes": 20014
+    },
+    {
+      "path": "eval/sources/OpenCC-LICENSE.txt",
+      "sha256": "b534e465949558eec2597b04f5092b5e161236a68dfbfd04d547592ac3964308",
+      "bytes": 9165
+    },
+    {
+      "path": "eval/sources/CC-CEDICT-NOTICE.txt",
+      "sha256": "c813a638296826bf786cf47f6644e2513b0fc3bfdbe8c7c6321438e17cf0591b",
+      "bytes": 777
+    }
+  ]
+}

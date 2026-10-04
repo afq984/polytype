@@ -255,3 +255,114 @@ annotations. Preserve attribution and the [CC BY-SA 4.0 terms](https://creativec
 for these adapted corpus annotations. These data terms do not license the rest
 of Polytype's code. Generated reports retain the same source attribution through
 this directory; no corpus text is bundled into the runtime dictionary.
+
+## Chinese + English development data
+
+`eval/zh-en/ascend.json` contains 300 mixed utterances and 50 Chinese-only
+controls from the **test** CSV of [CAiRE/ASCEND](https://huggingface.co/datasets/CAiRE/ASCEND/tree/b966160952fc5fe9cb036f098dd44f135d5c6f20).
+The source is Hong Kong conversational Mandarin-English speech, originally in
+Simplified characters. It includes fillers, repetitions and incomplete thoughts;
+this is development evidence, not private held-out data or representative Taiwan
+keyboard input. Audio, train and validation splits are never downloaded.
+
+Selection is deterministic source-file order: first 300 mixed (Han plus ASCII
+Latin letters) and first 50 Han-only utterances passing the documented encoding
+and length filters. Of 1,315 test utterances, 379 contain Han and Latin; 21 Han
+utterances contain annotation markup (`[UNK]`) and are excluded. After markup
+exclusion there are 358 mixed and 679 Chinese-only eligible utterances. One
+prospective selected mixed utterance cannot round-trip in Colemak (uppercase O);
+no utterance is excluded by the conservative 400-key length bound. Counts and
+original transcripts/source row identifiers are retained in the data. These are
+selected excerpts from an ordered corpus, with speaker/topic clustering, rather
+than a random sample.
+
+OpenCC **1.1.9**, pinned at `556ed22496d650bd0b13b6c163be9814637970ae`, provides
+the offline s2twp conversion dictionaries: maximal-match STPhrases/STCharacters,
+then merged TWPhrasesIT/Name/Other, then TWVariants. The small Node implementation
+in `scripts/zh-en-annotation.mjs` chooses each dictionary's first alternative;
+ambiguous alternatives and length-changing conversions enter the review queue.
+Conversion runs only during corpus import, never inside the decoder. OpenCC's
+Apache-2.0 license is retained under `eval/sources/`.
+
+Readings come from **CC-CEDICT**, independently of the dictionary under test.
+The pinned May 28, 2026 MDBG export is fetched from an immutable
+[tea-data source snapshot](https://github.com/steventango/tea-data/blob/e9b90d085dded03d7bce5e52d7a65844d53c67f1/cedict_ts.u8)
+(the exact revision and SHA-256 in `eval/sources/zh-en-pins.json` are authoritative).
+This mirror is used to make the export reproducible rather than fetching MDBG's
+moving latest release. The importer uses longest word matches, retains source
+line evidence and all candidate pinyin readings, prefers explicit `Taiwan pr.`
+readings, and converts numbered citation pinyin to Zhuyin without tone sandhi.
+Ambiguous candidates receive a deterministic provisional reading, preferring a
+Taiwan entry and then a non-name entry, never choosing from McBopomofo.
+
+Every selected syllable is compared with the expanded/prototype single-character
+readings accepted by the evaluated engine. Disagreements, single-character
+polyphones without word-level evidence, word ambiguity, conversion alternatives,
+erhua/unsupported readings and unmapped characters enter `eval/zh-en/review.json`.
+Affected entries stay `review: "pending"`; `review: "automatic"` means no detected
+issue, **not** human-approved gold. These auto-annotations cannot guarantee Taiwan
+citation pronunciation or conversational intent. The stream's full human-readable
+queue is in the out-of-tree stream report `data-review.md`, which is not part of
+the public corpus. Unmapped entries remain in the corpus and are listed
+by the generator's `zhEnSkipped`; they do not silently receive dictionary readings.
+The manifest records the evaluated dictionary hashes used for this comparison.
+
+ASCEND English is mostly lowercase, with capitalized names, `I`, acronyms and
+spelled-out letters (e.g. `G P A`); 44 selected mixed utterances contain capitals.
+Apostrophes are the only non-markup punctuation in the full test transcripts.
+Spelling, case, internal spaces, fillers and repetitions are retained. We recommend
+no automatic case/spelling cleanup for this diagnostic. A future transcript
+normalization experiment should be a separate annotated variant.
+
+`eval/zh-en/english-only.json` contains the first 200 representable **test**
+sentences of [UD English EWT](https://github.com/UniversalDependencies/UD_English-EWT/tree/4a4d77f599ea53cc405f85d0cec4b2f14f81d42b),
+with 4–25 integer-ID tokens, printable ASCII sentence text, at most 400 raw units,
+and an exact Colemak round trip. Of 2,077 test sentences, 1,409 meet the token
+range; 88 fail the encoding filter across the whole eligible split. The filter
+conservatively limits this guard to ASCII keyboard text and excludes Unicode
+punctuation as well as the existing Colemak uppercase-O limitation (PT-006).
+Apostrophes, hyphens, case and representable punctuation remain exact. Both layouts
+use the same source sentences with all three languages enabled.
+
+`eval/zh-en-cases.mjs` exports `zhEnCorpus`, `englishOnlyCorpus`, `zhEnCases`,
+`englishOnlyCases`, `zhEnSkipped` and `generateZhEnCases(entries, {spacing})`.
+Each ASCEND entry yields eight cases: QWERTY/Colemak × EN+ZH/all languages ×
+`current`/`target`. Chinese controls have separate `zh-only-*` groups. English
+controls yield two `en-only-*` cases. Cases carry `sourceId`, source segments,
+options and review status so downstream metrics can separate provisional targets.
+The generator reuses Rust/WASM `readingKeys` and the existing case-preserving
+Colemak encoder. It is intentionally **not** added to `eval/cases.mjs` or the
+existing report metrics; the evaluation stream owns that integration.
+
+The `current` contract types a separator at each language change, in addition to
+any first-tone completion Space. The `target` contract uses the first-tone Space
+as the only switch Space after such a syllable. Expected output follows literal
+spaces exactly: `剛␣call` for current, `剛call` for target. A single transcript
+space at a language boundary supplies the required separator, rather than adding
+a duplicate; extra transcript spaces remain literal. Whitespace/punctuation-only
+source spans are recorded as `lang: "en", kind: "literal"` and keep their original
+keys without creating a language switch. `spacing: "typed"` is the default;
+`spacing: "normalized"` removes spaces only in the expected scoring view. This
+single parameter does not change decoder output spacing or establish final policy.
+
+ASCEND text and adapted CC-CEDICT annotations retain **CC BY-SA 4.0**, with dataset
+citation, export header and license links in `eval/sources/`. EWT retains its
+**CC BY-SA 4.0** license and upstream README. No evaluation text or pronunciation
+annotation is added to `data/` or compiled into either demo. Each committed data
+file is below 1 MB; full upstream dictionary files are temporary downloads only.
+
+```sh
+bazelisk run //:import_zh_en                 # explicit network import, pinned hashes
+bazelisk run //:verify_zh_en                 # fetch, hash-check and reproduce without writes
+bazelisk run //:import_zh_en -- --from-dir=DIR # same source basenames, offline reproduction
+bazelisk run //:verify_zh_en -- --from-dir=DIR
+bazelisk run //:baseline_zh_en               # quick current-engine counts on stdout
+bazelisk test //...                         # offline data hashes, contracts, native/WASM parity
+```
+
+All source URLs/revisions/hashes live in `eval/sources/zh-en-pins.json`.
+`eval/zh-en/manifest.json` checks generated corpus and retained notices offline;
+network verification checks both pinned inputs and byte-identical reproduction.
+The import's dictionary comparison is diagnostic only; a dictionary change may
+require explicitly regenerating its comparison/review metadata. Initial baseline
+counts include pending readings and must be interpreted alongside the review queue.

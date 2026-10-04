@@ -1,0 +1,1215 @@
+{
+  "source": "UniversalDependencies/UD_English-EWT",
+  "revision": "4a4d77f599ea53cc405f85d0cec4b2f14f81d42b",
+  "split": "test",
+  "license": "CC BY-SA 4.0",
+  "selection": "First 200 test sentences in file order with 4–25 integer-ID tokens, printable ASCII text, <=400 raw units, and exact Colemak round trip. Eligibility/drop counts cover entire test split.",
+  "counts": {
+    "total": 2077,
+    "lengthEligible": 1409,
+    "unsupportedDropped": 88,
+    "selected": 200
+  },
+  "cases": [
+    {
+      "id": "ewt-test-001",
+      "sourceSent": "weblog-blogspot.com_zentelligence_20040423000200_ENG_20040423_000200-0002",
+      "tokens": 23,
+      "text": "What if Google expanded on its search-engine (and now e-mail) wares into a full-fledged operating system?"
+    },
+    {
+      "id": "ewt-test-002",
+      "sourceSent": "weblog-blogspot.com_zentelligence_20040423000200_ENG_20040423_000200-0003",
+      "tokens": 9,
+      "text": "[via Microsoft Watch from Mary Jo Foley ]"
+    },
+    {
+      "id": "ewt-test-003",
+      "sourceSent": "weblog-blogspot.com_marketview_20050511222700_ENG_20050511_222700-0001",
+      "tokens": 25,
+      "text": "(And, by the way, is anybody else just a little nostalgic for the days when that was a good thing?)"
+    },
+    {
+      "id": "ewt-test-004",
+      "sourceSent": "weblog-blogspot.com_marketview_20050511222700_ENG_20050511_222700-0003",
+      "tokens": 7,
+      "text": "Google is a nice search engine."
+    },
+    {
+      "id": "ewt-test-005",
+      "sourceSent": "weblog-blogspot.com_marketview_20050511222700_ENG_20050511_222700-0004",
+      "tokens": 8,
+      "text": "Does anybody use it for anything else?"
+    },
+    {
+      "id": "ewt-test-006",
+      "sourceSent": "weblog-blogspot.com_marketview_20050511222700_ENG_20050511_222700-0005",
+      "tokens": 7,
+      "text": "They own blogger, of course."
+    },
+    {
+      "id": "ewt-test-007",
+      "sourceSent": "weblog-blogspot.com_marketview_20050511222700_ENG_20050511_222700-0006",
+      "tokens": 6,
+      "text": "Is that a money maker?"
+    },
+    {
+      "id": "ewt-test-008",
+      "sourceSent": "weblog-blogspot.com_marketview_20050511222700_ENG_20050511_222700-0007",
+      "tokens": 8,
+      "text": "I'm staying away from the stock."
+    },
+    {
+      "id": "ewt-test-009",
+      "sourceSent": "weblog-blogspot.com_floppingaces_20041126180010_ENG_20041126_180010-0002",
+      "tokens": 22,
+      "text": "John Donovan from Argghhh! has put out a excellent slide show on what was actually found and fought for in Fallujah."
+    },
+    {
+      "id": "ewt-test-010",
+      "sourceSent": "weblog-blogspot.com_floppingaces_20041126180010_ENG_20041126_180010-0003",
+      "tokens": 6,
+      "text": "Click here To view it."
+    },
+    {
+      "id": "ewt-test-011",
+      "sourceSent": "weblog-blogspot.com_floppingaces_20041126180010_ENG_20041126_180010-0004",
+      "tokens": 12,
+      "text": "He makes some good observations on a few of the pic's."
+    },
+    {
+      "id": "ewt-test-012",
+      "sourceSent": "weblog-blogspot.com_floppingaces_20041126180010_ENG_20041126_180010-0007",
+      "tokens": 8,
+      "text": "Compare the flags to the Fallujah one."
+    },
+    {
+      "id": "ewt-test-013",
+      "sourceSent": "weblog-blogspot.com_floppingaces_20041126180010_ENG_20041126_180010-0008",
+      "tokens": 11,
+      "text": "You have to see these slides....they are amazing."
+    },
+    {
+      "id": "ewt-test-014",
+      "sourceSent": "weblog-blogspot.com_floppingaces_20041126180010_ENG_20041126_180010-0009",
+      "tokens": 24,
+      "text": "This Fallujah operation my turn out to be the most important operation done by the US Military since the end of the war."
+    },
+    {
+      "id": "ewt-test-015",
+      "sourceSent": "weblog-blogspot.com_marketview_20050224181500_ENG_20050224_181500-0002",
+      "tokens": 12,
+      "text": "I'm not fond of the Google-hates-privacy argument"
+    },
+    {
+      "id": "ewt-test-016",
+      "sourceSent": "weblog-blogspot.com_marketview_20050224181500_ENG_20050224_181500-0004",
+      "tokens": 9,
+      "text": "However, this toolbar is really bad news."
+    },
+    {
+      "id": "ewt-test-017",
+      "sourceSent": "weblog-blogspot.com_grandpasgripes_20060413051000_ENG_20060413_051000-0001",
+      "tokens": 12,
+      "text": "Iran says it is creating nuclear energy without wanting nuclear weapons."
+    },
+    {
+      "id": "ewt-test-018",
+      "sourceSent": "weblog-blogspot.com_grandpasgripes_20060413051000_ENG_20060413_051000-0002",
+      "tokens": 10,
+      "text": "The United States doesn't believe the Iranian Government."
+    },
+    {
+      "id": "ewt-test-019",
+      "sourceSent": "weblog-blogspot.com_grandpasgripes_20060413051000_ENG_20060413_051000-0004",
+      "tokens": 6,
+      "text": "But there is no proof ."
+    },
+    {
+      "id": "ewt-test-020",
+      "sourceSent": "weblog-blogspot.com_grandpasgripes_20060413051000_ENG_20060413_051000-0006",
+      "tokens": 18,
+      "text": "They are certainly being nasty to the United Nations Security Council in connection with the anti-proliferation treaty."
+    },
+    {
+      "id": "ewt-test-021",
+      "sourceSent": "weblog-blogspot.com_grandpasgripes_20060413051000_ENG_20060413_051000-0008",
+      "tokens": 13,
+      "text": "But he has insisted that he wants nuclear power for peaceful purposes."
+    },
+    {
+      "id": "ewt-test-022",
+      "sourceSent": "weblog-blogspot.com_grandpasgripes_20060413051000_ENG_20060413_051000-0009",
+      "tokens": 13,
+      "text": "Many people want to use diplomacy with Iran rather than military pressure."
+    },
+    {
+      "id": "ewt-test-023",
+      "sourceSent": "weblog-blogspot.com_grandpasgripes_20060413051000_ENG_20060413_051000-0010",
+      "tokens": 5,
+      "text": "But will diplomacy work?"
+    },
+    {
+      "id": "ewt-test-024",
+      "sourceSent": "weblog-blogspot.com_grandpasgripes_20060413051000_ENG_20060413_051000-0011",
+      "tokens": 9,
+      "text": "And can anyone use military pressure without proof?"
+    },
+    {
+      "id": "ewt-test-025",
+      "sourceSent": "weblog-blogspot.com_grandpasgripes_20060413051000_ENG_20060413_051000-0013",
+      "tokens": 5,
+      "text": "He has denied this."
+    },
+    {
+      "id": "ewt-test-026",
+      "sourceSent": "weblog-blogspot.com_grandpasgripes_20060413051000_ENG_20060413_051000-0014",
+      "tokens": 8,
+      "text": "We don't have to believe him."
+    },
+    {
+      "id": "ewt-test-027",
+      "sourceSent": "weblog-blogspot.com_grandpasgripes_20060413051000_ENG_20060413_051000-0015",
+      "tokens": 7,
+      "text": "But we can't prove it."
+    },
+    {
+      "id": "ewt-test-028",
+      "sourceSent": "weblog-blogspot.com_grandpasgripes_20060413051000_ENG_20060413_051000-0016",
+      "tokens": 16,
+      "text": "It does seem that Iranians frequently make statements and then hide behind lack of proof."
+    },
+    {
+      "id": "ewt-test-029",
+      "sourceSent": "weblog-juancole.com_juancole_20030914114200_ENG_20030914_114200-0003",
+      "tokens": 25,
+      "text": "It read, \"The people of Fallujah condemn the massacre which was committed on Friday against people dedicated to the protection of Fallujah."
+    },
+    {
+      "id": "ewt-test-030",
+      "sourceSent": "weblog-juancole.com_juancole_20030914114200_ENG_20030914_114200-0005",
+      "tokens": 9,
+      "text": "The clerics demanded talks with local US commanders."
+    },
+    {
+      "id": "ewt-test-031",
+      "sourceSent": "weblog-juancole.com_juancole_20030914114200_ENG_20030914_114200-0007",
+      "tokens": 22,
+      "text": "Cities such as Falluja received special treatment from Saddam and enjoyed a disproportionate share of the country's wealth and power."
+    },
+    {
+      "id": "ewt-test-032",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060629164800_ENG_20060629_164800-0002",
+      "tokens": 8,
+      "text": "The actual vote is a little confusing."
+    },
+    {
+      "id": "ewt-test-033",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060629164800_ENG_20060629_164800-0009",
+      "tokens": 24,
+      "text": "It will take me a little while to read the whole thing, but I rarely agree with a John Paul Stevens opinion."
+    },
+    {
+      "id": "ewt-test-034",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060629164800_ENG_20060629_164800-0010",
+      "tokens": 14,
+      "text": "I'll post highlights from the opinion and dissents when I'm finished."
+    },
+    {
+      "id": "ewt-test-035",
+      "sourceSent": "weblog-blogspot.com_tacitusproject_20040715092419_ENG_20040715_092419-0002",
+      "tokens": 11,
+      "text": "I had to go to the BBC for this report ."
+    },
+    {
+      "id": "ewt-test-036",
+      "sourceSent": "weblog-blogspot.com_tacitusproject_20040715092419_ENG_20040715_092419-0004",
+      "tokens": 5,
+      "text": "It's just disappointing."
+    },
+    {
+      "id": "ewt-test-037",
+      "sourceSent": "weblog-blogspot.com_tacitusproject_20040715092419_ENG_20040715_092419-0006",
+      "tokens": 24,
+      "text": "At that time, UN Secretary General Kofi Annan demanded steps be taken to end the ethnic violence in Darfur within 48 hours."
+    },
+    {
+      "id": "ewt-test-038",
+      "sourceSent": "weblog-blogspot.com_tacitusproject_20040715092419_ENG_20040715_092419-0007",
+      "tokens": 9,
+      "text": "Two weeks later, and the violence continues."
+    },
+    {
+      "id": "ewt-test-039",
+      "sourceSent": "weblog-blogspot.com_tacitusproject_20040715092419_ENG_20040715_092419-0009",
+      "tokens": 22,
+      "text": "And international donors have given only half of the relief aid that Darfur needs, according to the local UN officials."
+    },
+    {
+      "id": "ewt-test-040",
+      "sourceSent": "weblog-blogspot.com_marketview_20060625150800_ENG_20060625_150800-0001",
+      "tokens": 20,
+      "text": "Warren Buffett is giving away 85% of his wealth , mostly to the Bill and Melinda Gates Foundation."
+    },
+    {
+      "id": "ewt-test-041",
+      "sourceSent": "weblog-blogspot.com_marketview_20060625150800_ENG_20060625_150800-0004",
+      "tokens": 17,
+      "text": "Which essentially sounds like he's worried that Bill or Melinda are going to die soon."
+    },
+    {
+      "id": "ewt-test-042",
+      "sourceSent": "weblog-blogspot.com_marketview_20060625150800_ENG_20060625_150800-0006",
+      "tokens": 10,
+      "text": "I'm not sure how the market will react."
+    },
+    {
+      "id": "ewt-test-043",
+      "sourceSent": "weblog-blogspot.com_marketview_20060625150800_ENG_20060625_150800-0010",
+      "tokens": 12,
+      "text": "Because the 10.000.000 people dying from malaria will otherwise be dead."
+    },
+    {
+      "id": "ewt-test-044",
+      "sourceSent": "weblog-blogspot.com_marketview_20060625150800_ENG_20060625_150800-0013",
+      "tokens": 12,
+      "text": "He mentions his wife's death having an effect on him."
+    },
+    {
+      "id": "ewt-test-045",
+      "sourceSent": "weblog-blogspot.com_floppingaces_20050313182621_ENG_20050313_182621-0004",
+      "tokens": 20,
+      "text": "Syria has agreed to withdraw under the conditions set forth in UNSC Resolution 1559 , which has already begun ."
+    },
+    {
+      "id": "ewt-test-046",
+      "sourceSent": "weblog-blogspot.com_floppingaces_20050313182621_ENG_20050313_182621-0006",
+      "tokens": 22,
+      "text": "This acceptance of blatantly terrorist groups as legitimate freedom movements is a cancerous tumor on the United Nations and the media."
+    },
+    {
+      "id": "ewt-test-047",
+      "sourceSent": "weblog-blogspot.com_floppingaces_20050313182621_ENG_20050313_182621-0012",
+      "tokens": 4,
+      "text": "Wtf is this?"
+    },
+    {
+      "id": "ewt-test-048",
+      "sourceSent": "weblog-blogspot.com_floppingaces_20050313182621_ENG_20050313_182621-0013",
+      "tokens": 9,
+      "text": "This is a terrorist organization plain and simple."
+    },
+    {
+      "id": "ewt-test-049",
+      "sourceSent": "weblog-blogspot.com_floppingaces_20050313182621_ENG_20050313_182621-0015",
+      "tokens": 17,
+      "text": "This is just another reason to never trust the MSM, and certainly not the Europeans."
+    },
+    {
+      "id": "ewt-test-050",
+      "sourceSent": "weblog-juancole.com_juancole_20041109060653_ENG_20041109_060653-0002",
+      "tokens": 13,
+      "text": "It is now threatening to pull out of the Allawi caretaker government."
+    },
+    {
+      "id": "ewt-test-051",
+      "sourceSent": "weblog-juancole.com_juancole_20041109060653_ENG_20041109_060653-0005",
+      "tokens": 22,
+      "text": "Az-Zaman : The Association of Muslim Scholars forbade Iraqis to participate in the attack on Fallujah with the Americans."
+    },
+    {
+      "id": "ewt-test-052",
+      "sourceSent": "weblog-juancole.com_juancole_20041109060653_ENG_20041109_060653-0009",
+      "tokens": 23,
+      "text": "The radical Shiite Sadr movement issued a statement forbidding the participation of Iraqi troops in the attack on Fallujah, as well."
+    },
+    {
+      "id": "ewt-test-053",
+      "sourceSent": "weblog-juancole.com_juancole_20041109060653_ENG_20041109_060653-0011",
+      "tokens": 19,
+      "text": "It called a \"ploy\" the assertaion that the attack was merely on foreign fighters at Fallujah."
+    },
+    {
+      "id": "ewt-test-054",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0001",
+      "tokens": 13,
+      "text": "President Bush pinched a few nerves yesterday with his choice of words:"
+    },
+    {
+      "id": "ewt-test-055",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0006",
+      "tokens": 15,
+      "text": "Which is why he didn't say we're at war with Islamic people."
+    },
+    {
+      "id": "ewt-test-056",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0007",
+      "tokens": 8,
+      "text": "We're at war with Islamic fascists."
+    },
+    {
+      "id": "ewt-test-057",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0008",
+      "tokens": 23,
+      "text": "By using the word \"Islamic\" as an adjective Bush was purposely not associating Muslims with fascism, hence the qualifier."
+    },
+    {
+      "id": "ewt-test-058",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0009",
+      "tokens": 25,
+      "text": "And if you haven't heard by now, the roster of suspected terrorists has not a Tom, Dick or Harry among them:"
+    },
+    {
+      "id": "ewt-test-059",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0010",
+      "tokens": 7,
+      "text": "Umir Hussain, 24, London E14"
+    },
+    {
+      "id": "ewt-test-060",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0011",
+      "tokens": 8,
+      "text": "Muhammed Usman Saddique, 24, London E17"
+    },
+    {
+      "id": "ewt-test-061",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0012",
+      "tokens": 7,
+      "text": "Waheed Zaman, 22, London E17"
+    },
+    {
+      "id": "ewt-test-062",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0013",
+      "tokens": 8,
+      "text": "Assan Abdullah Khan, 22, London E17"
+    },
+    {
+      "id": "ewt-test-063",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0014",
+      "tokens": 7,
+      "text": "Waseem Kayani, 28, High Wycombe"
+    },
+    {
+      "id": "ewt-test-064",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0015",
+      "tokens": 8,
+      "text": "Waheed Arafat Khan, 24, London E17"
+    },
+    {
+      "id": "ewt-test-065",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0016",
+      "tokens": 7,
+      "text": "Cossor Ali, 24, London E17"
+    },
+    {
+      "id": "ewt-test-066",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0017",
+      "tokens": 6,
+      "text": "Tayib Rauf, 21, Birmingham"
+    },
+    {
+      "id": "ewt-test-067",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0018",
+      "tokens": 7,
+      "text": "Ibrahim Savant, 26, London E17"
+    },
+    {
+      "id": "ewt-test-068",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0020",
+      "tokens": 8,
+      "text": "Shamin Mohammed Uddin, 36, Stoke Newington"
+    },
+    {
+      "id": "ewt-test-069",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0021",
+      "tokens": 8,
+      "text": "Amin Asmin Tariq, 23, London E17"
+    },
+    {
+      "id": "ewt-test-070",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0022",
+      "tokens": 8,
+      "text": "Shazad Khuram Ali, 27, High Wycombe"
+    },
+    {
+      "id": "ewt-test-071",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0023",
+      "tokens": 7,
+      "text": "Tanvir Hussain, 24, London E10"
+    },
+    {
+      "id": "ewt-test-072",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0024",
+      "tokens": 12,
+      "text": "Umar Islam, 28, (born Brian Young) High Wycombe"
+    },
+    {
+      "id": "ewt-test-073",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0025",
+      "tokens": 7,
+      "text": "Assad Sarwar, 25, High Wycombe"
+    },
+    {
+      "id": "ewt-test-074",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0026",
+      "tokens": 7,
+      "text": "Abdullah Ali, 26, London E17"
+    },
+    {
+      "id": "ewt-test-075",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0027",
+      "tokens": 8,
+      "text": "Abdul Muneem Patel, 17, London E5"
+    },
+    {
+      "id": "ewt-test-076",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0030",
+      "tokens": 7,
+      "text": "Asad Ansari, 21, Mississauga;"
+    },
+    {
+      "id": "ewt-test-077",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0031",
+      "tokens": 7,
+      "text": "Shareef Abdelhaleen, 30, Mississauga;"
+    },
+    {
+      "id": "ewt-test-078",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0032",
+      "tokens": 8,
+      "text": "Qayyum Abdul Jamal, 43, Mississauga;"
+    },
+    {
+      "id": "ewt-test-079",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0034",
+      "tokens": 8,
+      "text": "Yasim Abdi Mohamed, 24, Kingston;"
+    },
+    {
+      "id": "ewt-test-080",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0035",
+      "tokens": 7,
+      "text": "Jahmaal James, 23, Toronto;"
+    },
+    {
+      "id": "ewt-test-081",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0036",
+      "tokens": 8,
+      "text": "Amin Mohamed Durrani, 19, Toronto;"
+    },
+    {
+      "id": "ewt-test-082",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0037",
+      "tokens": 11,
+      "text": "Steven Vikash Chand alias Abdul Shakur, 25, Toronto;"
+    },
+    {
+      "id": "ewt-test-083",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0038",
+      "tokens": 8,
+      "text": "Ahmad Mustafa Ghany, 21, Mississauga;"
+    },
+    {
+      "id": "ewt-test-084",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0039",
+      "tokens": 11,
+      "text": "Saad Khalid, 19, of Eclipse Avenue, Mississauga."
+    },
+    {
+      "id": "ewt-test-085",
+      "sourceSent": "weblog-blogspot.com_aggressivevoicedaily_20060811122000_ENG_20060811_122000-0041",
+      "tokens": 16,
+      "text": "Folks, if it's Islamic, and fascist, it's an Islamic fascist."
+    },
+    {
+      "id": "ewt-test-086",
+      "sourceSent": "weblog-juancole.com_juancole_20041018060600_ENG_20041018_060600-0002",
+      "tokens": 7,
+      "text": "This pledge is a new development."
+    },
+    {
+      "id": "ewt-test-087",
+      "sourceSent": "weblog-juancole.com_juancole_20041018060600_ENG_20041018_060600-0003",
+      "tokens": 25,
+      "text": "Abu Musab al-Zarqawi and his group are said to have been bitter rivals of al-Qaeda during the Afghan resistance days."
+    },
+    {
+      "id": "ewt-test-088",
+      "sourceSent": "weblog-juancole.com_juancole_20041018060600_ENG_20041018_060600-0006",
+      "tokens": 21,
+      "text": "This consolidation is obviously a result of Bush's aggressive invasion of Iraq and of the botching of the aftermath."
+    },
+    {
+      "id": "ewt-test-089",
+      "sourceSent": "weblog-juancole.com_juancole_20041018060600_ENG_20041018_060600-0007",
+      "tokens": 10,
+      "text": "It is a setback for the war on terror."
+    },
+    {
+      "id": "ewt-test-090",
+      "sourceSent": "weblog-juancole.com_juancole_20041018060600_ENG_20041018_060600-0014",
+      "tokens": 14,
+      "text": "They also had a special connection to some extremists in Jordan and Germany."
+    },
+    {
+      "id": "ewt-test-091",
+      "sourceSent": "weblog-juancole.com_juancole_20041018060600_ENG_20041018_060600-0019",
+      "tokens": 16,
+      "text": "These have been sighted among Iraqi crowds on Haifa Street in Baghdad and in Samarra."
+    },
+    {
+      "id": "ewt-test-092",
+      "sourceSent": "weblog-juancole.com_juancole_20041018060600_ENG_20041018_060600-0020",
+      "tokens": 19,
+      "text": "So now there are hundreds of al-Qaeda members in Iraq where there had been none before."
+    },
+    {
+      "id": "ewt-test-093",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0001",
+      "tokens": 11,
+      "text": "The September 11 Panel will issue its findings on Thursday."
+    },
+    {
+      "id": "ewt-test-094",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0002",
+      "tokens": 20,
+      "text": "It notes 10 points at which the US made key mistakes that might have stopped Bin Laden's plot."
+    },
+    {
+      "id": "ewt-test-095",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0003",
+      "tokens": 11,
+      "text": "Four of these were under Clinton and 6 under Bush."
+    },
+    {
+      "id": "ewt-test-096",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0005",
+      "tokens": 17,
+      "text": "This statement is, despite its facade of fair-mindedness, so many weasel words."
+    },
+    {
+      "id": "ewt-test-097",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0007",
+      "tokens": 14,
+      "text": "The question is, \"Should he have known it was coming?\""
+    },
+    {
+      "id": "ewt-test-098",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0008",
+      "tokens": 8,
+      "text": "The answer is, \"Yes!\""
+    },
+    {
+      "id": "ewt-test-099",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0009",
+      "tokens": 15,
+      "text": "We now know that Bush and his administration came into office obsessed with Iraq."
+    },
+    {
+      "id": "ewt-test-100",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0013",
+      "tokens": 14,
+      "text": "Even after the attacks on September 11, Bush was obsessing about Iraq."
+    },
+    {
+      "id": "ewt-test-101",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0014",
+      "tokens": 21,
+      "text": "Wolfowitz lied to him and said that there was a 10 to 50% chance that Iraq was behind them."
+    },
+    {
+      "id": "ewt-test-102",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0016",
+      "tokens": 24,
+      "text": "The hijackers were obviously al-Qaeda, and no operational links between al-Qaeda and Iraq had ever been found)."
+    },
+    {
+      "id": "ewt-test-103",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0017",
+      "tokens": 24,
+      "text": "Rumsfeld initially rejected an attack on al-Qaeda bases in Afghanistan, saying there were \"no good targets\" in Afghanistan."
+    },
+    {
+      "id": "ewt-test-104",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0018",
+      "tokens": 24,
+      "text": "(What about 40 al-Qaeda bases that had trained the 9/11 hijackers and other terrorists gunning for the United States??)"
+    },
+    {
+      "id": "ewt-test-105",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0020",
+      "tokens": 10,
+      "text": "Bush did not have his eye on the ball."
+    },
+    {
+      "id": "ewt-test-106",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0021",
+      "tokens": 9,
+      "text": "Neither did Cheney, Rumsfeld, or Wolfowitz."
+    },
+    {
+      "id": "ewt-test-107",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0022",
+      "tokens": 12,
+      "text": "They were playing Captain Ahab to Saddam's great white whale."
+    },
+    {
+      "id": "ewt-test-108",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0024",
+      "tokens": 11,
+      "text": "They were from all accounts marginalized and not listened to."
+    },
+    {
+      "id": "ewt-test-109",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0025",
+      "tokens": 22,
+      "text": "Bush demoted Dick Clarke, among the most vocal and focused of the al-Qaeda experts, from his cabinet."
+    },
+    {
+      "id": "ewt-test-110",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0027",
+      "tokens": 15,
+      "text": "As for the Clinton administration, let me say one thing in its defense."
+    },
+    {
+      "id": "ewt-test-111",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0029",
+      "tokens": 16,
+      "text": "I presume you need the Pakistan base for rescue operations in case anything went wrong."
+    },
+    {
+      "id": "ewt-test-112",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0030",
+      "tokens": 7,
+      "text": "You also need Pakistani air space."
+    },
+    {
+      "id": "ewt-test-113",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0031",
+      "tokens": 10,
+      "text": "The plan was all set and could have succeeded."
+    },
+    {
+      "id": "ewt-test-114",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0032",
+      "tokens": 16,
+      "text": "But in fall of 1999, Gen. Pervez Musharraf made a coup against Nawaz Sharif."
+    },
+    {
+      "id": "ewt-test-115",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0033",
+      "tokens": 22,
+      "text": "The Pakistani army was rife with elements protective of the Taliban, and the new military government reneged on the deal."
+    },
+    {
+      "id": "ewt-test-116",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0034",
+      "tokens": 21,
+      "text": "Musharraf told Clinton he couldn't use Pakistani soil or air space to send the team in against Bin Laden."
+    },
+    {
+      "id": "ewt-test-117",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0037",
+      "tokens": 18,
+      "text": "But for those of you tempted in that direction, please look up Carter's Tabas operation."
+    },
+    {
+      "id": "ewt-test-118",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0038",
+      "tokens": 6,
+      "text": "It should be easily googled."
+    },
+    {
+      "id": "ewt-test-119",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0039",
+      "tokens": 7,
+      "text": "Clinton tried, and tried hard."
+    },
+    {
+      "id": "ewt-test-120",
+      "sourceSent": "weblog-juancole.com_juancole_20040722101300_ENG_20040722_101300-0040",
+      "tokens": 10,
+      "text": "The gods weren't with us on that one."
+    },
+    {
+      "id": "ewt-test-121",
+      "sourceSent": "email-enronsent23_09-0001",
+      "tokens": 15,
+      "text": "that is how i want you to refer to me as \"the king\""
+    },
+    {
+      "id": "ewt-test-122",
+      "sourceSent": "email-enronsent23_09-0002",
+      "tokens": 6,
+      "text": "i don't think so."
+    },
+    {
+      "id": "ewt-test-123",
+      "sourceSent": "email-enronsent23_09-0003",
+      "tokens": 4,
+      "text": "i'm the king"
+    },
+    {
+      "id": "ewt-test-124",
+      "sourceSent": "email-enronsent23_10-0003",
+      "tokens": 16,
+      "text": "want to go to dinner with me before you have your 'matt time'?"
+    },
+    {
+      "id": "ewt-test-125",
+      "sourceSent": "email-enronsent23_10-0004",
+      "tokens": 6,
+      "text": "probablyl gonna just kick it"
+    },
+    {
+      "id": "ewt-test-126",
+      "sourceSent": "email-enronsent23_01-0001",
+      "tokens": 5,
+      "text": "you know, whatever."
+    },
+    {
+      "id": "ewt-test-127",
+      "sourceSent": "email-enronsent23_01-0002",
+      "tokens": 7,
+      "text": "i will let you know later."
+    },
+    {
+      "id": "ewt-test-128",
+      "sourceSent": "email-enronsent23_01-0003",
+      "tokens": 6,
+      "text": "what are you doing tonight."
+    },
+    {
+      "id": "ewt-test-129",
+      "sourceSent": "email-enronsent23_01-0005",
+      "tokens": 7,
+      "text": "i can think of a few things"
+    },
+    {
+      "id": "ewt-test-130",
+      "sourceSent": "email-enronsent23_05-0001",
+      "tokens": 4,
+      "text": "your retarded."
+    },
+    {
+      "id": "ewt-test-131",
+      "sourceSent": "email-enronsent23_05-0002",
+      "tokens": 6,
+      "text": "i used to have one."
+    },
+    {
+      "id": "ewt-test-132",
+      "sourceSent": "email-enronsent23_05-0003",
+      "tokens": 5,
+      "text": "they are great dogs."
+    },
+    {
+      "id": "ewt-test-133",
+      "sourceSent": "email-enronsent23_05-0004",
+      "tokens": 5,
+      "text": "cockerspaniels are retarded."
+    },
+    {
+      "id": "ewt-test-134",
+      "sourceSent": "email-enronsent23_05-0005",
+      "tokens": 11,
+      "text": "why do you think i should get one of those?"
+    },
+    {
+      "id": "ewt-test-135",
+      "sourceSent": "email-enronsent23_12-0001",
+      "tokens": 8,
+      "text": "can't believe you left last night."
+    },
+    {
+      "id": "ewt-test-136",
+      "sourceSent": "email-enronsent23_12-0003",
+      "tokens": 21,
+      "text": "that's fine, i don't want to see you either, i just need to make a cd."
+    },
+    {
+      "id": "ewt-test-137",
+      "sourceSent": "email-enronsent23_12-0004",
+      "tokens": 4,
+      "text": "i can't wait"
+    },
+    {
+      "id": "ewt-test-138",
+      "sourceSent": "email-enronsent23_02-0001",
+      "tokens": 13,
+      "text": "i was thinking somewhere that requires a jacket, like tony's."
+    },
+    {
+      "id": "ewt-test-139",
+      "sourceSent": "email-enronsent23_02-0002",
+      "tokens": 9,
+      "text": "someplace that is like $30 an entree."
+    },
+    {
+      "id": "ewt-test-140",
+      "sourceSent": "email-enronsent23_02-0003",
+      "tokens": 10,
+      "text": "yeah, i was thinking somewhere like mcdonald's."
+    },
+    {
+      "id": "ewt-test-141",
+      "sourceSent": "email-enronsent23_02-0004",
+      "tokens": 7,
+      "text": "that may be too nice though."
+    },
+    {
+      "id": "ewt-test-142",
+      "sourceSent": "email-enronsent23_02-0005",
+      "tokens": 5,
+      "text": "what do you think?"
+    },
+    {
+      "id": "ewt-test-143",
+      "sourceSent": "email-enronsent23_02-0006",
+      "tokens": 6,
+      "text": "we can go somewhere nice."
+    },
+    {
+      "id": "ewt-test-144",
+      "sourceSent": "email-enronsent23_06-0003",
+      "tokens": 17,
+      "text": "i must have had you messed up with some other girl i made the bet with."
+    },
+    {
+      "id": "ewt-test-145",
+      "sourceSent": "email-enronsent23_06-0005",
+      "tokens": 12,
+      "text": "really, i have no idea what you're talking about."
+    },
+    {
+      "id": "ewt-test-146",
+      "sourceSent": "email-enronsent23_06-0006",
+      "tokens": 8,
+      "text": "you must be thinking of someone else."
+    },
+    {
+      "id": "ewt-test-147",
+      "sourceSent": "email-enronsent23_06-0007",
+      "tokens": 14,
+      "text": "i don't even like a&m, i wouldn't bet on them."
+    },
+    {
+      "id": "ewt-test-148",
+      "sourceSent": "email-enronsent23_06-0008",
+      "tokens": 5,
+      "text": "colorado beat texas a&m."
+    },
+    {
+      "id": "ewt-test-149",
+      "sourceSent": "email-enronsent23_06-0009",
+      "tokens": 7,
+      "text": "i know you remember the bet."
+    },
+    {
+      "id": "ewt-test-150",
+      "sourceSent": "email-enronsent23_07-0002",
+      "tokens": 6,
+      "text": "i got her number though."
+    },
+    {
+      "id": "ewt-test-151",
+      "sourceSent": "email-enronsent23_07-0003",
+      "tokens": 15,
+      "text": "i want to hook up with that girl paige in the brown leather jacket."
+    },
+    {
+      "id": "ewt-test-152",
+      "sourceSent": "email-enronsent23_07-0004",
+      "tokens": 5,
+      "text": "what happened to you?"
+    },
+    {
+      "id": "ewt-test-153",
+      "sourceSent": "email-enronsent23_07-0005",
+      "tokens": 7,
+      "text": "i had a blast that night."
+    },
+    {
+      "id": "ewt-test-154",
+      "sourceSent": "email-enronsent23_07-0006",
+      "tokens": 11,
+      "text": "did you hook up with that blonde chick saturday night?"
+    },
+    {
+      "id": "ewt-test-155",
+      "sourceSent": "email-enronsent23_07-0007",
+      "tokens": 6,
+      "text": "no i am not lying."
+    },
+    {
+      "id": "ewt-test-156",
+      "sourceSent": "email-enronsent23_07-0008",
+      "tokens": 6,
+      "text": "i flew here last night."
+    },
+    {
+      "id": "ewt-test-157",
+      "sourceSent": "email-enronsent23_07-0009",
+      "tokens": 4,
+      "text": "are you lying?"
+    },
+    {
+      "id": "ewt-test-158",
+      "sourceSent": "email-enronsent23_07-0010",
+      "tokens": 6,
+      "text": "i am out of town."
+    },
+    {
+      "id": "ewt-test-159",
+      "sourceSent": "email-enronsent23_07-0011",
+      "tokens": 5,
+      "text": "i am in portland."
+    },
+    {
+      "id": "ewt-test-160",
+      "sourceSent": "email-enronsent23_07-0012",
+      "tokens": 10,
+      "text": "you can buy me dinner when we get back."
+    },
+    {
+      "id": "ewt-test-161",
+      "sourceSent": "email-enronsent23_03-0001",
+      "tokens": 6,
+      "text": "i am sure they are."
+    },
+    {
+      "id": "ewt-test-162",
+      "sourceSent": "email-enronsent23_03-0002",
+      "tokens": 15,
+      "text": "houston won't be too affected b/c most of the layoffs affect satelite offices."
+    },
+    {
+      "id": "ewt-test-163",
+      "sourceSent": "email-enronsent23_03-0003",
+      "tokens": 6,
+      "text": "economy should be good here."
+    },
+    {
+      "id": "ewt-test-164",
+      "sourceSent": "email-enronsent23_03-0004",
+      "tokens": 7,
+      "text": "hopefully she doesn't hose you."
+    },
+    {
+      "id": "ewt-test-165",
+      "sourceSent": "email-enronsent23_03-0005",
+      "tokens": 8,
+      "text": "I'll probably start looking next weekend."
+    },
+    {
+      "id": "ewt-test-166",
+      "sourceSent": "email-enronsent23_03-0006",
+      "tokens": 17,
+      "text": "I heard that more may be going up for sale in the next month or do."
+    },
+    {
+      "id": "ewt-test-167",
+      "sourceSent": "email-enronsent23_03-0007",
+      "tokens": 12,
+      "text": "Someone told me that Chase is planning a shitload of layoffs."
+    },
+    {
+      "id": "ewt-test-168",
+      "sourceSent": "email-enronsent23_03-0008",
+      "tokens": 11,
+      "text": "I am not sure how reliable that is, though."
+    },
+    {
+      "id": "ewt-test-169",
+      "sourceSent": "email-enronsent23_03-0009",
+      "tokens": 11,
+      "text": "she is waiting to see if she can get financing."
+    },
+    {
+      "id": "ewt-test-170",
+      "sourceSent": "email-enronsent27_02-0004",
+      "tokens": 5,
+      "text": "Hello from South America."
+    },
+    {
+      "id": "ewt-test-171",
+      "sourceSent": "email-enronsent27_02-0005",
+      "tokens": 15,
+      "text": "I just got your email and I certainly concur with Jeff making the call."
+    },
+    {
+      "id": "ewt-test-172",
+      "sourceSent": "email-enronsent27_02-0006",
+      "tokens": 9,
+      "text": "He has maintained a good relationship with Mulva."
+    },
+    {
+      "id": "ewt-test-173",
+      "sourceSent": "email-enronsent27_02-0007",
+      "tokens": 17,
+      "text": "This was a risk that we had but we did have assurances from Phillips regarding performance."
+    },
+    {
+      "id": "ewt-test-174",
+      "sourceSent": "email-enronsent27_02-0008",
+      "tokens": 11,
+      "text": "I don't know how much it will help however."
+    },
+    {
+      "id": "ewt-test-175",
+      "sourceSent": "email-enronsent27_02-0009",
+      "tokens": 24,
+      "text": "Richard Harper and Mary Nell Browning may have some ideas here but I am sure you've already gone through it with them."
+    },
+    {
+      "id": "ewt-test-176",
+      "sourceSent": "email-enronsent27_02-0010",
+      "tokens": 13,
+      "text": "I am amazed how the details get fuzzy on an old project."
+    },
+    {
+      "id": "ewt-test-177",
+      "sourceSent": "email-enronsent27_02-0011",
+      "tokens": 25,
+      "text": "When you discussed it, i was trying to think back to our remedies and discussions but the 3 years have made it difficult."
+    },
+    {
+      "id": "ewt-test-178",
+      "sourceSent": "email-enronsent27_02-0012",
+      "tokens": 19,
+      "text": "I don't know if there is anything I can do but I'm always willing to help."
+    },
+    {
+      "id": "ewt-test-179",
+      "sourceSent": "email-enronsent21_01-0001",
+      "tokens": 8,
+      "text": "These guys tried the Ken Lay route."
+    },
+    {
+      "id": "ewt-test-180",
+      "sourceSent": "email-enronsent21_01-0002",
+      "tokens": 9,
+      "text": "Now they are part of your working group."
+    },
+    {
+      "id": "ewt-test-181",
+      "sourceSent": "email-enronsent21_01-0003",
+      "tokens": 19,
+      "text": "Hilary E. Ackermann Goldman Sachs Credit Risk Management & Advisory Phone: 212-902-3724 Fax: 212-428-1181 E-Mail: hilary.ackermann@gs.com"
+    },
+    {
+      "id": "ewt-test-182",
+      "sourceSent": "email-enronsent21_01-0004",
+      "tokens": 4,
+      "text": "Dear Mr. Lavorato:"
+    },
+    {
+      "id": "ewt-test-183",
+      "sourceSent": "email-enronsent21_01-0006",
+      "tokens": 19,
+      "text": "Hilary E. Ackermann Goldman Sachs Credit Risk Management & Advisory Phone: 212-902-3724 Fax: 212-428-1181 E-Mail: hilary.ackermann@gs.com"
+    },
+    {
+      "id": "ewt-test-184",
+      "sourceSent": "email-enronsent21_01-0009",
+      "tokens": 18,
+      "text": "I know you must be going nuts with all the events, so I have not called."
+    },
+    {
+      "id": "ewt-test-185",
+      "sourceSent": "email-enronsent21_01-0010",
+      "tokens": 6,
+      "text": "Hope you will be sorted."
+    },
+    {
+      "id": "ewt-test-186",
+      "sourceSent": "email-enronsent21_01-0011",
+      "tokens": 7,
+      "text": "Call me if you have time."
+    },
+    {
+      "id": "ewt-test-187",
+      "sourceSent": "email-enronsent21_01-0015",
+      "tokens": 13,
+      "text": "There are only two counterparties at this time who have overdue margin:"
+    },
+    {
+      "id": "ewt-test-188",
+      "sourceSent": "email-enronsent21_01-0017",
+      "tokens": 6,
+      "text": "Kinder Morgan $ 3,500,000 $ 1,250,000"
+    },
+    {
+      "id": "ewt-test-189",
+      "sourceSent": "email-enronsent21_01-0018",
+      "tokens": 5,
+      "text": "AEP $19,250,000 $38,750,000"
+    },
+    {
+      "id": "ewt-test-190",
+      "sourceSent": "email-enronsent21_01-0020",
+      "tokens": 5,
+      "text": "Totals $22,750,000 $40,000,000"
+    },
+    {
+      "id": "ewt-test-191",
+      "sourceSent": "email-enronsent21_01-0021",
+      "tokens": 11,
+      "text": "Please let us know if you need any additional information."
+    },
+    {
+      "id": "ewt-test-192",
+      "sourceSent": "email-enronsent04_02-0001",
+      "tokens": 13,
+      "text": "not sure, but i assume that the bluegrass songbook is mine."
+    },
+    {
+      "id": "ewt-test-193",
+      "sourceSent": "email-enronsent04_02-0002",
+      "tokens": 5,
+      "text": "is it for guitar?"
+    },
+    {
+      "id": "ewt-test-194",
+      "sourceSent": "email-enronsent04_02-0003",
+      "tokens": 6,
+      "text": "I'll need to ponder."
+    },
+    {
+      "id": "ewt-test-195",
+      "sourceSent": "email-enronsent04_02-0004",
+      "tokens": 10,
+      "text": "I'll try to get back to you pronto."
+    },
+    {
+      "id": "ewt-test-196",
+      "sourceSent": "email-enronsent04_02-0006",
+      "tokens": 5,
+      "text": "We have this report?"
+    },
+    {
+      "id": "ewt-test-197",
+      "sourceSent": "email-enronsent04_02-0008",
+      "tokens": 7,
+      "text": "Thought that you might be interested."
+    },
+    {
+      "id": "ewt-test-198",
+      "sourceSent": "email-enronsent04_02-0011",
+      "tokens": 6,
+      "text": "Well, he launched today."
+    },
+    {
+      "id": "ewt-test-199",
+      "sourceSent": "email-enronsent04_02-0012",
+      "tokens": 14,
+      "text": "Have you seen the materials from the press conference that he launched today?"
+    },
+    {
+      "id": "ewt-test-200",
+      "sourceSent": "email-enronsent04_02-0015",
+      "tokens": 8,
+      "text": "Well, wouldn't you know it."
+    }
+  ]
+}

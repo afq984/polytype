@@ -1,0 +1,80 @@
+{
+  "revisions": {
+    "ascend": "b966160952fc5fe9cb036f098dd44f135d5c6f20",
+    "opencc": "556ed22496d650bd0b13b6c163be9814637970ae",
+    "ewt": "4a4d77f599ea53cc405f85d0cec4b2f14f81d42b",
+    "cedict": "e9b90d085dded03d7bce5e52d7a65844d53c67f1"
+  },
+  "sources": [
+    {
+      "name": "ascend-test_metadata.csv",
+      "url": "https://huggingface.co/datasets/CAiRE/ASCEND/resolve/b966160952fc5fe9cb036f098dd44f135d5c6f20/test_metadata.csv",
+      "sha256": "15689bc1c1a0bc29b250f63221576392b627da9cc1d80e51bb1a422118b9732c"
+    },
+    {
+      "name": "ascend-README.md",
+      "url": "https://huggingface.co/datasets/CAiRE/ASCEND/resolve/b966160952fc5fe9cb036f098dd44f135d5c6f20/README.md",
+      "sha256": "93e4b299266be73d265667e87ee780c6ff9e08cdb46df60302cb8d2cc91bfc47"
+    },
+    {
+      "name": "opencc-s2twp.json",
+      "url": "https://raw.githubusercontent.com/BYVoid/OpenCC/556ed22496d650bd0b13b6c163be9814637970ae/data/config/s2twp.json",
+      "sha256": "72d187574510542be608c862d5359d29480ee61f137082df8a06d74f7bcfc79c"
+    },
+    {
+      "name": "opencc-STPhrases.txt",
+      "url": "https://raw.githubusercontent.com/BYVoid/OpenCC/556ed22496d650bd0b13b6c163be9814637970ae/data/dictionary/STPhrases.txt",
+      "sha256": "17fece21a28f3db2dc32397abd73d21ae73261c3f295fa6a3fe64b5e8d8b554b"
+    },
+    {
+      "name": "opencc-STCharacters.txt",
+      "url": "https://raw.githubusercontent.com/BYVoid/OpenCC/556ed22496d650bd0b13b6c163be9814637970ae/data/dictionary/STCharacters.txt",
+      "sha256": "ed1d268e0ad028511dcf5b0089faed0a980ad332449ec11d481ceefde6879f41"
+    },
+    {
+      "name": "opencc-TWPhrasesIT.txt",
+      "url": "https://raw.githubusercontent.com/BYVoid/OpenCC/556ed22496d650bd0b13b6c163be9814637970ae/data/dictionary/TWPhrasesIT.txt",
+      "sha256": "3a4a2ad207f3a9442eb8f399630cf982c2ffc561df9c58b2ee352cfa023915c1"
+    },
+    {
+      "name": "opencc-TWPhrasesName.txt",
+      "url": "https://raw.githubusercontent.com/BYVoid/OpenCC/556ed22496d650bd0b13b6c163be9814637970ae/data/dictionary/TWPhrasesName.txt",
+      "sha256": "76e643569a30ea54e7ab6e52621fd4c396e01ee6dc2d15b7d25bf23addf4438a"
+    },
+    {
+      "name": "opencc-TWPhrasesOther.txt",
+      "url": "https://raw.githubusercontent.com/BYVoid/OpenCC/556ed22496d650bd0b13b6c163be9814637970ae/data/dictionary/TWPhrasesOther.txt",
+      "sha256": "6d0365fd180283f3e14b44f63d19d1aca045d60b0e000765902ad889a90d7a33"
+    },
+    {
+      "name": "opencc-TWVariants.txt",
+      "url": "https://raw.githubusercontent.com/BYVoid/OpenCC/556ed22496d650bd0b13b6c163be9814637970ae/data/dictionary/TWVariants.txt",
+      "sha256": "30e6f8395edbfdd74e293fd8b9c62105d787c849fbb208d2a7832eac696734d7"
+    },
+    {
+      "name": "opencc-LICENSE",
+      "url": "https://raw.githubusercontent.com/BYVoid/OpenCC/556ed22496d650bd0b13b6c163be9814637970ae/LICENSE",
+      "sha256": "b534e465949558eec2597b04f5092b5e161236a68dfbfd04d547592ac3964308"
+    },
+    {
+      "name": "ewt-en_ewt-ud-test.conllu",
+      "url": "https://raw.githubusercontent.com/UniversalDependencies/UD_English-EWT/4a4d77f599ea53cc405f85d0cec4b2f14f81d42b/en_ewt-ud-test.conllu",
+      "sha256": "fa024f43dc5da3c5ac02563bc9bd0e974f46cbb1560823976a8f342a37dc494a"
+    },
+    {
+      "name": "ewt-README.md",
+      "url": "https://raw.githubusercontent.com/UniversalDependencies/UD_English-EWT/4a4d77f599ea53cc405f85d0cec4b2f14f81d42b/README.md",
+      "sha256": "c2dc7edaf5937d18cb3ff142410fde7460e32faa69b2bd0a041abc3f957da281"
+    },
+    {
+      "name": "ewt-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/UniversalDependencies/UD_English-EWT/4a4d77f599ea53cc405f85d0cec4b2f14f81d42b/LICENSE.txt",
+      "sha256": "b3d1b0f4c6ae151f7eb78738f46ebd5ee140f8a7f76501ba26af123140d35ae7"
+    },
+    {
+      "name": "cedict_ts.u8",
+      "url": "https://raw.githubusercontent.com/steventango/tea-data/e9b90d085dded03d7bce5e52d7a65844d53c67f1/cedict_ts.u8",
+      "sha256": "d5a4758577c0ad602c64b6258212563c1871978cf1ac86e450926115ec6c5e95"
+    }
+  ]
+}
