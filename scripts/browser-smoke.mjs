@@ -317,6 +317,10 @@ try {
     await new Promise(resolve=>setTimeout(resolve,100));
     const correctionBoxes=await evaluate("['raw','preedit','segment-menu','segment-preview'].map(id=>{const r=document.getElementById(id).getBoundingClientRect();return {id,top:r.top,bottom:r.bottom,height:innerHeight}})");
     for(const box of correctionBoxes)assert.ok(box.top>=0&&box.bottom<=box.height,JSON.stringify(box));
+    const previewLayout=await evaluate("(()=>{const scroller=document.getElementById('segment-scroll'),preview=document.getElementById('segment-preview');return {scrollBottom:scroller.getBoundingClientRect().bottom,previewTop:preview.getBoundingClientRect().top,scrollOverflow:getComputedStyle(scroller).overflowY,previewParent:preview.parentElement.id}})()");
+    assert.ok(previewLayout.scrollBottom<=previewLayout.previewTop,JSON.stringify(previewLayout));
+    assert.equal(previewLayout.scrollOverflow,'auto');
+    assert.equal(previewLayout.previewParent,'segment-menu');
     await send('Emulation.clearDeviceMetricsOverride');
     await new Promise(resolve=>setTimeout(resolve,100));
     await key('2','Digit2');

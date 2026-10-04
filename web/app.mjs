@@ -105,6 +105,7 @@ function previewChoice(index){
  $('segment-preview').textContent=preview?commitCandidate(preview.result[0]):'This choice has no complete interpretation in the current composition.';
  [...$('segment-choices').querySelectorAll('button')].forEach((button,i)=>{button.setAttribute('aria-selected',String(i===segmentMenu.index));if(i===segmentMenu.index)button.setAttribute('aria-disabled',String(!preview))});
  $('segment-menu-status').textContent=preview?`Choose ${choice.commitText} · ${choice.lang}`:'Choose another alternative or a larger span.';
+ keepChoiceInView();
 }
 function applyChoice(index){
  previewChoice(index);if(!segmentMenu?.preview)return;
@@ -135,12 +136,21 @@ function openSegment(span,selection,anchor){
  const initial=segmentMenu.choices.findIndex(choice=>choice.lang===current?.lang&&choice.commitText===current?.text);
  previewChoice(initial<0?0:initial);fitSegmentMenu();$('segment-menu').focus({preventScroll:true});
 }
-// Scroll long menus inside the slot, leaving the raw field and preedit in view.
+// Scroll only choices/controls; preview has its own row below that scroll area.
+function keepChoiceInView(){
+ if(!segmentMenu)return;
+ const choice=$('segment-choices').children[segmentMenu.index];if(!choice)return;
+ const scroller=$('segment-scroll'),visible=scroller.getBoundingClientRect(),item=choice.getBoundingClientRect();
+ if(item.top<visible.top)scroller.scrollTop+=item.top-visible.top;
+ else if(item.bottom>visible.bottom)scroller.scrollTop+=item.bottom-visible.bottom;
+}
+// Bound the menu inside the slot, leaving the raw field and preedit in view.
 function fitSegmentMenu(){
  if(!segmentMenu)return;
  const viewport=window.visualViewport,top=viewport?.offsetTop??0,height=viewport?.height??innerHeight;
  const slot=$('choice-slot').getBoundingClientRect();
  $('segment-menu').style.maxHeight=Math.max(24,top+height-slot.top-8)+'px';
+ keepChoiceInView();
 }
 function openCaretSegment(){
  const caret=$('raw').selectionStart,units=segmentView?.units??[];
