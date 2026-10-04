@@ -114,6 +114,92 @@ never overwrite checked-in reports. `--timing` works with either input form.
 Keep private inputs and redirected results outside every repository; external
 private snapshots should use `//:corpus` so text stays out of terminal/build logs.
 
+## ASUS-inspired boundary diagnostics (Phase 1)
+
+[asus-cases.mjs](asus-cases.mjs) contains hand-authored synthetic development
+phrases inspired by ASUS Smart Input [Store reviews](https://apps.microsoft.com/detail/9MT4L79Z1G0N)
+and its [reinterpretation FAQ](https://www.asus.com/tw/support/FAQ/1048636/),
+as described in the supplied research summary. These measure Polytype, not ASUS.
+The short review failure patterns are retained; surrounding phrases and Chinese
+readings are developer annotations, not user-confirmed gold or dictionary data.
+The set has 18 in-contract entries (12 mixed, six Chinese-only), two no-Space
+diagnostics and one bare-Zhuyin correction probe: 156 configurations in total.
+
+In-contract entries run both `current` and `target` typing contracts, both layouts
+and EN+ZH/all-language modes. Chinese-only rows repeat across the two contracts.
+Output spaces are exactly typed: target `ㄍㄤ␣call␣ㄋㄧˇ` expects `剛call 你`;
+current adds one literal Space after 剛 and expects `剛 call 你`. The attached
+`PC版` and `call你` cases have `scope: 'out-of-contract'`, separate groups and
+diagnostic targets; they do not request no-Space switching. The FAQ's `calls以`
+is a reported incorrect display, not a raw input spelling: the attached probe
+types Roman `call` followed by physical Zhuyin `su3` for 你.
+
+Baseline: main `4a27ff5b`, expanded ranking ending in `+heterophony-v1+numbers-v2`.
+Phase 1 changes only evaluation inputs, tests and this summary; it improves no
+decoder result. The prototype comparison below measures existing profile
+differences, not an ASUS-related fix. Correction uses the existing bounded BFS
+(depth two, 2,000 states), with exact committed targets and no retyping.
+
+| Contract | Layout | Languages | Prototype top 1 / top 5 | Main top 1 / top 5 | Main <=1 / <=2 corrections |
+| --- | --- | --- | --- | --- | --- |
+| current | QWERTY | EN+ZH | 4 / 5 | 15 / 17 | 17 / 18 |
+| current | QWERTY | all | 3 / 5 | 15 / 17 | 17 / 18 |
+| current | Colemak | EN+ZH | 4 / 5 | 15 / 17 | 17 / 18 |
+| current | Colemak | all | 3 / 5 | 15 / 17 | 17 / 18 |
+| target | QWERTY | EN+ZH | 3 / 4 | 15 / 17 | 17 / 18 |
+| target | QWERTY | all | 3 / 4 | 15 / 17 | 17 / 18 |
+| target | Colemak | EN+ZH | 3 / 4 | 15 / 17 | 17 / 18 |
+| target | Colemak | all | 3 / 4 | 15 / 17 | 17 / 18 |
+
+Each row has 18 targets. Main has English exact 15/15 tokens, Han edits 4/40
+characters and wrong-language intrusions 0/6 Chinese-only cases in every group.
+Bare `1` is already ㄅ at rank one in all four configurations; explicit numeric
+`1` and phonetic ㄅ menu choices can replace each other without changing raw keys.
+The two out-of-contract targets are absent from the top five in all four modes
+and unresolved by the bounded correction search. No correction state budget is
+exhausted; the in-contract 指 and 新/心 menus are marked truncated.
+
+| Pattern | Main result and diagnosis |
+| --- | --- |
+| 關於 Ben 的 and three variants | All pass. Converted Chinese, literal spaces, case-sensitive English fallback and 的 conversion retain the intended boundaries. |
+| crash dmp 要分析 and two variants | All pass. SCOWL evidence for crash and English continuity retain literal dmp. In QWERTY, the `crash dmp 的檔案` target scores 33.6578, above the Space-eating unsupported `crash ㄎㄩㄣˉ的檔案` at 31.2078. |
+| PC 版 | Rank two in every mode. The existing English `number_in_roman_context` branch scores 103 at 7.5 even though it is a clean ㄅㄢˇ reading. Total `PC 103` scores 11.2 versus `PC 版` 8.8359. This branch predates numbers-v2 and bypasses its clean-reading guard. One local correction recovers the target. |
+| 新 PC 版 / 新PC 版 | 心 narrowly outranks 新 by 0.0192, alongside the same numeric error. The target survives at lattice rank seven for widths 12, 48 and 192, outside the displayed five. Two local corrections recover it. |
+| Standalone 版, 指頭 | Both pass; clean Chinese digit readings and phrase evidence win. |
+| Standalone 指 | Rank two, behind 只: scores 3.5220 versus 4.0720. It is a unigram homophone choice, not an accidental number. One local choice recovers 指. |
+| Initial 所, 所以, 所有 | All pass; the Chinese single/phrase paths consume the whole initial raw syllable. No forced initial Latin n occurs. |
+| call 你 and 剛call 你 / 剛 call 你 | All in-contract targets pass with literal Space before 你. |
+| Attached PC版 | The whole Roman identifier PC103 wins. No Space opens a Chinese continuation. Diagnostic only. |
+| Attached call你 | QWERTY raw callsu3 becomes 鳥 after slot replacement; Colemak raw cauusu3 prefers literal callrl3. General intra-token switching is unsupported. Diagnostic only. |
+
+Native diagnostics used widths 12/48/192 for all 156 configurations; a finite
+wider beam is not a reachability oracle. The failing in-contract targets keep
+the same displayed/lattice ranks at every width. The shortest completed failing
+buffers are `PC 103` (Colemak `RC 103`), `53`, and `vup␣PC␣103` (Colemak
+`vup␣RC␣103`, target contract); the last has 心 already at prefix `vup␣`.
+Passing Ben/dmp boundaries stay literal at their English-ending Space in both
+layouts. In QWERTY, typing just `2` after `關於 Ben ` temporarily displays a
+digit, then `2k` displays ㄉㄜ and `2k7` converts 的. This is prefix ambiguity,
+not the reported completed-word Space loss.
+
+`tests/asus.test.mjs` gates the 15 passing targets in all eight configurations,
+keeps three failing intended targets as TODOs, checks empty-lock and native/WASM
+parity on all cases, and applies digit-to-phonetic correction for bare `1`.
+No existing expectation, dictionary, frozen reference or ranking ID changes.
+No latency comparison is claimed because the decoder is unchanged.
+
+```sh
+bazelisk build //:demo
+bazelisk run //:evaluate_local -- --extra-cases="$PWD/bazel-bin/demo.runtime/eval/asus-cases.mjs" --correction
+bazelisk test //...
+```
+
+The module path uses the built runtime so its imports use Bazel's WASM, with
+no generated bindings in the checkout. The extra-cases command also evaluates
+bundled controls; filter `asus-` groups for these counts. Detailed traces and
+experiment output stay outside the repository. This small, selected development
+set establishes regression targets and diagnosis only; fixes await Phase 2.
+
 ## What this measures
 
 japanese-words.json contains the first 100 long-unit words tagged NOUN, PROPN,
