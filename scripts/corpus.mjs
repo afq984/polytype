@@ -4,6 +4,7 @@ import {createHash, randomUUID} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {resolve, dirname, join, relative, isAbsolute, basename} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {summarizeMilestone} from './evaluation-metrics.mjs';
 
 const runtime = fileURLToPath(new URL('..', import.meta.url));
 const hash = data => createHash('sha256').update(data).digest('hex');
@@ -207,11 +208,14 @@ export async function main(args) {
       wasmSha256:hash(await readFile(join(runtime, 'web/pkg/polytype_bg.wasm'))),
       adapterSha256:hash(await readFile(join(runtime, 'web/engine.mjs'))),
       evaluatorSha256:hash(await readFile(join(runtime, 'scripts/evaluate.mjs'))),
+      metricsSha256:hash(await readFile(join(runtime, 'scripts/evaluation-metrics.mjs'))),
+      caseLoaderSha256:hash(await readFile(join(runtime, 'scripts/evaluation-cases.mjs'))),
       preparationSha256:hash(await readFile(fileURLToPath(import.meta.url))),
       note:'Prototype is historical. Save the expanded results as the current baseline. CER measures text edits, not user correction actions.'};
     // Keep per-layout/stratum counts separate: variants are not independent text.
     for (const result of Object.values(report.profiles)) {
       result.benchmarkGroups = {};
+      const groupRows = new Map();
       for (const [index, row] of rows.entries()) {
         const measured = result.rows[index];
         const accepted = new Set([row.text, ...row.acceptable]);
@@ -219,13 +223,18 @@ export async function main(args) {
         measured.acceptableRank = acceptedRank;
         for (const group of ['layout:' + row.options.layout, 'languages:' + [...row.languages].sort().join('+') + '/' + row.options.layout, 'domain:' + row.domain + '/' + row.options.layout]) {
           const metric = result.benchmarkGroups[group] ??= {rows:0, units:[], top1:0, top5:0, acceptableTop1:0, acceptableTop5:0, edits:0, characters:0};
+          if (!groupRows.has(group)) groupRows.set(group, []);
+          groupRows.get(group).push(measured);
           metric.rows++; if (!metric.units.includes(row.unitId)) metric.units.push(row.unitId);
           metric.top1 += Number(measured.rank === 1); metric.top5 += Number(measured.rank > 0);
           metric.acceptableTop1 += Number(acceptedRank === 1); metric.acceptableTop5 += Number(acceptedRank > 0);
           metric.edits += measured.edits; metric.characters += measured.characters;
         }
       }
-      for (const metric of Object.values(result.benchmarkGroups)) {metric.units = metric.units.length; metric.characterErrorRate = metric.edits / Math.max(1, metric.characters);}
+      for (const [group, metric] of Object.entries(result.benchmarkGroups)) {
+        metric.units = metric.units.length; metric.characterErrorRate = metric.edits / Math.max(1, metric.characters);
+        Object.assign(metric, summarizeMilestone(groupRows.get(group)));
+      }
     }
     await writeFile(join(output, 'report.json'), json(report), {mode:0o600, flag:'wx'});
     return {evaluated:true, split, rows:rows.length, units:new Set(rows.map(row => row.unitId)).size, note:'Detailed results written only to the external run directory.'};

@@ -9,6 +9,11 @@ const root = resolve(directory);
 const workspace = process.env.BUILD_WORKSPACE_DIRECTORY;
 const caller = process.env.BUILD_WORKING_DIRECTORY || process.cwd();
 const run = (script, argv = [], cwd = root) => execFileSync(process.execPath, [join(cwd, script), ...argv], {cwd, stdio:'inherit'});
+function evaluationArgs(args) {
+  return args.map(arg => arg.startsWith('--extra-cases=')
+    ? '--extra-cases=' + resolve(caller, arg.slice('--extra-cases='.length))
+    : arg.startsWith('--') ? arg : resolve(caller, arg));
+}
 async function makeWritable(path) {
   const info = await stat(path);
   await chmod(path, info.mode | (info.isDirectory() ? 0o700 : 0o200));
@@ -56,10 +61,10 @@ if (mode === 'test') {
     if (server.exitCode === null) await stopped;
   }
 } else if (mode === 'measure-evaluation') {
-  run('scripts/evaluate.mjs', ['--timing', ...args.map(arg => resolve(caller, arg))]);
+  run('scripts/evaluate.mjs', ['--timing', ...evaluationArgs(args)]);
 } else if (mode === 'evaluate-local') {
-  if (args.length !== 1) throw new Error('Use bazelisk run //:evaluate_local -- PATH.jsonl');
-  run('scripts/evaluate.mjs', [resolve(caller, args[0])]);
+  if (!args.length) throw new Error('Use bazelisk run //:evaluate_local -- [PATH.jsonl] [--extra-cases=PATH.mjs]');
+  run('scripts/evaluate.mjs', evaluationArgs(args));
 } else if (mode === 'corpus') {
   // Resolve user paths against the invoking directory, never the runfiles tree.
   const argv = [...args];

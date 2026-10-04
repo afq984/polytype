@@ -59,7 +59,7 @@ from the checkout:
 | //:serve | Local demo at http://127.0.0.1:4173/ |
 | //:preview | Pages preview at http://127.0.0.1:4174/polytype/ |
 | //:measure_evaluation | Explicit host-dependent latency measurements, JSON on stdout |
-| //:evaluate_local | `bazelisk run //:evaluate_local -- /path/to/cases.jsonl` |
+| //:evaluate_local | `bazelisk run //:evaluate_local -- /path/to/cases.jsonl` or `--extra-cases=/path/to/cases.mjs`; see [metrics](../eval/README.md). |
 | //:corpus | External benchmark preparation and private reports; see [collection protocol](../eval/COLLECTION.md). |
 | //:diagnose | `bazelisk run //:diagnose -- /path/to/report.json` |
 | //:benchmark | Comparison against an explicitly supplied historical WASM engine |

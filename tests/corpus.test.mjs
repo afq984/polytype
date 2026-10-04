@@ -148,9 +148,14 @@ test('frozen external reports preserve baseline identity, split boundaries and p
   const report = JSON.parse(await readFile(join(root, 'runs/baseline/report.json'), 'utf8'));
   assert.equal(report.benchmark.split, 'development');
   assert.match(report.benchmark.wasmSha256, /^[a-f0-9]{64}$/);
+  assert.match(report.benchmark.metricsSha256, /^[a-f0-9]{64}$/);
+  assert.match(report.benchmark.caseLoaderSha256, /^[a-f0-9]{64}$/);
   assert.equal(report.profiles.expanded.rows.length, 2);
   assert.equal(report.profiles.expanded.benchmarkGroups['layout:colemak'].top1, 0);
   assert.equal(report.profiles.expanded.benchmarkGroups['layout:colemak'].acceptableTop1, 1);
+  assert.equal(report.profiles.expanded.benchmarkGroups['layout:colemak'].englishExact, 0);
+  assert.equal(report.profiles.expanded.benchmarkGroups['layout:colemak'].hanCER, null);
+  assert.equal(report.profiles.expanded.benchmarkGroups['layout:colemak'].wrongLanguage, 0);
   await assert.rejects(main(['evaluate', root, 'pilot', 'development', 'baseline']));
   await main(['evaluate', root, 'pilot', 'heldout', 'opened', '--open-heldout']);
   assert.equal(JSON.parse(await readFile(join(root, 'runs/opened/started.json'), 'utf8')).heldoutOpened, true);

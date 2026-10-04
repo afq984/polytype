@@ -29,6 +29,31 @@ The first 100 long-unit words (LUWBILabel=B) tagged NOUN, PROPN, VERB, ADJ or AD
 | expanded / japanese-words-jp | 75/100 | 86/100 | 75/100 | 86/100 | 47.4% | 86 |
 | expanded / japanese-words-all | 75/100 | 86/100 | 75/100 | 86/100 | 48.3% | 86 |
 
+## Milestone metrics by configuration
+
+Space normalization deletes only U+0020 runs directly between Han and Latin-script letters/ASCII digits. English exact is ordered whole-token recall over ASCII letter/digit runs including apostrophe, hyphen, underscore and period (punctuation-only runs excluded). Han CER aligns only Han characters. Wrong language counts intrusions only for targets with exclusively Latin or exclusively Han letters; spaces, numbers, punctuation and symbols are neutral. Han-only Japanese targets are indistinguishable from Chinese by this script diagnostic. Rates use pooled token/character/eligible-case denominators; null means no eligible target units. Exact and reading-level metrics remain unchanged.
+
+| Profile / group / layout / enabled languages | Top 1 | Top 5 | Space-normalized top 1 | Space-normalized top 5 | English exact | Han CER | Wrong language |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| prototype / real-text / colemak / english+japanese+zhuyin | 0/20 | 0/20 | 0/20 | 0/20 | n/a (0/0) | 74.2% (173/233) | 100.0% (20/20) |
+| prototype / guards / colemak / english+japanese+zhuyin | 20/22 | 21/22 | 20/22 | 21/22 | 86.4% (19/22) | 0.0% (0/27) | 18.2% (2/11) |
+| prototype / user-feedback / colemak / english+japanese+zhuyin | 0/5 | 3/5 | 0/5 | 3/5 | 40.0% (12/30) | 100.0% (2/2) | 100.0% (4/4) |
+| prototype / mixed-colemak-all / colemak / english+japanese+zhuyin | 0/6 | 0/6 | 0/6 | 0/6 | 34.6% (9/26) | n/a (0/0) | n/a (0/0) |
+| prototype / mixed-colemak-en-jp / colemak / english+japanese | 0/6 | 0/6 | 0/6 | 0/6 | 57.7% (15/26) | n/a (0/0) | n/a (0/0) |
+| prototype / mixed-qwerty-all / qwerty / english+japanese+zhuyin | 0/6 | 0/6 | 0/6 | 0/6 | 34.6% (9/26) | n/a (1/0) | n/a (0/0) |
+| prototype / mixed-qwerty-en-jp / qwerty / english+japanese | 0/6 | 0/6 | 0/6 | 0/6 | 57.7% (15/26) | n/a (0/0) | n/a (0/0) |
+| prototype / japanese-words-jp / qwerty / japanese | 0/100 | 1/100 | 0/100 | 1/100 | n/a (0/0) | 100.0% (201/201) | 0.0% (0/78) |
+| prototype / japanese-words-all / qwerty / english+japanese+zhuyin | 0/100 | 1/100 | 0/100 | 1/100 | n/a (0/0) | 100.0% (201/201) | 1.3% (1/78) |
+| expanded / real-text / colemak / english+japanese+zhuyin | 12/20 | 17/20 | 12/20 | 17/20 | n/a (0/0) | 5.6% (13/233) | 0.0% (0/20) |
+| expanded / guards / colemak / english+japanese+zhuyin | 12/22 | 22/22 | 12/22 | 22/22 | 100.0% (22/22) | 51.9% (14/27) | 0.0% (0/11) |
+| expanded / user-feedback / colemak / english+japanese+zhuyin | 5/5 | 5/5 | 5/5 | 5/5 | 100.0% (30/30) | 0.0% (0/2) | 0.0% (0/4) |
+| expanded / mixed-colemak-all / colemak / english+japanese+zhuyin | 1/6 | 3/6 | 1/6 | 3/6 | 92.3% (24/26) | n/a (9/0) | n/a (0/0) |
+| expanded / mixed-colemak-en-jp / colemak / english+japanese | 1/6 | 3/6 | 1/6 | 3/6 | 92.3% (24/26) | n/a (9/0) | n/a (0/0) |
+| expanded / mixed-qwerty-all / qwerty / english+japanese+zhuyin | 1/6 | 3/6 | 1/6 | 3/6 | 92.3% (24/26) | n/a (9/0) | n/a (0/0) |
+| expanded / mixed-qwerty-en-jp / qwerty / english+japanese | 1/6 | 3/6 | 1/6 | 3/6 | 92.3% (24/26) | n/a (9/0) | n/a (0/0) |
+| expanded / japanese-words-jp / qwerty / japanese | 75/100 | 86/100 | 75/100 | 86/100 | n/a (0/0) | 33.3% (67/201) | 0.0% (0/78) |
+| expanded / japanese-words-all / qwerty / english+japanese+zhuyin | 75/100 | 86/100 | 75/100 | 86/100 | n/a (0/0) | 33.3% (67/201) | 2.6% (2/78) |
+
 Top-1 regressions: acceptance-7, acceptance-8, acceptance-9, acceptance-10, acceptance-11, acceptance-12, acceptance-13, synthetic-6, synthetic-7, trilingual (reading level: none).
 Top-5 regressions: none (reading level: none).
 

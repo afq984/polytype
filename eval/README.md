@@ -31,6 +31,57 @@ Save test case / Export cases workflow creates compatible JSONL, after the user
 reviews or corrects the expected output. Exports do not contain custom dictionary
 entries; restore those separately when reproducing custom-dependent cases.
 
+## Milestone diagnostics and extra cases
+
+Each profile's existing `groups` keeps exact top-1/top-5, reading-level results
+and full-text CER unchanged. New `configurationGroups` also separates every
+named group by the effective layout and language flags (omitted options use the
+core's Colemak/all-on defaults). The Markdown report shows each configuration
+beside its exact counts. These diagnostics use committed candidate text:
+
+- `spaceNormalizedTop1/Top5`: case counts after deleting only literal U+0020
+  runs directly between Han and a Latin-script letter or ASCII digit, either
+  order. Latin-to-Latin, Han-to-Han, leading/trailing spaces, tabs and other
+  whitespace still count. This changes evaluation only; output spacing is unchanged.
+- `englishExact`: matched target tokens / target tokens, pooled across cases.
+  Tokens are maximal runs of ASCII letters/digits plus `'-_.`, with at least
+  one letter/digit. Match whole tokens exactly, including case and punctuation,
+  in order using the largest common subsequence; repeated tokens need separate
+  output occurrences. This is recall; added output tokens are not penalized here.
+- `hanCER`: summed edit distance / summed target Han characters after removing
+  all non-Han characters from target and top-1 output. Uses Unicode Han script
+  code points, including supplementary characters. Insertions count and CER may
+  exceed 100%; it is separate from the original full-text CER.
+- `wrongLanguage`: affected cases / eligible cases. Targets whose letters are
+  exclusively Latin or exclusively Han are eligible; punctuation, spaces,
+  numbers and symbols are neutral. Latin targets flag Han, kana or Bopomofo;
+  Han targets flag Latin letters or Bopomofo (kana is not flagged there).
+  Mixed-script, kana and digit-only targets are excluded. Han-only Japanese
+  words are indistinguishable from Chinese by this script check.
+
+Counts/denominators accompany each new rate. A rate is `null` (`n/a` in Markdown)
+when its target denominator is zero. A missing output fails exact matching and
+loses its tokens/Han characters; an empty output has no wrong-script intrusion.
+All visible cases remain development evidence. These metrics do not measure
+correction actions or native IME behavior.
+
+To add another development case module alongside the bundled cases:
+
+```sh
+bazelisk run //:evaluate_local -- --extra-cases=/absolute/path/to/cases.mjs
+```
+
+The module exports an array named `cases` (or a default array), with entries
+`{id, group, raw, text, options, segments}`. Only raw/text are required; optional
+segments/provenance are retained when loading and are never used to populate a
+dictionary. Use a `group` for each corpus/stratum; configuration separation is
+automatic. Repeat `--extra-cases` to append modules. A positional JSONL replaces
+the bundled cases and can also be combined with extra modules. JSONL `group`
+values are preserved (default `local`). Module runs print JSON to stdout and
+never overwrite checked-in reports. `--timing` works with either input form.
+Keep private inputs and redirected results outside every repository; external
+private snapshots should use `//:corpus` so text stays out of terminal/build logs.
+
 ## What this measures
 
 japanese-words.json contains the first 100 long-unit words tagged NOUN, PROPN,

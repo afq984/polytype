@@ -169,7 +169,8 @@ Record the source revision and any working-copy changes in `SAMPLING.md` too.
 The expanded results are the **current baseline** for later decoder changes.
 Prototype results remain a historical comparison. Reports break out exact and
 acceptable top-one/top-five counts by layout, intended language mix and domain,
-along with CER against the primary target. They count configurations and distinct
+along with CER against the primary target and the [milestone diagnostics](README.md)
+(space-normalized counts, English exact, Han CER and wrong-language rate). They count configurations and distinct
 units separately. Do not combine prototype-to-expanded gains with new sprint gains.
 
 Held-out evaluation requires an explicit opening:
