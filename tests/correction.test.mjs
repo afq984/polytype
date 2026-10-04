@@ -313,3 +313,53 @@ test('local menu caps conversion choices but preserves explicit languages and sc
     assert.throws(() => engine.decodeConstrained('y94', [{start:0,end:3,text:'假',lang:'TW'}]), /reachable/);
   } finally { engine.dispose(); }
 });
+
+test('raw edits rebase or release whole locks, with native/WASM parity', () => {
+  const engine = createEngine(), requests = [], expected = [];
+  const lock = (start, end, text, lang = 'TW') => ({start,end,text,lang});
+  const query = (input, nextInput, constraints, edit, options = {layout:'qwerty'}) => {
+    const result = engine.rebaseConstraints(input, nextInput, constraints, options, edit);
+    requests.push({version:1,op:'rebaseConstraints',input,nextInput,constraints,options,...(edit ? {edit} : {})});
+    expected.push(result); return result;
+  };
+  try {
+    const raw = 'y94 y94 hello', locks = [lock(0,3,'再'),lock(4,7,'再')];
+    assert.deepEqual(query(raw, 'us3 '+raw, locks, {start:0,end:0,inserted:'us3 '}).constraints.map(c => [c.start,c.end]), [[4,7],[8,11]]);
+    assert.deepEqual(query(raw, 'y94 us3 y94 hello', locks, {start:4,end:4,inserted:'us3 '}).constraints.map(c => [c.start,c.end]), [[0,3],[8,11]]);
+    assert.equal(query(raw, 'yu94 y94 hello', locks, {start:1,end:1,inserted:'u'}).removed.length, 1);
+    assert.deepEqual(query(raw, 'y94lc3 y94 hello', locks, {start:3,end:3,inserted:'lc3'}).constraints.map(c => [c.start,c.end]), [[0,3],[7,10]]);
+    assert.equal(query(raw, 'y9 y94 hello', locks, {start:2,end:3,inserted:''}).removed.length, 1);
+    assert.equal(query(raw, 'hello', locks, {start:0,end:8,inserted:''}).removed.length, 2);
+    assert.equal(query('hello', 'hellox', [lock(0,5,'hello','EN')], {start:5,end:5,inserted:'x'}).constraints.length, 0);
+    assert.equal(query('hello', "hello's", [lock(0,5,'hello','EN')], {start:5,end:5,inserted:"'s"}).constraints.length, 0);
+    assert.equal(query('hello', 'hello ', [lock(0,5,'hello','EN')], {start:5,end:5,inserted:' '}).constraints.length, 1);
+    assert.equal(query('hello', 'hellox', [lock(0,5,'hello','RAW')], {start:5,end:5,inserted:'x'}).constraints.length, 1);
+    assert.equal(query('us', 'us3', [lock(0,2,'ㄋㄧ')], {start:2,end:2,inserted:'3'}).constraints.length, 0);
+    assert.equal(query('m/4', 'm/4us3', [lock(0,3,'用')], {start:3,end:3,inserted:'us3'}).constraints.length, 1);
+    assert.equal(query('hello kan', 'hello kana', [lock(6,9,'カン','JP')], {start:9,end:9,inserted:'a'}).constraints.length, 0);
+    assert.equal(query('hello kan', "hello kan'", [lock(6,9,'カン','JP')], {start:9,end:9,inserted:"'"}).constraints.length, 0);
+    assert.equal(query('hello kan', 'hello kan ', [lock(6,9,'カン','JP')], {start:9,end:9,inserted:' '}).constraints.length, 1);
+    assert.equal(query('y94 hello', 'y94hello', [lock(4,9,'hello','EN')], {start:3,end:4,inserted:''}).constraints.length, 0);
+    assert.deepEqual(query('😀 y94', '🙂😀 y94', [lock(3,6,'再')], {start:0,end:0,inserted:'🙂'}).constraints.map(c => [c.start,c.end]), [[5,8]]);
+    assert.deepEqual(query('😀 y94', ' y94', [lock(3,6,'再')]).constraints.map(c => [c.start,c.end]), [[1,4]]);
+    assert.equal(query('y94 y94', 'y94 y94 y94', locks).removed.length, 2);
+    assert.equal(query(raw, raw, locks).removed.length, 0);
+    const colemak = {layout:'colemak'}, hello = encode('hello');
+    assert.equal(query(hello, hello+encode('O'), [lock(0,5,'hello','EN')], {start:5,end:5,inserted:':'}, colemak).removed.length, 1);
+    assert.equal(query(hello, hello+encode(':'), [lock(0,5,'hello','EN')], {start:5,end:5,inserted:'P'}, colemak).constraints.length, 1);
+    const punct = [lock(3,4,'（','punct')];
+    assert.deepEqual(query('y94(', 'y94 ', punct, {start:3,end:4,inserted:' '}).constraints, []);
+    assert.deepEqual(query('y94(', 'us3 y94(', punct, {start:0,end:0,inserted:'us3 '}).constraints.map(c => [c.start,c.end]), [[7,8]]);
+    assert.equal(query('1 ', '1  ', [lock(0,2,'ㄅ')], {start:2,end:2,inserted:' '}).constraints.length, 1);
+    assert.equal(query('1 ', '2 ', [lock(0,2,'ㄅ')], {start:0,end:1,inserted:'2'}).removed.length, 1);
+    assert.throws(() => query('😀 y94', ' y94', [lock(3,6,'再')], {start:1,end:2,inserted:''}), /range/);
+    assert.throws(() => query(raw, 'hello', locks, {start:0,end:1,inserted:''}), /match/);
+    const child = spawnSync(native, [], {input:requests.map(request => JSON.stringify(request)).join('\n')+'\n',encoding:'utf8',maxBuffer:4*1024*1024});
+    assert.equal(child.status, 0, child.stderr);
+    child.stdout.trim().split('\n').forEach((line, index) => assert.deepEqual(JSON.parse(line).ok, expected[index], JSON.stringify(requests[index])));
+    engine.setCustomEntries([{reading:'ㄗㄞˋ',text:'自訂'}]);
+    const custom = [lock(0,3,'自訂')];
+    engine.setCustomEntries([]);
+    assert.equal(engine.rebaseConstraints('y94', 'y94', custom).removed.length, 1);
+  } finally { engine.dispose(); }
+});

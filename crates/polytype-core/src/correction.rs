@@ -525,6 +525,132 @@ pub struct Span {
     pub end: usize,
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RawEdit {
+    pub start: usize,
+    pub end: usize,
+    pub inserted: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct RebasedConstraints {
+    pub constraints: Vec<Constraint>,
+    pub removed: Vec<Constraint>,
+    pub edit: RawEdit,
+}
+
+pub(crate) fn rebase(
+    input: &str,
+    next_input: &str,
+    constraints: &[Constraint],
+    options: &DecodeOptions,
+    edit: Option<&RawEdit>,
+    dictionary: &Dictionary,
+) -> Result<RebasedConstraints, String> {
+    if !dictionary.expanded {
+        return Err("Segment correction is unavailable for the prototype profile".into());
+    }
+    let old = units(input)?;
+    let next = units(next_input)?;
+    let infer_origin = edit.is_none();
+    let inferred;
+    let edit = if let Some(edit) = edit {
+        edit
+    } else {
+        let mut start = old.iter().zip(&next).take_while(|(a, b)| a == b).count();
+        while !boundary(&old, start) || !boundary(&next, start) {
+            start -= 1;
+        }
+        let mut suffix = old[start..]
+            .iter()
+            .rev()
+            .zip(next[start..].iter().rev())
+            .take_while(|(a, b)| a == b)
+            .count();
+        while !boundary(&old, old.len() - suffix) || !boundary(&next, next.len() - suffix) {
+            suffix -= 1;
+        }
+        inferred = RawEdit {
+            start,
+            end: old.len() - suffix,
+            inserted: String::from_utf16_lossy(&next[start..next.len() - suffix]),
+        };
+        &inferred
+    };
+    if edit.start > edit.end || !boundary(&old, edit.start) || !boundary(&old, edit.end) {
+        return Err("Invalid raw edit range".into());
+    }
+    let inserted: Vec<_> = edit.inserted.encode_utf16().collect();
+    let mut expected = old[..edit.start].to_vec();
+    expected.extend(&inserted);
+    expected.extend(&old[edit.end..]);
+    if expected != next {
+        return Err("Raw edit does not match the updated input".into());
+    }
+    let deleted = edit.end - edit.start;
+    let delta = inserted.len() as isize - deleted as isize;
+    // Unknown edit origins can be ambiguous in repeated text. Detect alternate
+    // equally small splices and release only locks whose alignment can differ.
+    let mut origins = vec![edit.start];
+    if infer_origin && old != next {
+        for start in 0..=old.len() - deleted {
+            let end = start + deleted;
+            let next_end = start + inserted.len();
+            if next_end <= next.len()
+                && boundary(&old, start)
+                && boundary(&old, end)
+                && boundary(&next, start)
+                && boundary(&next, next_end)
+                && old[..start] == next[..start]
+                && old[end..] == next[next_end..]
+            {
+                origins.push(start);
+            }
+        }
+        origins.sort_unstable();
+    }
+    let mut kept = Vec::new();
+    let mut removed = Vec::new();
+    let mut ordered = constraints.to_vec();
+    ordered.sort_by_key(|c| c.start);
+    let mut previous = 0;
+    for constraint in ordered {
+        range(&old, constraint.start, constraint.end)?;
+        if constraint.start < previous {
+            return Err("Correction constraints overlap".into());
+        }
+        previous = constraint.end;
+        let overlap = old != next && edit.start < constraint.end && edit.end > constraint.start;
+        let inside = old != next
+            && deleted == 0
+            && edit.start > constraint.start
+            && edit.start < constraint.end;
+        let ambiguous = old != next
+            && origins[0] < constraint.end
+            && origins[origins.len() - 1] > constraint.start;
+        if overlap || inside || ambiguous {
+            removed.push(constraint);
+            continue;
+        }
+        let mut shifted = constraint.clone();
+        if edit.end <= constraint.start {
+            shifted.start = (constraint.start as isize + delta) as usize;
+            shifted.end = (constraint.end as isize + delta) as usize;
+        }
+        if resolve(&next, &shifted, dictionary, options).is_ok() {
+            kept.push(shifted);
+        } else {
+            removed.push(constraint);
+        }
+    }
+    Ok(RebasedConstraints {
+        constraints: kept,
+        removed,
+        edit: edit.clone(),
+    })
+}
+
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Segment {

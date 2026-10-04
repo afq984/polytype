@@ -5,7 +5,10 @@ mod japanese;
 mod phonetic;
 mod search;
 
-pub use correction::{Alternative, AlternativePage, Constraint, Segment, SegmentView, Span};
+pub use correction::{
+    Alternative, AlternativePage, Constraint, RawEdit, RebasedConstraints, Segment, SegmentView,
+    Span,
+};
 pub use dictionary::Entry;
 use dictionary::{
     Dictionary, LEXICON, english_size, expanded_size, japanese_size, validate_entries,
@@ -118,6 +121,24 @@ impl Engine {
         )
     }
 
+    pub fn rebase_constraints(
+        &self,
+        input: &str,
+        next_input: &str,
+        options: &DecodeOptions,
+        constraints: &[Constraint],
+        edit: Option<&RawEdit>,
+    ) -> Result<RebasedConstraints, String> {
+        correction::rebase(
+            input,
+            next_input,
+            constraints,
+            options,
+            edit,
+            &self.dictionary,
+        )
+    }
+
     /// Bounded native-only search experiment; not part of the browser protocol.
     #[cfg(feature = "diagnostics")]
     pub fn diagnose(
@@ -179,7 +200,7 @@ impl Engine {
                 .ok_or_else(|| "Expected string input".to_owned())
         };
         let result = match value["op"].as_str().ok_or("Expected operation")? {
-            "decode" | "segments" | "alternatives" => {
+            "decode" | "segments" | "alternatives" | "rebaseConstraints" => {
                 let options = value
                     .get("options")
                     .map(|v| serde_json::from_value::<DecodeOptions>(v.clone()))
@@ -202,6 +223,23 @@ impl Engine {
                     "decode" => json!(self.decode_constrained(input()?, &options, &constraints)?),
                     "segments" => {
                         json!(self.segments(input()?, &options, &constraints, index()?)?)
+                    }
+                    "rebaseConstraints" => {
+                        let next = value["nextInput"]
+                            .as_str()
+                            .ok_or("Expected string nextInput")?;
+                        let edit = value
+                            .get("edit")
+                            .map(|v| serde_json::from_value::<RawEdit>(v.clone()))
+                            .transpose()
+                            .map_err(|e| e.to_string())?;
+                        json!(self.rebase_constraints(
+                            input()?,
+                            next,
+                            &options,
+                            &constraints,
+                            edit.as_ref()
+                        )?)
                     }
                     _ => {
                         let span: Span = serde_json::from_value(

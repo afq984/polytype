@@ -19,6 +19,7 @@ export function createEngine({dictionary='expanded'} = {}) {
     decodeConstrained: (input, constraints = [], options = {}) => request('decode', {input, options, constraints}),
     segments: (input, options = {}, constraints = [], candidateIndex = 0) => request('segments', {input, options, constraints, candidateIndex}),
     alternatives: (input, span, options = {}, constraints = [], candidateIndex = 0) => request('alternatives', {input, options, constraints, candidateIndex, ...span}),
+    rebaseConstraints: (input, nextInput, constraints = [], options = {}, edit) => request('rebaseConstraints', {input, nextInput, constraints, options, ...(edit ? {edit} : {})}),
     commitCandidate: candidate => request('commitCandidate', {candidate}),
     setCustomEntries: entries => request('setCustomEntries', {entries}),
     dictionarySize: () => request('dictionarySize'),
@@ -33,7 +34,7 @@ export function createEngine({dictionary='expanded'} = {}) {
   };
 }
 
-export const {decode, decodeConstrained, segments, alternatives, commitCandidate, setCustomEntries, dictionarySize,
+export const {decode, decodeConstrained, segments, alternatives, rebaseConstraints, commitCandidate, setCustomEntries, dictionarySize,
   readZhuyin, readingKeys, composeJapanese, toKatakana, zhuyin, colemak, encode} = createEngine();
 
 export const sample='flldal 2k7u/ jp6g4 dmauu';
