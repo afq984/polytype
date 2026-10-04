@@ -1,5 +1,30 @@
 # Polytype handoff
 
+## English rank evidence (en-freq-v1)
+
+Expanded English now uses a pinned, MIT-licensed ECDICT rank join onto the
+unchanged 101,191-spelling SCOWL vocabulary. The lossless 61,883-rank binary is
+144,167 bytes; inferred inflections and missing-rank fallback are documented in
+[docs/ENGLISH-SCORING.md](docs/ENGLISH-SCORING.md). Logs replace coverage-tier
+lexical rates, with existing case/continuity cues, numeric evidence, possessives,
+first-tone eligibility and exact spaces preserved. Ordinary letters keep symbol
+evidence; `a`/`i` use lexical ranks. Prototype and historical ablations retain
+old scores; `current+no-english-frequency` restores main evidence. English memory
+still prefers exact whole tokens through explicit constraints, before frequency
+ranking, while explicit correction locks win.
+
+Rebased onto main `40a24133`. EWT improves 192 → 193/200 top one in each layout,
+with wrong-language cases 8 → 7 and top five still 200/200. ASCEND target Colemak
+gains one sentence in each language mode; all other mixed top-one/top-five
+counts, Chinese-only, GSD, Japanese, mixed-six, numeric, feedback and frozen
+targets hold, with zero individual target losses. All 4,124 Chinese prefixes are
+unchanged. Seven Bazel targets, including Chrome and remembered-word parity,
+pass (119 Node passes, four existing TODOs). Five alternating WASM rounds over
+6,337 prefixes give median p95 ratio 0.831196 against that main snapshot.
+The compact build matches all TSV candidates and scores on 5,664 native and
+WASM configurations. WASM grows 146,326 bytes (2.81%), below the 150 KB target.
+See [eval/ENGLISH.md](eval/ENGLISH.md) for development limits and reproduction.
+
 ## Explicit correction memory
 
 After applying a Chinese/English choice, reopen its locked menu and choose
