@@ -112,7 +112,10 @@ deploy only when the deploy checkbox is checked on `main`.
 - QWERTY-encoded `us3lc3` → 你好; `/j5 ` (with trailing Space) → 中.
 
 After completed Chinese, punctuation prefers the standard Chinese forms with
-ASCII alternatives still selectable; see [the key map and numeric limitations](docs/PUNCTUATION.md).
+ASCII alternatives still selectable; see [the key map](docs/PUNCTUATION.md).
+Space-separated numbers and short identifiers now have literal evidence next to
+Chinese (`17`, `v3`, `11:25`), while clean digit-key Chinese readings retain
+precedence. See [numeric boundaries and remaining ambiguities](docs/NUMBERS.md).
 
 Literal spaces permit language changes. A Zhuyin first-tone space completes a
 syllable without printing a separator and permits another language after Chinese

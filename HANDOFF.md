@@ -1,5 +1,32 @@
 # Polytype handoff
 
+## Numeric evidence at Chinese boundaries (numbers-v1)
+
+Expanded engines recognize numeric/short identifier syntax at sentence start,
+literal Chinese boundaries and converted first-tone switches. Clean imported or
+custom Chinese readings keep precedence; digit-bearing Zhuyin words no longer
+receive the unconditional first-tone identifier bonus. Numeric times retain
+ASCII colons, while Chinese punctuation retains its full-width preference.
+Spaces remain exactly typed. Policy/ablations and limitations are in
+[docs/NUMBERS.md](docs/NUMBERS.md); no dictionary or corpus reading is changed.
+
+The new public synthetic set contains 144 numeric sentences and 48 Chinese
+controls, each in eight configurations. Numeric exact top one improves 572 →
+896/1,152 and top five 888 → 1,020. Eight numeric configurations lose targets
+because `19␣` and `04/16` are clean Chinese readings; those targets are retained
+as failures. Chinese controls remain 44/48 top one and 48/48 top five per mode.
+All existing full-sentence targets survive; target Colemak ASCEND gains one case
+per language mode. GSD/Japanese/mixed-six, English 192/200 with 8/200 wrong-language,
+historical 376-row ablations and prototype parity retain their targets.
+
+Every-prefix diagnostics cover 4,124 Chinese excerpt/control prefixes, with 386
+changed top outputs and measured temporary numeric prefixes. Against main
+`32b96ff1`, five alternating WASM rounds over 6,337 prefixes give median p95
+ratio 1.0032 (budget 1.15). The no-numbers ablation reproduces main candidates
+and scores on 5,624 configurations. All seven Bazel targets pass, including
+Chrome, segment correction, empty constraints and numeric native/WASM parity.
+See [eval/NUMBERS.md](eval/NUMBERS.md) for development evidence and reproduction.
+
 ## ASCEND typing and word-boundary review, round 2
 
 On main `10a5a21a`, corpus-only adjudication adds the owner's conjunction 和
