@@ -10,8 +10,8 @@ from Bazel globs. No new third-party text was downloaded or added to this tree;
 existing development corpora/notices and the decoder are unchanged.
 
 Browser imports remain pending/unassigned and exposed to development. Active
-snapshots require explicit source-use evidence, reviewed input/targets, paired
-layouts and no unresolved custom dictionary dependency. Related source groups,
+snapshots require explicit source-use evidence, reviewed input/targets in at least one
+layout and no unresolved custom dictionary dependency. Related source groups,
 layout variants and duplicate targets cannot cross development/held-out splits.
 Challenge/unassigned queues are excluded. Frozen files have hashes; evaluation
 records engine identity and writes text-bearing reports only to the external run
@@ -25,7 +25,7 @@ pending challenge coverage; no reading was guessed or Space policy changed.
 Preparation is complete only as tooling/protocol, not as a collected benchmark.
 
 Validation covers external-path/link refusal, capture fidelity and review state,
-split leakage, paired layouts, provenance/custom-entry blockers, snapshot hashes,
+split leakage, informational paired-layout coverage, provenance/custom-entry blockers, snapshot hashes,
 private report output and the Bazel runfiles entry point. Use the existing
 regression suite separately; the historical reports are not held-out evidence.
 

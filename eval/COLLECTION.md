@@ -79,7 +79,7 @@ One JSONL record describes one configuration of a text unit:
 | --- | --- |
 | `id` | Unique record ID, such as `case-0001-colemak`. |
 | `unitId` | Shared by layouts, alternative raw spellings and language-option configurations of the same text. Configuration variants do not count as independent samples. |
-| `inputVariant` | Optional spelling-variant ID (default `primary`); each variant needs its own paired layouts. |
+| `inputVariant` | Optional spelling-variant ID (default `primary`); one reviewed layout is sufficient; additional layouts are optional. |
 | `sourceId`, `sourceGroup` | Source registry ID and related-session/document group. Group excerpts, paraphrases, near-duplicates and variants together. Replace imported `needs-grouping` before freezing. |
 | `split` | `unassigned`, `development`, `heldout`, `regression` or `challenge`. |
 | `domain`, `languages`, `features` | Describe intended text, not the engine's prediction. Languages use `zh`, `ja`, `en`; features can include first-tone-space, names, numbers, code, punctuation, script-choice and replacements. |
@@ -98,9 +98,11 @@ names. For Chinese, annotate citation readings independently of the tested
 dictionary. Do not normalize away Space: it can finish first-tone Zhuyin or be
 a literal language separator. Keep correction/replacement keys if actually typed.
 
-For each active unit and language-toggle configuration, prepare both Colemak and
-QWERTY variants with the same intended output. The tool checks that both exist.
-Use actual typing or a separately verified transcription. Never apply a Roman
+A unit may use a single reviewed layout, including Colemak only. Optional Colemak
+and QWERTY variants share the same intended output. `check` reports
+`pairedLayoutUnits`: active units with both layouts for every annotated input
+variant/language-toggle configuration. This is informational, never a freeze
+blocker. Use actual typing or a separately verified transcription. Never apply a Roman
 layout conversion to the whole mixed raw buffer: Zhuyin positions stay fixed.
 Derived variants must be labelled and reviewed. The current uppercase-O Colemak
 encoding limitation belongs in challenge coverage until it can be represented;
@@ -118,7 +120,7 @@ units**. This is a proposed initial sample size, not a statistical guarantee.
 Cover each single language and each useful language combination. Include short
 and longer compositions, successful typing and failures, exact first-tone/literal
 spaces, names, numbers, punctuation and code. Record collection dates/method and
-gaps in an external `SAMPLING.md`. Both layouts are configurations of each unit.
+gaps in an external `SAMPLING.md`. Additional layouts are configurations of a unit, not independent samples.
 
 Assign approximately 75% of new source groups to development and 25% to heldout
 **before decoding or tuning**, balancing language mixes where feasible. Keep all
@@ -144,7 +146,7 @@ bazelisk run //:corpus -- evaluate /absolute/private/polytype-corpus pilot-01 de
 ```
 
 `check` reports counts and numbered annotation blockers without printing text.
-`freeze` requires active rows to have reviewed targets/inputs, paired layouts,
+`freeze` requires active rows to have reviewed targets/inputs in at least one layout,
 resolved local-use provenance and no custom dictionary dependency. It writes a
 new exclusive `snapshots/NAME/` containing source metadata, selected cases,
 split JSONL and SHA-256 hashes. Names cannot overwrite prior snapshots. Freezing
@@ -186,7 +188,7 @@ CER and candidate rank are not counts of actions.
 - Complete the annotation pilot and resolve ambiguous targets with the user.
 - Collect 50–100 independent units with documented sampling limits and language
   coverage, including independently prepared held-out source groups.
-- Review paired layouts, exact spaces, target alternatives and source provenance.
+- Review the collected layouts, exact spaces, target alternatives and source provenance.
 - Freeze a versioned corpus; retain a development baseline with engine identity.
 - Predeclare the next experiment's quality/regression and latency criteria before
   opening the holdout. Preserve existing guards and report language regressions.

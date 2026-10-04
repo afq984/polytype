@@ -62,7 +62,7 @@ test('capture import preserves exact spaces/options without certifying or exposi
   assert.equal((await stat(join(root, 'cases.jsonl'))).mode & 0o777, 0o600);
 });
 
-test('snapshot readiness distinguishes pending review, rights, custom entries and paired layouts', () => {
+test('snapshot readiness distinguishes pending review, rights, custom entries and informational layout coverage', () => {
   const rows = rowsFor('one', 'development', '42');
   assert.equal(validateCorpus([source], rows).readyToFreeze, true);
   for (const mutate of [
@@ -73,11 +73,24 @@ test('snapshot readiness distinguishes pending review, rights, custom entries an
     assert.equal(validateCorpus([source], changed).readyToFreeze, false);
   }
   assert.equal(validateCorpus([{...source, localEvaluation:'pending'}], rows).readyToFreeze, false);
-  assert.equal(validateCorpus([source], rows.slice(0, 1)).readyToFreeze, false);
+  const single = validateCorpus([source], rows.slice(0, 1));
+  assert.equal(single.readyToFreeze, true); assert.equal(single.pairedLayoutUnits, 0);
+  assert.equal(validateCorpus([source], rows).pairedLayoutUnits, 1);
+  assert.throws(() => validateCorpus([source], [...rows, {...rows[0], id:'duplicate'}]), /Duplicate layout/);
   const challenge = {...rows[0], id:'challenge', unitId:'challenge', sourceGroup:'challenge', split:'challenge', raw:null, options:null, review:{status:'pending'}};
   assert.equal(validateCorpus([source], [...rows, challenge]).readyToFreeze, true);
   assert.throws(() => validateCorpus([source], [{...rows[0], raw:'a'.repeat(401)}]), /400/);
   assert.throws(() => validateCorpus([source], [{...rows[0], raw:'\ud800'}]), /UTF-16/);
+});
+
+test('one reviewed layout can freeze independently', async t => {
+  const parent = await temporary(t), root = join(parent, 'corpus');
+  await main(['init', root]);
+  await writeFile(join(root, 'sources.json'), JSON.stringify([source]));
+  await writeRows(root, rowsFor('single', 'heldout', '57').slice(0, 1));
+  const summary = await main(['check', root]);
+  assert.equal(summary.pairedLayoutUnits, 0); assert.equal(summary.readyToFreeze, true);
+  assert.equal((await main(['freeze', root, 'single-layout'])).rows, 1);
 });
 
 test('holdout checks catch grouped, normalized and acceptable-target leakage, including challenge queues', () => {

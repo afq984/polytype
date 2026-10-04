@@ -133,6 +133,7 @@ export function validateCorpus(sources, rows) {
       if (reasons.length) blockers.push({row:index + 1, reasons});
     }
   }
+  let pairedLayoutUnits = 0;
   for (const unit of units.values()) {
     if (!active(unit.rows[0])) continue;
     const configurations = new Map();
@@ -143,12 +144,12 @@ export function validateCorpus(sources, rows) {
       requireThat(!configurations.get(key).has(row.options.layout), 'Duplicate layout/options variant within one unit.');
       configurations.get(key).add(row.options.layout);
     }
-    if ([...configurations.values()].some(layouts => layouts.size !== 2)) blockers.push({row:rows.indexOf(unit.rows[0]) + 1, reasons:['paired Colemak/QWERTY annotation missing']});
+    if (configurations.size && [...configurations.values()].every(layouts => layouts.size === 2)) pairedLayoutUnits++;
   }
   const countUnits = predicate => new Set(rows.filter(predicate).map(row => row.unitId)).size;
   return {rows:rows.length, units:units.size, splits:Object.fromEntries(splits.map(split => [split, {rows:rows.filter(row => row.split === split).length, units:countUnits(row => row.split === split)}])),
     confirmedRows:rows.filter(row => row.review.status === 'confirmed').length,
-    activeUnits:countUnits(active), blockers, readyToFreeze:rows.some(active) && blockers.length === 0};
+    activeUnits:countUnits(active), pairedLayoutUnits, blockers, readyToFreeze:rows.some(active) && blockers.length === 0};
 }
 
 const template = {

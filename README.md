@@ -141,7 +141,7 @@ data/chinese-source.json and data/japanese-source.json. Imported data notices ar
 included in both web builds.
 
 The next benchmark has an [external collection/review workflow](eval/COLLECTION.md)
-for provenance, user-confirmed targets, paired layouts and development/held-out
+for provenance, user-confirmed targets, reviewed layouts and development/held-out
 splits. `bazelisk run //:corpus -- init /absolute/private/polytype-corpus` creates
 an empty private collection outside the repository. New corpus text and detailed
 reports are never build inputs; this tooling does not constitute a completed benchmark.
