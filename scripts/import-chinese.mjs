@@ -1,17 +1,29 @@
 // Reproducible, corpus-independent subset of McBopomofo's source lexicon.
+// --phrase-limit=40000 (or all), --from-dir=DIR and --output-dir=DIR permit
+// checksum-verified coverage experiments without overwriting the shipped cut.
 import {createHash} from 'node:crypto';
 import {mkdir, readFile, writeFile} from 'node:fs/promises';
+import {resolve, join} from 'node:path';
+import {pathToFileURL} from 'node:url';
 const root = new URL('../', import.meta.url);
+const option = name => process.argv.slice(2).find(arg=>arg.startsWith(`--${name}=`))?.slice(name.length+3);
+const requestedLimit = option('phrase-limit') ?? '40000';
+if (requestedLimit!=='all' && !/^[1-9]\d*$/.test(requestedLimit)) throw new Error('Phrase limit must be a positive integer or all');
+const phraseLimit = requestedLimit==='all' ? Infinity : Number(requestedLimit);
+if (requestedLimit!=='all' && !Number.isSafeInteger(phraseLimit)) throw new Error('Phrase limit must be a safe integer');
+const localDir = option('from-dir');
+const outputRoot = option('output-dir') ? pathToFileURL(resolve(option('output-dir'))+'/') : root;
 const revision = 'f5ba010ce8795d283ee336ca7d16380f200bd2ec';
 const base = `https://raw.githubusercontent.com/openvanilla/McBopomofo/${revision}/`;
 const sources = ['Source/Data/BPMFBase.txt', 'Source/Data/BPMFMappings.txt', 'Source/Data/phrase.occ', 'LICENSE.txt'];
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
-await mkdir(new URL('data/sources/mcbopomofo/', root), {recursive:true});
+await mkdir(new URL('data/sources/mcbopomofo/', outputRoot), {recursive:true});
 const prior = await readFile(new URL('data/chinese-source.json', root), 'utf8').then(JSON.parse).catch(e=>{if(e.code!=='ENOENT')throw e;return null});
 const inputs = await Promise.all(sources.map(async path => {
-  const response = await fetch(base+path);
-  if (!response.ok) throw new Error(`${response.status}: ${path}`);
-  const bytes = Buffer.from(await response.arrayBuffer());
+  const bytes = localDir ? await readFile(join(localDir,path)) : await fetch(base+path).then(async response=>{
+    if (!response.ok) throw new Error(`${response.status}: ${path}`);
+    return Buffer.from(await response.arrayBuffer());
+  });
   const hash = sha256(bytes);
   const expected = prior?.sources.find(source=>source.path===path)?.sha256;
   if (expected && hash!==expected) throw new Error(`Source checksum mismatch: ${path}`);
@@ -46,15 +58,15 @@ for (const line of inputs[1].text.trim().split('\n')) {
 }
 const ordered = [...rows.values()].sort((a,b)=>b[2]-a[2] || (a[1]<b[1]?-1:a[1]>b[1]?1:a[0]<b[0]?-1:1));
 const singles = ordered.filter(row=>!row[0].includes(' '));
-const phrases = ordered.filter(row=>row[0].includes(' ')).slice(0,20000);
+const phrases = ordered.filter(row=>row[0].includes(' ')).slice(0,phraseLimit);
 const selected = [...singles,...phrases].sort((a,b)=>b[2]-a[2] || (a[1]<b[1]?-1:a[1]>b[1]?1:a[0]<b[0]?-1:1));
 const output = selected.map(row=>row.join('\t')).join('\n')+'\n';
-await writeFile(new URL('data/chinese.tsv',root),output);
-await writeFile(new URL('data/sources/mcbopomofo/LICENSE.txt',root),inputs[3].text);
+await writeFile(new URL('data/chinese.tsv',outputRoot),output);
+await writeFile(new URL('data/sources/mcbopomofo/LICENSE.txt',outputRoot),inputs[3].text);
 const manifest = {name:'McBopomofo',revision,license:'MIT; upstream describes BPMFMappings ancestry as libtabe BSD',
-  selection:'All positive-frequency Big5 single-character readings; top 20,000 positive-frequency phrase/readings. Han output only. No evaluation-corpus input.',
+  selection:`All positive-frequency Big5 single-character readings; ${requestedLimit==='all'?'all':`top ${phraseLimit.toLocaleString('en-US')}`} positive-frequency phrase/readings. Han output only. No evaluation-corpus input.`,
   sources:inputs.map(x=>({path:x.path,url:base+x.path,sha256:x.hash})),
   entries:selected.length,uniqueOutputs:new Set(selected.map(row=>row[1])).size,singles:singles.length,phrases:phrases.length,
   skipped:stats,sha256:sha256(output)};
-await writeFile(new URL('data/chinese-source.json',root),JSON.stringify(manifest,null,2)+'\n');
+await writeFile(new URL('data/chinese-source.json',outputRoot),JSON.stringify(manifest,null,2)+'\n');
 console.log(JSON.stringify({entries:manifest.entries,uniqueOutputs:manifest.uniqueOutputs,singles:manifest.singles,phrases:manifest.phrases,bytes:Buffer.byteLength(output),skipped:stats},null,2));

@@ -2,7 +2,7 @@
   "name": "McBopomofo",
   "revision": "f5ba010ce8795d283ee336ca7d16380f200bd2ec",
   "license": "MIT; upstream describes BPMFMappings ancestry as libtabe BSD",
-  "selection": "All positive-frequency Big5 single-character readings; top 20,000 positive-frequency phrase/readings. Han output only. No evaluation-corpus input.",
+  "selection": "All positive-frequency Big5 single-character readings; top 40,000 positive-frequency phrase/readings. Han output only. No evaluation-corpus input.",
   "sources": [
     {
       "path": "Source/Data/BPMFBase.txt",
@@ -25,15 +25,15 @@
       "sha256": "72ed32193b0c629def66df63791b2fb125946b593a3251380e6b949488f47b72"
     }
   ],
-  "entries": 28184,
-  "uniqueOutputs": 26236,
+  "entries": 48184,
+  "uniqueOutputs": 45471,
   "singles": 8184,
-  "phrases": 20000,
+  "phrases": 40000,
   "skipped": {
     "invalid": 42,
     "zeroFrequency": 47369,
     "nonBig5Single": 12170,
     "duplicate": 0
   },
-  "sha256": "31ec4f8c89501eb4f215ccfaff1f27ca9be9f066fc1217d89ac35cacc8424b3c"
+  "sha256": "44804ca256f8e8443508da97e3aa8122f4948b584040689d1def37a25e9a9364"
 }

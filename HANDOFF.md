@@ -1,5 +1,47 @@
 # Polytype handoff
 
+## Chinese frequency scoring and 40k phrase cut (freq-v1)
+
+Expanded Chinese now scores dictionary edges by `2 * normalized key units +
+5.2 * syllables + 0.7 * ln(count / 40,000,000) - discarded-key cost`. Key and
+syllable terms are independent of segmentation; summed log priors compare phrase
+and single-character paths within the existing beam. Common characters retain
+similar language evidence and rare readings become expensive. Logs are cached;
+prototype fallbacks use count one and custom entries omit the prior while
+retaining local insertion priority, including multiple custom homophones. Imported
+choices carry the matching local rank offset. See docs/CHINESE-SCORING.md for constants,
+limits and native ablations. Current ranking is
+`scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1+zh-punct-v1+freq-v1`; English and Japanese
+score branches, prototype behavior and first-tone boundaries are unchanged.
+
+The default Chinese import now keeps 40,000 phrase/readings plus 8,184 singles:
+48,184 pairs, 45,471 unique outputs, TSV 1,435,375 bytes. All source hashes and
+notices are unchanged. The importer supports checksum-verified cached inputs,
+experimental output directories and explicit cut sizes. Historical native
+ablations retain the original 20k cut; all 376 frozen baseline rows and scores
+remain reproducible. No evaluation text was added to the dictionary.
+
+Visible Chinese development excerpts improve 12/20 -> 17/20 top one,
+17/20 -> 19/20 top five, CER 5.6% -> 1.3%. Scoring alone at the 20k cut reaches
+14/20 and 18/20. All 104,221 positive-frequency phrases give the same accuracy
+as the 40k cut at a larger size. Guards, feedback, mixed lines and Japanese
+metrics remain unchanged; no previously correct target is lost, and all 140
+frozen Chinese-control prefix top-ones remain unchanged. This is a local change
+on small development sets, not held-out evidence or native IME support.
+
+Validation: all six Bazel test targets pass, including native/WASM and frozen
+prototype parity; 45 Node tests pass with three existing TODOs. Five alternating
+WASM rounds over 6,321 prefixes against main give median p95 ratio 1.003
+(budget 1.15). WASM 5,051,243 bytes, standalone 12,088,339 bytes. Browser smoke
+was not run because no Chrome executable is available in this sandbox.
+
+The first-tone diagnostic now keeps `This is a bug.` intact, but still changes
+24 Chinese prefixes and six of the old 15 regression events (slash interpretations).
+It remains disabled. Chinese
+homophone context and single-space switching are still open work.
+
+The following sections retain earlier milestone measurements.
+
 ## Contextual Chinese punctuation (zh-punct-v1)
 
 Expanded search now prefers McBopomofo standard-layout punctuation after a
@@ -54,8 +96,6 @@ Validation covers external-path/link refusal, capture fidelity and review state,
 split leakage, informational paired-layout coverage, provenance/custom-entry blockers, snapshot hashes,
 private report output and the Bazel runfiles entry point. Use the existing
 regression suite separately; the historical reports are not held-out evidence.
-
-
 ## Japanese dictionary import (jpdict-v1)
 
 Expanded Japanese conversion now uses data/japanese.tsv: 69,097 reading/surface
@@ -489,10 +529,10 @@ checked-in standalone after source changes. npm start only serves local files.
 ## Remaining limitations and next work
 
 The prototype profile still has 181 Chinese rows including duplicates/alternatives.
-Expanded Chinese coverage is substantially larger; imported word frequencies only
-order alternatives and are not pronunciation-conditioned or a calibrated language
-model. English membership and the Japanese kanji map remain small. No contextual
-model, learning or typo model. Do not hardcode evaluation sentences into the lexicon.
+Expanded Chinese coverage is substantially larger; its unigram surface counts
+are not pronunciation-conditioned and do not provide a contextual language model.
+English membership and the Japanese kanji map remain limited. No learning or typo
+model. Do not hardcode evaluation sentences into the lexicon.
 
 Global beam pruning can crowd out languages. Literal-space boundaries remain
 deliberate for now; do not remove them during dictionary work without agreement.

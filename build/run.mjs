@@ -105,8 +105,15 @@ if (mode === 'test') {
       const command = commands[mode];
       if (!command || !workspace) throw new Error(`Unknown command: ${mode}`);
       if (args.includes('--freeze')) throw new Error('Frozen migration evidence must not be overwritten.');
-      run('scripts/' + command[0], mode === 'verify-zh-en' ? ['--verify', ...args] : args, work);
-      for (const name of command[1]) await publish(join(work, name), join(workspace, name));
+      const commandArgs = mode === 'import-chinese' ? args.map(arg=>{
+        for (const flag of ['--from-dir=', '--output-dir=']) if (arg.startsWith(flag)) return flag+resolve(caller,arg.slice(flag.length));
+        return arg;
+      }) : mode === 'verify-zh-en' ? ['--verify', ...args] : args;
+      run('scripts/' + command[0], commandArgs, work);
+      // An experimental cut must not publish dictionary files into the checkout.
+      if (!(mode === 'import-chinese' && args.some(arg=>arg.startsWith('--output-dir=')))) {
+        for (const name of command[1]) await publish(join(work, name), join(workspace, name));
+      }
     }
   } finally {
     await rm(temporary, {recursive:true, force:true});

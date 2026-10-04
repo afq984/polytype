@@ -51,7 +51,7 @@ test('expanded data matches pinned manifest and remains independent of evaluatio
   const manifest=JSON.parse(readFileSync(new URL('../data/chinese-source.json',import.meta.url)));
   assert.equal(createHash('sha256').update(source).digest('hex'),manifest.sha256);
   assert.equal(source.toString().trim().split('\n').length,manifest.entries);
-  assert.equal(manifest.entries,28184);
+  assert.equal(manifest.entries,48184);
   // No whole evaluation excerpts have been inserted as dictionary entries.
   const words=new Set(source.toString().trim().split('\n').map(line=>line.split('\t')[1]));
   for(const row of cases.filter(row=>row.group==='real-text'))assert.ok(!words.has(row.text),row.id);
@@ -70,7 +70,7 @@ test('expanded native and WASM candidates agree on real text and language guards
     const normalized=value=>JSON.parse(JSON.stringify(value,(key,val)=>key==='score'?Math.round(val*1e10)/1e10:val));
     assert.equal(results.length,rows.length);
     rows.forEach((row,i)=>assert.deepEqual(normalized(engine.decode(row.raw,row.options)),normalized(results[i]),row.id));
-    assert.equal(engine.dictionarySize().imported,28184);
+    assert.equal(engine.dictionarySize().imported,48184);
   }finally{engine.dispose()}
 });
 

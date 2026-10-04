@@ -108,16 +108,17 @@ Literal spaces permit language changes. A Zhuyin first-tone space completes a
 syllable instead of inserting a separator. Candidate selection and commit operate
 on the whole composition. Other unfinished consonants can still commit literally.
 
-Chinese includes 28,184 imported reading/output pairs (26,236 unique outputs)
+Chinese includes 48,184 imported reading/output pairs (45,471 unique outputs)
 from a pinned McBopomofo subset, plus prototype fallback and custom entries.
-Occurrence counts order imported alternatives; custom entries take precedence.
+Log occurrence counts score Chinese alternatives and segmentations; custom entries
+take precedence. See [Chinese unigram scoring](docs/CHINESE-SCORING.md).
 Japanese includes 69,097 reading/surface pairs for 53,410 readings from a pinned
 Mozc open-source dictionary subset, ordered by Mozc's standalone cost; the
 prototype's demo words remain as fallback. Whole-token conversion cannot split
 word-plus-particle spellings such as `kyouha`, and homophone choice has no
 sentence context. Ranking is heuristic, and ambiguous input can prefer another
-language. This is still a playground. The WASM is 4.36 MB and the standalone HTML
-10.45 MB (decimal bytes).
+language. This is still a playground. The WASM is 5.05 MB and the standalone HTML
+12.09 MB (decimal bytes).
 
 ## Dictionary and real-text evaluation
 
@@ -131,9 +132,9 @@ bazelisk run //:verify_corpus    # explicit network check against pinned source 
 The [evaluation report](eval/REPORT.md) compares the prototype and expanded
 profiles on 20 independently annotated sourced Chinese excerpts, 100 sourced
 Japanese words with UniDic readings, 22 regression/synthetic language controls
-and six user-supplied mixed lines. Chinese top-1 exact matches are 12/20 with
-17/20 in the top five, unchanged by the Japanese import. Japanese word conversion
-is 75/100 top one and 86/100 top five; 86 targets are in the imported subset, so
+and six user-supplied mixed lines. Chinese top-1 exact matches are 17/20 with
+19/20 in the top five after frequency scoring and the 40k phrase cut. Japanese word
+conversion is 75/100 top one and 86/100 top five; 86 targets are in the imported subset, so
 the rest are coverage or compound-segmentation gaps, not ranking. Kana-annotated
 targets are additionally reported at the reading level, where an imported
 conversion of the same reading counts as correct. These small development sets

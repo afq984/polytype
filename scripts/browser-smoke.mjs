@@ -135,7 +135,7 @@ try {
     assert.equal(await evaluate("document.getElementById('preedit').textContent"), '学校 你好 hello');
     await evaluate("[...document.querySelectorAll('#examples button')].find(b=>b.textContent==='Expanded Chinese dictionary').click()");
     assert.equal(await evaluate("document.getElementById('preedit').textContent"), '資料庫 hello');
-    assert.ok(await evaluate("document.getElementById('dictionary-count').textContent.includes('28184')"));
+    assert.ok(await evaluate("document.getElementById('dictionary-count').textContent.includes('48184')"));
     assert.ok(await evaluate("document.getElementById('dictionary-count').textContent.includes('69097')"));
     // Shift+Comma follows a converted Chinese segment; ASCII stays selectable.
     await evaluate("document.getElementById('raw').value='us3lc3'; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true})); document.getElementById('raw').focus(); document.getElementById('raw').setSelectionRange(6,6)");

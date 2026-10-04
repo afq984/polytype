@@ -8382,25 +8382,25 @@
         "builtIn": 181,
         "custom": 0,
         "englishImported": 101191,
-        "imported": 28184,
+        "imported": 48184,
         "japaneseImported": 69097
       },
       "groups": {
         "real-text": {
           "cases": 20,
-          "top1": 12,
-          "top5": 17,
-          "readingTop1": 12,
-          "readingTop5": 17,
-          "characterErrorRate": 0.055793991416309016,
+          "top1": 17,
+          "top5": 19,
+          "readingTop1": 17,
+          "readingTop5": 19,
+          "characterErrorRate": 0.012875536480686695,
           "reachable": 20,
-          "spaceNormalizedTop1": 12,
-          "spaceNormalizedTop5": 17,
+          "spaceNormalizedTop1": 17,
+          "spaceNormalizedTop5": 19,
           "englishExact": null,
           "englishMatches": 0,
           "englishTokens": 0,
-          "hanCER": 0.055793991416309016,
-          "hanEdits": 13,
+          "hanCER": 0.012875536480686695,
+          "hanEdits": 3,
           "hanCharacters": 233,
           "wrongLanguage": 0,
           "wrongLanguageCases": 0,
@@ -8577,19 +8577,19 @@
             "zhuyin": true
           },
           "cases": 20,
-          "top1": 12,
-          "top5": 17,
-          "readingTop1": 12,
-          "readingTop5": 17,
-          "characterErrorRate": 0.055793991416309016,
+          "top1": 17,
+          "top5": 19,
+          "readingTop1": 17,
+          "readingTop5": 19,
+          "characterErrorRate": 0.012875536480686695,
           "reachable": 20,
-          "spaceNormalizedTop1": 12,
-          "spaceNormalizedTop5": 17,
+          "spaceNormalizedTop1": 17,
+          "spaceNormalizedTop5": 19,
           "englishExact": null,
           "englishMatches": 0,
           "englishTokens": 0,
-          "hanCER": 0.055793991416309016,
-          "hanEdits": 13,
+          "hanCER": 0.012875536480686695,
+          "hanEdits": 3,
           "hanCharacters": 233,
           "wrongLanguage": 0,
           "wrongLanguageCases": 0,
@@ -8818,24 +8818,24 @@
           "group": "real-text",
           "raw": "5k4u;42k7tj3xu3u,3u03g/ xk7u vu, jp4wu6",
           "expected": "這樣的處理也衍生了一些問題",
-          "actual": "這樣的處理也演生了一些問題",
-          "rank": 2,
-          "readingRank": 2,
-          "spaceNormalizedRank": 2,
+          "actual": "這樣的處理也衍生了一些問題",
+          "rank": 1,
+          "readingRank": 1,
+          "spaceNormalizedRank": 1,
           "englishMatches": 0,
           "englishTokens": 0,
-          "hanEdits": 1,
+          "hanEdits": 0,
           "hanCharacters": 13,
           "singleLanguage": "chinese",
           "wrongLanguage": false,
-          "edits": 1,
+          "edits": 0,
           "characters": 13,
           "reachable": true,
           "candidates": [
-            "這樣的處理也演生了一些問題",
             "這樣的處理也衍生了一些問題",
+            "這樣的處理也演生了一些問題",
             "這樣的處理也眼生了一些問題",
-            "這樣的處理野演生了一些問題",
+            "這樣的處理野衍生了一些問題",
             "5e4lo42e7gn3xl3l,3l03d/ xe7l vl, n;4wl6"
           ]
         },
@@ -8860,8 +8860,8 @@
           "candidates": [
             "企業界陸續有人提供捐款",
             "企業界陸續友人提供捐款",
-            "氣業界陸續有人提供捐款",
-            "企業解陸續有人提供捐款",
+            "企業界陸續有任提供捐款",
+            "企業界陸續有人提供身款",
             "tl4l,4pl,4xn4vm4l.3b;6wl6fn/ pm0 sn03"
           ]
         },
@@ -8870,24 +8870,24 @@
           "group": "real-text",
           "raw": "2j4rm0 cj8 jo6jp 29456j4",
           "expected": "杜鵑花為溫帶植物",
-          "actual": "杜鵑化為溫大植物",
-          "rank": 0,
-          "readingRank": 0,
-          "spaceNormalizedRank": 0,
+          "actual": "杜鵑花為溫帶植物",
+          "rank": 1,
+          "readingRank": 1,
+          "spaceNormalizedRank": 1,
           "englishMatches": 0,
           "englishTokens": 0,
-          "hanEdits": 2,
+          "hanEdits": 0,
           "hanCharacters": 8,
           "singleLanguage": "chinese",
           "wrongLanguage": false,
-          "edits": 2,
+          "edits": 0,
           "characters": 8,
           "reachable": true,
           "candidates": [
-            "杜鵑化為溫大植物",
-            "杜鵑化為溫大職務",
-            "杜鵑化為溫代植物",
-            "杜鵑化為塭大植物",
+            "杜鵑花為溫帶植物",
+            "杜鵑花為溫大植物",
+            "杜鵑花為溫帶職務",
+            "杜鵑花為溫大職務",
             "2n4pm0 cn8 ny6n; 29456n4"
           ]
         },
@@ -8911,8 +8911,8 @@
           "reachable": true,
           "candidates": [
             "台北雖然在亞熱帶",
+            "台北雖然在亞熱大",
             "台北雖然在訝熱帶",
-            "台北雖然在軋熱帶",
             "台北雖然再亞熱帶",
             "w961y3kny b06j94l84be4294"
           ]
@@ -8923,9 +8923,9 @@
           "raw": "u 2j/4xu;3h/6x.62k7ru045j6",
           "expected": "一棟兩層樓的建築",
           "actual": "一動兩層樓的建築",
-          "rank": 4,
-          "readingRank": 4,
-          "spaceNormalizedRank": 4,
+          "rank": 2,
+          "readingRank": 2,
+          "spaceNormalizedRank": 2,
           "englishMatches": 0,
           "englishTokens": 0,
           "hanEdits": 1,
@@ -8937,9 +8937,9 @@
           "reachable": true,
           "candidates": [
             "一動兩層樓的建築",
-            "一動兩層樓地建築",
-            "一動倆層樓的建築",
             "一棟兩層樓的建築",
+            "一動兩層樓地建築",
+            "一動兩層樓得建築",
             "l 2n/4xlo3h/6x.62e7pl045n6"
           ]
         },
@@ -8963,8 +8963,8 @@
           "reachable": true,
           "candidates": [
             "樓頂有天文台",
-            "樓頂友天文台",
             "樓鼎有天文台",
+            "樓頂友天文台",
             "嘍頂有天文台",
             "x.62l/3l.3wl0 n;6w96"
           ]
@@ -8990,8 +8990,8 @@
           "candidates": [
             "現為天文社使用",
             "現為天文設使用",
-            "現維天文社使用",
             "見為天文社使用",
+            "見為天文設使用",
             "vl04ny6wl0 n;6de4d3m/4"
           ]
         },
@@ -9000,24 +9000,24 @@
           "group": "real-text",
           "raw": "5j3ul4cji3104g4b41p3c04ao3eji6",
           "expected": "主要夥伴是日本和美國",
-          "actual": "主要火辦事日本和美國",
-          "rank": 2,
-          "readingRank": 2,
-          "spaceNormalizedRank": 2,
+          "actual": "主要夥伴是日本和美國",
+          "rank": 1,
+          "readingRank": 1,
+          "spaceNormalizedRank": 1,
           "englishMatches": 0,
           "englishTokens": 0,
-          "hanEdits": 3,
+          "hanEdits": 0,
           "hanCharacters": 10,
           "singleLanguage": "chinese",
           "wrongLanguage": false,
-          "edits": 3,
+          "edits": 0,
           "characters": 10,
           "reachable": true,
           "candidates": [
-            "主要火辦事日本和美國",
             "主要夥伴是日本和美國",
-            "主要火辦事日本漢美國",
-            "主要夥伴是日本漢美國",
+            "主要伙伴是日本和美國",
+            "主要夥伴事日本和美國",
+            "主要夥伴市日本和美國",
             "5n3li4cnu3104d4b41;3c04ay3fnu6"
           ]
         },
@@ -9026,24 +9026,24 @@
           "group": "real-text",
           "raw": "5k4vu, 2u04cj84ru/ rul cj04ru tj3xu3",
           "expected": "這些電話經交換機處理",
-          "actual": "這些電話經教換機處理",
-          "rank": 4,
-          "readingRank": 4,
-          "spaceNormalizedRank": 4,
+          "actual": "這些電話經交換機處理",
+          "rank": 1,
+          "readingRank": 1,
+          "spaceNormalizedRank": 1,
           "englishMatches": 0,
           "englishTokens": 0,
-          "hanEdits": 1,
+          "hanEdits": 0,
           "hanCharacters": 10,
           "singleLanguage": "chinese",
           "wrongLanguage": false,
-          "edits": 1,
+          "edits": 0,
           "characters": 10,
           "reachable": true,
           "candidates": [
-            "這些電話經教換機處理",
-            "這些電話經交換其處理",
-            "這些電話經交換基礎理",
             "這些電話經交換機處理",
+            "這些電話更交換機處理",
+            "這些電話精交換機處理",
+            "這些電話京交換機處理",
             "5e4vl, 2l04cn84pl/ pli cn04pl gn3xl3"
           ]
         },
@@ -9068,8 +9068,8 @@
           "candidates": [
             "使用的媒介包括海底電纜",
             "使用地媒介包括海底電纜",
-            "使用得媒介包括海底電纜",
             "使用的沒解包括海底電纜",
+            "使用得媒介包括海底電纜",
             "d3m/42e7ay6pl,41i snu4c932l32l04x03"
           ]
         },
@@ -9093,9 +9093,9 @@
           "reachable": true,
           "candidates": [
             "團購網站的產品原價和購買數量",
+            "團購網站的產品員價和購買數量",
             "團購網站的產品原價漢購買數量",
-            "團購網站地產品原價和購買數量",
-            "團購網站的產品原價汗購買數量",
+            "團購網站的產品員假和購買數量",
             "wn06f.4no35042e7g03ql;3m06pl84c04f.4a93dn4xlo4"
           ]
         },
@@ -9104,7 +9104,33 @@
           "group": "real-text",
           "raw": "wj06e.4j;35042k75j3ul4t03qup3zp jo6ru8 rm xo4",
           "expected": "團購網站的主要產品分為家居類",
-          "actual": "團購網站的主要產品分為家車類",
+          "actual": "團購網站的主要產品分為家居類",
+          "rank": 1,
+          "readingRank": 1,
+          "spaceNormalizedRank": 1,
+          "englishMatches": 0,
+          "englishTokens": 0,
+          "hanEdits": 0,
+          "hanCharacters": 14,
+          "singleLanguage": "chinese",
+          "wrongLanguage": false,
+          "edits": 0,
+          "characters": 14,
+          "reachable": true,
+          "candidates": [
+            "團購網站的主要產品分為家居類",
+            "團購網站的主要產品分為家車類",
+            "團購網站的主要產品分為加車類",
+            "團購網站的主要產品分為家居累",
+            "wn06f.4no35042e75n3li4g03ql;3z; ny6pl8 pm xy4"
+          ]
+        },
+        {
+          "id": "gsd-13",
+          "group": "real-text",
+          "raw": "up h3w.4eji4fu, ek rmp4b.41u04s/6zp 1u04-45k3",
+          "expected": "因此透過切割菌肉便能分辨二者",
+          "actual": "因此透過切割俊肉便能分辨二者",
           "rank": 3,
           "readingRank": 3,
           "spaceNormalizedRank": 3,
@@ -9118,36 +9144,10 @@
           "characters": 14,
           "reachable": true,
           "candidates": [
-            "團購網站的主要產品分為家車類",
-            "團購網站的主要產品分為家車累",
-            "團購網站的主要產品分為家居類",
-            "團購網站的主要產品紛為家車類",
-            "wn06f.4no35042e75n3li4g03ql;3z; ny6pl8 pm xy4"
-          ]
-        },
-        {
-          "id": "gsd-13",
-          "group": "real-text",
-          "raw": "up h3w.4eji4fu, ek rmp4b.41u04s/6zp 1u04-45k3",
-          "expected": "因此透過切割菌肉便能分辨二者",
-          "actual": "因此透過切割俊肉變能分辨二者",
-          "rank": 0,
-          "readingRank": 0,
-          "spaceNormalizedRank": 0,
-          "englishMatches": 0,
-          "englishTokens": 0,
-          "hanEdits": 2,
-          "hanCharacters": 14,
-          "singleLanguage": "chinese",
-          "wrongLanguage": false,
-          "edits": 2,
-          "characters": 14,
-          "reachable": true,
-          "candidates": [
-            "因此透過切割俊肉變能分辨二者",
-            "因此透過切割俊肉變能分辨二赭",
-            "因此透過切割俊肉變能分辨貳者",
             "因此透過切割俊肉便能分辨二者",
+            "因此透過切割俊肉變能分辨二者",
+            "因此透過切割菌肉便能分辨二者",
+            "因此透過切割菌肉變能分辨二者",
             "l; h3w.4fnu4tl, fe pm;4b.41l04r/6z; 1l04-45e3"
           ]
         },
@@ -9182,24 +9182,24 @@
           "group": "real-text",
           "raw": "gp g.4e/ yji4g zo62/3bp6jo6up nj42k7u/3vu;3-6ru61j4jp32u/4",
           "expected": "深受耕作施肥等人為因素的影響而極不穩定",
-          "actual": "深受耕作師肥等人為因素的影響而及不穩定",
+          "actual": "深受耕作施肥等人為因素的影響而及不穩定",
           "rank": 0,
           "readingRank": 0,
           "spaceNormalizedRank": 0,
           "englishMatches": 0,
           "englishTokens": 0,
-          "hanEdits": 2,
+          "hanEdits": 1,
           "hanCharacters": 19,
           "singleLanguage": "chinese",
           "wrongLanguage": false,
-          "edits": 2,
+          "edits": 1,
           "characters": 19,
           "reachable": true,
           "candidates": [
-            "深受耕作師肥等人為因素的影響而及不穩定",
-            "深受耕作師肥等人為因素的影響而及部穩定",
-            "深受耕作師肥等人為因素的影響而即不穩定",
-            "深受耕作師肥等人為因素的影響兒及不穩定",
+            "深受耕作施肥等人為因素的影響而及不穩定",
+            "深受更作施肥等人為因素的影響而及不穩定",
+            "深受耕作施肥等人為因素的影響而即不穩定",
+            "深受耕作施肥等人為因素的影響而吃不穩定",
             "d; d.4f/ jnu4d zy62/3b;6ny6l; kn42e7l/3vlo3-6pl61n4n;32l/4"
           ]
         },
@@ -9223,9 +9223,9 @@
           "reachable": true,
           "candidates": [
             "土壤是重要的自然資源和生產資料",
-            "土壤是重要的自然資源漢生產資料",
             "土壤事重要的自然資源和生產資料",
-            "土壤是重要的自然資源汗生產資料",
+            "土壤市重要的自然資源和生產資料",
+            "土壤使重要的自然資源和生產資料",
             "wn3bo3d45n/4li42e7j4b06j m06c04d/ g03j xli4"
           ]
         },
@@ -9249,9 +9249,9 @@
           "reachable": true,
           "candidates": [
             "土壤的植物生產能力是衡量土壤資源質量的標誌",
-            "土壤的植物生產能力是衡量土壤資源質量地標誌",
-            "土壤的植物生產能力事衡量土壤資源質量的標誌",
             "土壤的職務生產能力是衡量土壤資源質量的標誌",
+            "土壤的植物生產能力事衡量土壤資源質量的標誌",
+            "土壤的植物生產能力市衡量土壤資源質量的標誌",
             "wn3bo32e756n4d/ g03r/6xl4d4c/6xlo6wn3bo3j m0656xlo42e71li 54"
           ]
         },
@@ -9275,9 +9275,9 @@
           "reachable": true,
           "candidates": [
             "這個計算機控制了火箭",
-            "這個計算其控制了火箭",
-            "這個計算機空知了火箭",
             "這個計算機控制了火間",
+            "這個計算機控制了火建",
+            "這個計算機控制了火見",
             "5e4fe7pl4kn04pl sn/454xe7cnu3pl04"
           ]
         },
@@ -9302,8 +9302,8 @@
           "candidates": [
             "教堂完成了主體大修工程",
             "教堂完成了主體大休工程",
-            "教堂玩成了主體大修工程",
-            "教堂玩成了主體大休工程",
+            "教堂完成了著體大修工程",
+            "教堂完成了主體大羞工程",
             "pli4wo6n06g/6xe75n3wl3284vl. fn/ g/6"
           ]
         },
@@ -9327,9 +9327,9 @@
           "reachable": true,
           "candidates": [
             "工程包括內部結構的調整",
+            "工程包括那不結構的調整",
+            "工程包括內不結構的調整",
             "工程包括內部結構地調整",
-            "工程包括內部結構得調整",
-            "公成包括內部結構的調整",
             "fn/ g/61i snu4ry41n4pl,6f.42e7wli65/3"
           ]
         },
@@ -9355,7 +9355,7 @@
             "小さい 的英文是 small",
             "ちいさい 的英文是 small",
             "小さい 的英文事 small",
-            "小さい 地英文是 small",
+            "小さい 的英文市 small",
             "tiisai 2e7l/ n;6d4 small"
           ]
         },
@@ -9405,9 +9405,9 @@
           "reachable": null,
           "candidates": [
             "你好",
-            "你郝",
             "妳好",
-            "妳郝",
+            "擬好",
+            "你郝",
             "lr3ic3"
           ]
         },
@@ -9882,9 +9882,9 @@
           "raw": "tann;i us3lc3 hkuu;",
           "expected": "がっこう 你好 hello",
           "actual": "学校 你好 hello",
-          "rank": 2,
+          "rank": 3,
           "readingRank": 1,
-          "spaceNormalizedRank": 2,
+          "spaceNormalizedRank": 3,
           "englishMatches": 1,
           "englishTokens": 1,
           "hanEdits": 2,
@@ -9896,9 +9896,9 @@
           "reachable": null,
           "candidates": [
             "学校 你好 hello",
-            "がっこう 你好 hello",
-            "学校 你郝 hello",
             "学校 妳好 hello",
+            "がっこう 你好 hello",
+            "学校 擬好 hello",
             "gakkou lr3ic3 hello"
           ]
         },
@@ -9922,7 +9922,10 @@
           "reachable": null,
           "candidates": [
             "for (int i = 0; i < 100; i++)",
-            "for (int i = 0; 凹， 100; i++)"
+            "for (int i = 0; i ， 100; i++)",
+            "for (int i = 0; い < 100; i++)",
+            "for (int い = 0; i < 100; i++)",
+            "for (int i = 0; い ， 100; i++)"
           ]
         },
         {
@@ -10022,7 +10025,7 @@
             "I think 注音's priority is too high  (this is also a good test sentence)",
             "I think 著因's priority is too high  (this is also a good test sentence)",
             "I think 注音's priority is too high  (this is also あ good test sentence)",
-            "I think 注音's priority is too high  (this is also ア good test sentence)",
+            "I think 助因's priority is too high  (this is also a good test sentence)",
             "I think 5n4l; 's priority is too high  (this is also a good test sentence)"
           ]
         },
@@ -10694,7 +10697,7 @@
             "よやくは TableCheck で, なまえは Tanaka / 田中 で いれておいた.",
             "よやくは TableCheck で, なまえは Tanaka / タナカ で いれておいた.",
             "よやくは TableCheck で, なまえは Tanaka / たなか で いれておいた.",
-            "よやくは TableCheck で, なまえは Tanaka / 田中 で ireteoita.",
+            "よやくは TableCheck で, なまえは Tanaka / 田中 出 いれておいた.",
             "yoyakuha TableCheck de, namaeha Tanaka / tanaka de ireteoita."
           ]
         },

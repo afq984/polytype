@@ -19,7 +19,7 @@ The first 100 long-unit words (LUWBILabel=B) tagged NOUN, PROPN, VERB, ADJ or AD
 | prototype / mixed-qwerty-en-jp | 0/6 | 0/6 | 0/6 | 0/6 | 38.0% | n/a |
 | prototype / japanese-words-jp | 0/100 | 1/100 | 0/100 | 1/100 | 165.1% | 0 |
 | prototype / japanese-words-all | 0/100 | 1/100 | 0/100 | 1/100 | 165.5% | 0 |
-| expanded / real-text | 12/20 | 17/20 | 12/20 | 17/20 | 5.6% | 20 |
+| expanded / real-text | 17/20 | 19/20 | 17/20 | 19/20 | 1.3% | 20 |
 | expanded / guards | 12/22 | 22/22 | 22/22 | 22/22 | 17.5% | n/a |
 | expanded / user-feedback | 5/5 | 5/5 | 5/5 | 5/5 | 0.0% | n/a |
 | expanded / mixed-colemak-all | 1/6 | 3/6 | 4/6 | 4/6 | 12.5% | n/a |
@@ -44,7 +44,7 @@ Space normalization deletes only U+0020 runs directly between Han and Latin-scri
 | prototype / mixed-qwerty-en-jp / qwerty / english+japanese | 0/6 | 0/6 | 0/6 | 0/6 | 57.7% (15/26) | n/a (0/0) | n/a (0/0) |
 | prototype / japanese-words-jp / qwerty / japanese | 0/100 | 1/100 | 0/100 | 1/100 | n/a (0/0) | 100.0% (201/201) | 0.0% (0/78) |
 | prototype / japanese-words-all / qwerty / english+japanese+zhuyin | 0/100 | 1/100 | 0/100 | 1/100 | n/a (0/0) | 100.0% (201/201) | 1.3% (1/78) |
-| expanded / real-text / colemak / english+japanese+zhuyin | 12/20 | 17/20 | 12/20 | 17/20 | n/a (0/0) | 5.6% (13/233) | 0.0% (0/20) |
+| expanded / real-text / colemak / english+japanese+zhuyin | 17/20 | 19/20 | 17/20 | 19/20 | n/a (0/0) | 1.3% (3/233) | 0.0% (0/20) |
 | expanded / guards / colemak / english+japanese+zhuyin | 12/22 | 22/22 | 12/22 | 22/22 | 100.0% (22/22) | 51.9% (14/27) | 0.0% (0/11) |
 | expanded / user-feedback / colemak / english+japanese+zhuyin | 5/5 | 5/5 | 5/5 | 5/5 | 100.0% (30/30) | 0.0% (0/2) | 0.0% (0/4) |
 | expanded / mixed-colemak-all / colemak / english+japanese+zhuyin | 1/6 | 3/6 | 1/6 | 3/6 | 92.3% (24/26) | n/a (9/0) | n/a (0/0) |
@@ -60,14 +60,9 @@ Top-5 regressions: none (reading level: none).
 
 ## Remaining expanded-profile errors
 
-- gsd-01: 這樣的處理也衍生了一些問題 → 這樣的處理也演生了一些問題 (target rank: 2; reading-level rank: 2; dictionary reachable: true)
-- gsd-03: 杜鵑花為溫帶植物 → 杜鵑化為溫大植物 (target rank: outside top 5; reading-level rank: outside top 5; dictionary reachable: true)
-- gsd-05: 一棟兩層樓的建築 → 一動兩層樓的建築 (target rank: 4; reading-level rank: 4; dictionary reachable: true)
-- gsd-08: 主要夥伴是日本和美國 → 主要火辦事日本和美國 (target rank: 2; reading-level rank: 2; dictionary reachable: true)
-- gsd-09: 這些電話經交換機處理 → 這些電話經教換機處理 (target rank: 4; reading-level rank: 4; dictionary reachable: true)
-- gsd-12: 團購網站的主要產品分為家居類 → 團購網站的主要產品分為家車類 (target rank: 3; reading-level rank: 3; dictionary reachable: true)
-- gsd-13: 因此透過切割菌肉便能分辨二者 → 因此透過切割俊肉變能分辨二者 (target rank: outside top 5; reading-level rank: outside top 5; dictionary reachable: true)
-- gsd-15: 深受耕作施肥等人為因素的影響而極不穩定 → 深受耕作師肥等人為因素的影響而及不穩定 (target rank: outside top 5; reading-level rank: outside top 5; dictionary reachable: true)
+- gsd-05: 一棟兩層樓的建築 → 一動兩層樓的建築 (target rank: 2; reading-level rank: 2; dictionary reachable: true)
+- gsd-13: 因此透過切割菌肉便能分辨二者 → 因此透過切割俊肉便能分辨二者 (target rank: 3; reading-level rank: 3; dictionary reachable: true)
+- gsd-15: 深受耕作施肥等人為因素的影響而極不穩定 → 深受耕作施肥等人為因素的影響而及不穩定 (target rank: outside top 5; reading-level rank: outside top 5; dictionary reachable: true)
 - acceptance-7: さくら → 桜 (target rank: 2; reading-level rank: 1; dictionary reachable: not measured)
 - acceptance-8: がっこう → 学校 (target rank: 2; reading-level rank: 1; dictionary reachable: not measured)
 - acceptance-9: りょこう → 旅行 (target rank: 2; reading-level rank: 1; dictionary reachable: not measured)
@@ -77,7 +72,7 @@ Top-5 regressions: none (reading level: none).
 - acceptance-13: かん  hello! → 感  hello! (target rank: 4; reading-level rank: 1; dictionary reachable: not measured)
 - synthetic-6: さくら hello → 桜 hello (target rank: 2; reading-level rank: 1; dictionary reachable: not measured)
 - synthetic-7: がっこう small → 学校 small (target rank: 2; reading-level rank: 1; dictionary reachable: not measured)
-- trilingual: がっこう 你好 hello → 学校 你好 hello (target rank: 2; reading-level rank: 1; dictionary reachable: not measured)
+- trilingual: がっこう 你好 hello → 学校 你好 hello (target rank: 3; reading-level rank: 1; dictionary reachable: not measured)
 - mixed-01-colemak-all: GPU たりないから batch size 16 のまま train まわす. → GPU たりないから batch size 16 のまま train 回す. (target rank: 3; reading-level rank: 1; dictionary reachable: not measured)
 - mixed-01-colemak-en-jp: GPU たりないから batch size 16 のまま train まわす. → GPU たりないから batch size 16 のまま train 回す. (target rank: 3; reading-level rank: 1; dictionary reachable: not measured)
 - mixed-01-qwerty-all: GPU たりないから batch size 16 のまま train まわす. → GPU たりないから batch size 16 のまま train 回す. (target rank: 3; reading-level rank: 1; dictionary reachable: not measured)

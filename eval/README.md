@@ -1,12 +1,18 @@
 # Text evaluation
 
+Expanded Chinese now uses [log-frequency unigram scoring](../docs/CHINESE-SCORING.md)
+and a 40k phrase cut: 17/20 top one, 19/20 top five, 1.3% CER on the Chinese
+development excerpts. At the original 20k cut, scoring alone gives 14/20 and
+18/20; all 104,221 positive-frequency phrases give the same accuracy as 40k.
+English/Japanese controls and prior correct targets are retained. First-tone
+switching remains diagnostic-only. Older milestone results below are historical.
+
 For the next benchmark, see [the external collection and review protocol](COLLECTION.md).
 `bazelisk run //:corpus -- init /absolute/private/polytype-corpus` prepares an
 empty external collection. It supports capture import, provenance/review checks,
 grouped split validation, frozen snapshots and private report output. New source
 text and annotations stay outside every repository and Bazel input. This is
 preparation; no new user-confirmed benchmark has been collected yet.
-
 The [English-island experiment](ISLANDS.md) compares continuation retention,
 discard penalties, identifier evidence and a diagnostic-only first-tone boundary
 variant against a frozen family-v1 baseline. Only retention ships; see the report
