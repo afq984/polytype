@@ -11,7 +11,8 @@ pub use correction::{
 };
 pub use dictionary::Entry;
 use dictionary::{
-    Dictionary, LEXICON, english_size, expanded_size, japanese_size, validate_entries,
+    Dictionary, LEXICON, english_size, expanded_size, japanese_size, validate_english_entries,
+    validate_entries,
 };
 pub use japanese::{Composition, compose_japanese, to_katakana};
 pub use phonetic::{Syllable, colemak, encode, read_zhuyin, reading_keys, zhuyin};
@@ -81,7 +82,8 @@ impl Engine {
     }
 
     pub fn decode_with_options(&self, raw: &str, options: &DecodeOptions) -> Vec<Candidate> {
-        search::decode(raw, &self.dictionary, options)
+        correction::decode(raw, &[], &self.dictionary, options)
+            .expect("Empty explicit constraints are valid")
     }
 
     pub fn decode_constrained(
@@ -174,7 +176,22 @@ impl Engine {
     /// Replace entries atomically. Validation never mutates the active dictionary.
     pub fn set_custom_entries(&mut self, entries: Vec<Entry>) -> Result<Vec<Entry>, String> {
         let entries = validate_entries(entries)?;
+        let english = self.dictionary.custom_english.clone();
         self.dictionary = Dictionary::new(entries.clone(), self.dictionary.expanded);
+        self.dictionary.custom_english = english;
+        Ok(entries)
+    }
+
+    /// Validate first, then atomically replace this engine's exact English word list.
+    pub fn set_custom_english_entries(
+        &mut self,
+        entries: Vec<String>,
+    ) -> Result<Vec<String>, String> {
+        if !self.dictionary.expanded {
+            return Err("Custom English requires the expanded profile".into());
+        }
+        let entries = validate_english_entries(entries)?;
+        self.dictionary.custom_english = entries.clone();
         Ok(entries)
     }
 
@@ -182,6 +199,7 @@ impl Engine {
         let mut size = json!({"builtIn": LEXICON.chinese.len(), "imported": if self.dictionary.expanded { expanded_size() } else { 0 }, "custom": self.dictionary.custom.len()});
         if self.dictionary.expanded {
             size["englishImported"] = json!(english_size());
+            size["englishCustom"] = json!(self.dictionary.custom_english.len());
             size["japaneseImported"] = json!(japanese_size());
         }
         size
@@ -283,6 +301,11 @@ impl Engine {
             )),
             "toKatakana" => json!(to_katakana(input()?)),
             "dictionarySize" => self.dictionary_size(),
+            "setCustomEnglishEntries" => {
+                let entries = serde_json::from_value::<Vec<String>>(value["entries"].clone())
+                    .map_err(|e| e.to_string())?;
+                json!(self.set_custom_english_entries(entries)?)
+            }
             "setCustomEntries" => {
                 let rows = value["entries"]
                     .as_array()

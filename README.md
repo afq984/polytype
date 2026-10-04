@@ -125,7 +125,10 @@ sentence. Local English/kana/raw choices, paired punctuation and Chinese
 syllable/phrase selection lock that span while the rest is re-decoded. Enter in
 the menu applies; Enter in the editor commits the selected whole candidate.
 Space keeps typing. See [segment correction](docs/CORRECTION.md) for keys,
-edit behavior and the native/WASM API. Other unfinished consonants can still
+edit behavior and the native/WASM API. A dotted Chinese underline suggests a close
+local alternative. After applying a Chinese or English correction, reopen its menu
+and choose Remember to save it explicitly. Inspect/remove remembered words or export
+the dictionary from 中文詞庫. Other unfinished consonants can still
 commit literally.
 
 Chinese includes 48,184 imported reading/output pairs (45,471 unique outputs)

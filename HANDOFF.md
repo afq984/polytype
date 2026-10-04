@@ -1,5 +1,18 @@
 # Polytype handoff
 
+## Explicit correction memory
+
+After applying a Chinese/English choice, reopen its locked menu and choose
+Remember; merely applying/committing never saves a word. Chinese readings come
+from Rust alternatives and use the existing dictionary. Exact-case English words
+use a separate atomic, per-engine list and prefer literal English via correction
+constraints, with normal boundaries and explicit locks preserved. Empty user data
+leaves ranking unchanged. The dictionary panel lists/removes both kinds and exports
+JSON. Storage denial/corruption preserves session export and old stored data.
+Captures omit lists and flag custom-entry dependence; English memory appends
++remember-en-v1 only to dependent capture identities. Details and limits are in
+docs/CORRECTION.md. No automatic learning or native OS IME is added.
+
 ## Chinese local ambiguity cues
 
 Unlocked Chinese segments expose a deterministic local `confidenceMargin` through

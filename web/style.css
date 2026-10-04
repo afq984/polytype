@@ -107,3 +107,5 @@ main>.notes{margin-top:16px}
 
 /* A score ambiguity cue occupies the existing underline, without adding height. */
 .preedit .segment-piece.uncertain::after{border-bottom-style:dotted}
+
+#segment-remember[aria-pressed=true]{outline:2px solid #527c8d;outline-offset:2px}

@@ -1,7 +1,7 @@
-import{rankingId,rawEncodingVersion,decode,decodeConstrained,segments,alternatives,rebaseConstraints,commitCandidate,examplesForLayout,physicalKey,setCustomEntries,dictionarySize}from'./engine.mjs';
+import{rankingId,rawEncodingVersion,decode,decodeConstrained,segments,alternatives,rebaseConstraints,commitCandidate,examplesForLayout,physicalKey,setCustomEntries,setCustomEnglishEntries,dictionarySize}from'./engine.mjs';
 const $=id=>document.getElementById(id);let candidates=[],selected=0,committed='',timer=null;
 let constraints=[],rawSnapshot='',segmentView=null,segmentMenu=null,pendingEdit;
-const ranking=()=>rankingId+(constraints.length?'+segment-v1':'');
+const ranking=()=>rankingId+(englishEntries.length?'+remember-en-v1':'')+(constraints.length?'+segment-v1':'');
 const blind=()=>$('blind-capture').checked;
 const options=()=>({layout:$('keyboard-layout').value,english:$('enable-english').checked,japanese:$('enable-japanese').checked,zhuyin:$('enable-zhuyin').checked});
 const toolsKey='polytype-tools-open-v1';
@@ -98,17 +98,19 @@ function previewChoice(index){
  if(segmentMenu.signature!==correctionSignature()){closeSegment();$('correction-status').textContent='Correction menu closed after the composition changed.';return}
  segmentMenu.index=Math.max(0,Math.min(index,segmentMenu.choices.length-1));
  const choice=segmentMenu.choices[segmentMenu.index];if(!choice)return;
+ $('segment-remember').setAttribute('aria-pressed',String(choice.kind==='remember'));
  let preview;
  try{const locks=menuConstraints(choice),result=decodeConstrained($('raw').value,locks,options());if(result.length)preview={locks,result}}
  catch{/* This local source choice may not fit the surrounding interpretation. */}
  segmentMenu.preview=preview;
  $('segment-preview').textContent=preview?commitCandidate(preview.result[0]):'This choice has no complete interpretation in the current composition.';
  [...$('segment-choices').querySelectorAll('button')].forEach((button,i)=>{button.setAttribute('aria-selected',String(i===segmentMenu.index));if(i===segmentMenu.index)button.setAttribute('aria-disabled',String(!preview))});
- $('segment-menu-status').textContent=preview?`Choose ${choice.commitText} · ${choice.lang}`:'Choose another alternative or a larger span.';
+ $('segment-menu-status').textContent=preview?`${choice.kind==='remember'?'Remember explicitly':'Choose'} ${choice.commitText} · ${choice.lang}`:'Choose another alternative or a larger span.';
  keepChoiceInView();
 }
 function applyChoice(index){
  previewChoice(index);if(!segmentMenu?.preview)return;
+ if(segmentMenu.choices[segmentMenu.index].kind==='remember'){rememberChoice(segmentMenu.choices[segmentMenu.index]);return}
  const {locks}=segmentMenu.preview,choice=segmentMenu.choices[segmentMenu.index];constraints=locks;
  closeSegment();$('correction-status').textContent=`Locked ${choice.commitText}.`;render();
 }
@@ -129,7 +131,12 @@ function openSegment(span,selection,anchor){
  for(const unit of segmentView.units.filter(unit=>unit.start>=span.start&&unit.end<=span.end&&(unit.start!==span.start||unit.end!==span.end))){
   const button=el('button','quiet',`Syllable ${unit.raw.replaceAll(' ','␣')}`);button.type='button';button.onclick=()=>openSegment(unit,saved);$('segment-splits').append(button);
  }
- $('segment-unlock').hidden=!constraints.some(c=>c.start===span.start&&c.end===span.end);
+ const applied=constraints.find(c=>c.start===span.start&&c.end===span.end);
+ const remembered=segmentMenu.choices.find(choice=>choice.lang===applied?.lang&&choice.commitText===applied?.text);
+ const eligible=remembered&&(remembered.rememberReading||remembered.lang==='EN'&&englishWord(remembered.commitText));
+ $('segment-remember').hidden=!eligible;
+ if(eligible){segmentMenu.remember={...remembered,kind:'remember'};segmentMenu.choices.push(segmentMenu.remember);$('segment-remember').setAttribute('aria-label',`Remember ${remembered.commitText} in this browser`)}
+ $('segment-unlock').hidden=!applied;
  $('segment-menu').hidden=false;
  document.querySelectorAll('#preedit [data-start],#segments [data-start]').forEach(element=>element.classList.toggle('correction-focus',Number(element.dataset.start)<span.end&&Number(element.dataset.end)>span.start));
  const current=segmentView.segments.find(s=>s.start===span.start&&s.end===span.end);
@@ -139,7 +146,7 @@ function openSegment(span,selection,anchor){
 // Scroll only choices/controls; preview has its own row below that scroll area.
 function keepChoiceInView(){
  if(!segmentMenu)return;
- const choice=$('segment-choices').children[segmentMenu.index];if(!choice)return;
+ const choice=segmentMenu.choices[segmentMenu.index]?.kind==='remember'?$('segment-remember'):$('segment-choices').children[segmentMenu.index];if(!choice)return;
  const scroller=$('segment-scroll'),visible=scroller.getBoundingClientRect(),item=choice.getBoundingClientRect();
  if(item.top<visible.top)scroller.scrollTop+=item.top-visible.top;
  else if(item.bottom>visible.bottom)scroller.scrollTop+=item.bottom-visible.bottom;
@@ -173,6 +180,7 @@ $('correct-segment').onclick=openCaretSegment;
 $('unlock-all').onclick=()=>{closeSegment();constraints=[];$('correction-status').textContent='All choices unlocked.';render()};
 $('segment-unlock').onclick=()=>{if(segmentMenu)unlockSpan(segmentMenu.span)};
 $('segment-cancel').onclick=()=>closeSegment();
+$('segment-remember').onclick=()=>{if(segmentMenu?.remember)rememberChoice(segmentMenu.remember)};
 $('segment-extend-left').onclick=()=>extendSegment(-1);$('segment-extend-right').onclick=()=>extendSegment(1);
 $('raw').addEventListener('pointerdown',()=>closeSegment(false));
 document.addEventListener('pointerdown',event=>{if(segmentMenu&&!event.target.closest('#segment-menu,#preedit,#segments,#correct-segment'))closeSegment(false)});
@@ -211,6 +219,7 @@ $('copy-debug').onclick=async()=>{
   selectedRank:visibleCandidates.length?selected+1:null,
   candidates:visibleCandidates.map((c,i)=>({rank:i+1,text:c.text,commitText:commitCandidate(c),score:c.score,lang:c.lang})),
   selectedTrace:visibleCandidates[selected]?.parts??[],dictionary:dictionarySize(),
+  customEntryDependent:dictionarySize().custom>0||dictionarySize().englishCustom>0,
   ...(constraints.length?{constraints:constraints.map(c=>({...c}))}:{}),
   omitted:'Committed history and custom dictionary contents are not included.',
  };
@@ -241,7 +250,7 @@ $('blind-capture').onchange=()=>{
 };
 $('capture-case').onclick=()=>{
  stop();if(!$('raw').value)return;
- caseSnapshot={...(blind()?{blind:true}:{}),raw:$('raw').value,rawEncodingVersion,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),ranking:ranking(),...(constraints.length?{constraints:constraints.map(c=>({...c}))}:{})};
+ caseSnapshot={...(blind()?{blind:true}:{}),raw:$('raw').value,rawEncodingVersion,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),customEntryDependent:dictionarySize().custom>0||dictionarySize().englishCustom>0,ranking:ranking(),...(constraints.length?{constraints:constraints.map(c=>({...c}))}:{})};
  $('case-expected-label').textContent=blind()?'Intended text · type with your OS IME':'Expected output · edit if the selected candidate is wrong';
  $('case-raw').value=caseSnapshot.raw;$('case-expected').value=!blind()&&candidates[selected]?commitCandidate(candidates[selected]):'';
  $('more-tools').open=true;$('case-editor').hidden=false;$('case-editor').open=true;$('case-expected').focus();
@@ -263,14 +272,36 @@ $('export-cases').onclick=()=>{
  const url=URL.createObjectURL(blob),link=el('a');link.href=url;link.download='polytype-local-cases.jsonl';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 $('replay').onclick=()=>{if(timer){stop();return}const target=$('raw').value||examples[0].raw;setRaw('');let i=0;$('replay').textContent='Pause replay';timer=setInterval(()=>{$('raw').value=target.slice(0,++i);render();if(i>=target.length)stop()},145)};
-const storageKey='polytype-custom-tw-v1';let userEntries=[];
+const storageKey='polytype-custom-tw-v1',englishStorageKey='polytype-custom-en-v1';let userEntries=[],englishEntries=[];
+let chineseStorageHealthy=true,englishStorageHealthy=true;
+const englishWord=text=>{const word=text.replace(/[.,;]+$/,'');return /[A-Za-z]/.test(word)&&/^[A-Za-z0-9'_\-]{1,40}$/.test(word)?word:null};
+function rememberChoice(choice){
+ try{let persisted;
+  if(choice.lang==='TW'&&choice.rememberReading){
+   const entry={reading:choice.rememberReading,text:choice.commitText};
+   userEntries=setCustomEntries([entry,...userEntries.filter(e=>e.reading!==entry.reading||e.text!==entry.text)]);persisted=persistDictionary();
+  }else if(choice.lang==='EN'&&englishWord(choice.commitText)){
+   const word=englishWord(choice.commitText);englishEntries=setCustomEnglishEntries([...new Set([...englishEntries,word])]);persisted=persistEnglish();
+  }else throw new Error('This choice cannot be remembered.');
+  closeSegment();syncRaw();drawDictionary();render();$('correction-status').textContent=`Remembered ${choice.commitText} · ${persisted?'saved':'session only'}.`;
+ }catch(error){$('segment-menu-status').textContent=error.message;$('dictionary-status').textContent=error.message}
+}
+function persistEnglish(){try{if(!englishStorageHealthy)throw new Error('Unavailable');localStorage.setItem(englishStorageKey,JSON.stringify(englishEntries));$('dictionary-status').textContent='Saved in this browser.';return true}catch{$('dictionary-status').textContent='Storage unavailable: session only. Export dictionary before closing.';return false}}
+try{const saved=localStorage.getItem(englishStorageKey);if(saved)englishEntries=setCustomEnglishEntries(JSON.parse(saved))}catch{englishStorageHealthy=false;$('dictionary-status').textContent='Cannot load English words; stored data is preserved.'}
+
 function drawDictionary(){
- const size=dictionarySize();$('dictionary-count').textContent=size.builtIn+' 筆基礎 · '+size.imported+' 筆擴充 · '+size.custom+' 筆自訂 · '+size.englishImported+' English · '+size.japaneseImported+' 日本語';
+ const size=dictionarySize();$('dictionary-count').textContent=size.builtIn+' 筆基礎 · '+size.imported+' 筆擴充 · '+size.custom+' 筆自訂 · '+size.englishImported+' English'+(size.englishCustom?' + '+size.englishCustom+' custom':'')+' · '+size.japaneseImported+' 日本語';
+ $('export-dictionary').disabled=!userEntries.length&&!englishEntries.length;
  $('custom-entries').replaceChildren();
  userEntries.forEach((entry,index)=>{const row=el('div','custom-entry');row.append(el('span','',entry.reading+' → '+entry.text));const remove=el('button','quiet','移除');remove.type='button';remove.setAttribute('aria-label','移除 '+entry.text);remove.onclick=()=>{userEntries=setCustomEntries(userEntries.filter((_,i)=>i!==index));closeSegment(false);syncRaw();persistDictionary();drawDictionary();render()};row.append(remove);$('custom-entries').append(row)});
+ englishEntries.forEach((word,index)=>{const row=el('div','custom-entry');row.append(el('span','','English → '+word));const remove=el('button','quiet','Remove');remove.type='button';remove.setAttribute('aria-label','Remove English '+word);remove.onclick=()=>{englishEntries=setCustomEnglishEntries(englishEntries.filter((_,i)=>i!==index));closeSegment(false);syncRaw();persistEnglish();drawDictionary();render()};row.append(remove);$('custom-entries').append(row)});
 }
-function persistDictionary(){try{localStorage.setItem(storageKey,JSON.stringify(userEntries));$('dictionary-status').textContent='已儲存在此瀏覽器。'}catch{$('dictionary-status').textContent='此瀏覽器無法儲存；新增詞條僅在本次開啟期間有效。'}}
-try{const saved=localStorage.getItem(storageKey);if(saved)userEntries=setCustomEntries(JSON.parse(saved))}catch{$('dictionary-status').textContent='無法載入自訂詞庫，先使用內建詞庫。'}
+$('export-dictionary').onclick=()=>{
+ const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,chinese:userEntries,english:englishEntries},null,2)+'\n'],{type:'application/json'}));
+ const link=el('a');link.href=url;link.download='polytype-custom-dictionary.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+function persistDictionary(){try{if(!chineseStorageHealthy)throw new Error('Unavailable');localStorage.setItem(storageKey,JSON.stringify(userEntries));$('dictionary-status').textContent='已儲存在此瀏覽器。';return true}catch{$('dictionary-status').textContent='此瀏覽器無法儲存；新增詞條僅在本次開啟期間有效。';return false}}
+try{const saved=localStorage.getItem(storageKey);if(saved)userEntries=setCustomEntries(JSON.parse(saved))}catch{chineseStorageHealthy=false;$('dictionary-status').textContent='無法載入自訂詞庫，先使用內建詞庫。'}
 $('dictionary-form').addEventListener('submit',e=>{
  e.preventDefault();
  try{const entry={reading:$('entry-reading').value,text:$('entry-text').value};

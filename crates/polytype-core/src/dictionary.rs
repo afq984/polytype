@@ -161,6 +161,7 @@ static HISTORICAL_SINGLE_LOGS: LazyLock<HashMap<String, f64>> = LazyLock::new(||
 pub(crate) struct Dictionary {
     pub expanded: bool,
     pub custom: Vec<Entry>,
+    pub custom_english: Vec<String>,
     pub singles: HashMap<String, Vec<ChineseWord>>,
     pub phrases: HashMap<String, Vec<ChineseWord>>,
     pub prefixes: HashSet<String>,
@@ -206,6 +207,7 @@ impl Dictionary {
         let mut dict = Self {
             expanded,
             custom,
+            custom_english: Vec::new(),
             singles: HashMap::new(),
             phrases: HashMap::new(),
             prefixes: HashSet::new(),
@@ -314,4 +316,27 @@ pub fn validate_entries(entries: Vec<Entry>) -> Result<Vec<Entry>, String> {
             })
         })
         .collect()
+}
+
+/// Exact case-preserving spellings, independent of physical keyboard layout.
+pub fn validate_english_entries(entries: Vec<String>) -> Result<Vec<String>, String> {
+    if entries.len() > 200 {
+        return Err("At most 200 custom English words".into());
+    }
+    let mut result = Vec::new();
+    for word in entries {
+        if word.is_empty()
+            || word.len() > 40
+            || !word.chars().any(|c| c.is_ascii_alphabetic())
+            || !word
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || "'-_".contains(c))
+        {
+            return Err("English words need 1–40 ASCII letters/digits, apostrophes, hyphens or underscores, including a letter".into());
+        }
+        if !result.contains(&word) {
+            result.push(word);
+        }
+    }
+    Ok(result)
 }

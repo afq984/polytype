@@ -381,3 +381,46 @@ test('raw edits rebase or release whole locks, with native/WASM parity', () => {
   assert.deepEqual(normalized(JSON.parse(child.stdout).ok),normalized(view));
  }finally {engine.dispose()}
  });
+
+test('explicit English memory is atomic, per-engine, layout-aware and subordinate to explicit locks', () => {
+ const engine=createEngine(),empty=createEngine(),requests=[],expected=[];
+ const query=(op,fields)=>{const value=op==='setCustomEnglishEntries'?engine.setCustomEnglishEntries(fields.entries):op==='setCustomEntries'?engine.setCustomEntries(fields.entries):engine.decodeConstrained(fields.input,fields.constraints??[],fields.options);requests.push({version:1,op,...fields});expected.push(value);return value};
+ try{
+  for(const layout of ['qwerty','colemak']){
+   const raw=layout==='qwerty'?'gakkou':encode('gakkou'),options={layout};
+   query('setCustomEnglishEntries',{entries:[]});const ordinary=engine.decode(raw,options);assert.equal(ordinary[0].text,'学校');
+   assert.deepEqual(query('decode',{input:raw,options,constraints:[]}),ordinary);
+   query('setCustomEnglishEntries',{entries:['gakkou','Term_2',"O'Brien"]});
+   assert.equal(query('decode',{input:raw,options})[0].text,'gakkou');
+   assert.equal(query('decode',{input:raw+'.',options})[0].text,'gakkou.');
+   assert.equal(query('decode',{input:'us3lc3 '+raw,options})[0].text,'你好 gakkou');
+   assert.equal(query('decode',{input:engine.readingKeys('ㄍㄤ').join('')+raw,options})[0].text,'剛gakkou');
+   assert.equal(empty.decode(raw,options)[0].text,'学校');
+   assert.equal(query('decode',{input:raw,options:{...options,english:false}})[0].text,'学校');
+   const choice=engine.alternatives(raw,{start:0,end:raw.length},options).items.find(c=>c.commitText==='学校');
+   assert.ok(choice);assert.equal(query('decode',{input:raw,options,constraints:[choice.constraint]})[0].text,'学校');
+   assert.throws(()=>engine.setCustomEnglishEntries(['valid','two words']));
+   assert.equal(engine.dictionarySize().englishCustom,3);assert.equal(engine.decode(raw,options)[0].text,'gakkou');
+   query('setCustomEntries',{entries:[{reading:'ㄗㄞˋ',text:'載'}]});assert.equal(engine.decode(raw,options)[0].text,'gakkou');
+   query('setCustomEnglishEntries',{entries:[]});assert.equal(engine.decode('y94',{layout})[0].text,'載');
+   assert.deepEqual(engine.decode(raw,options),empty.decode(raw,options));
+  }
+  const longest='a'.repeat(40);engine.setCustomEnglishEntries([longest]);assert.equal(engine.decode(longest+'.',{layout:'qwerty'}).length,1);
+  engine.setCustomEnglishEntries(['gakkou']);assert.doesNotThrow(()=>engine.decode('a'.repeat(401)));
+  assert.throws(()=>engine.setCustomEnglishEntries(Array(201).fill('word')));
+  assert.throws(()=>engine.setCustomEnglishEntries(['中文']));
+  const child=spawnSync(native,[],{input:requests.map(r=>JSON.stringify(r)).join('\n')+'\n',encoding:'utf8',maxBuffer:16e6});assert.equal(child.status,0,child.stderr);
+  child.stdout.trim().split('\n').forEach((line,i)=>assert.deepEqual(normalize(JSON.parse(line).ok),normalize(expected[i]),JSON.stringify(requests[i])));
+  const prototype=createEngine({dictionary:'prototype'});try{assert.throws(()=>prototype.setCustomEnglishEntries(['word']))}finally{prototype.dispose()}
+ }finally {engine.dispose();empty.dispose()}
+});
+
+test('Remember metadata uses composed Chinese readings, including unordered/replaced slots and phrase tones', () => {
+ const e=createEngine();try{
+  for(const raw of ['y94','us3lc3','sujo/5 ','1 ']){
+   const view=e.segments(raw,{layout:'qwerty'});for(const span of view.spans){const page=e.alternatives(raw,span,{layout:'qwerty'});for(const choice of page.items.filter(c=>c.lang==='TW')){assert.ok(choice.rememberReading);assert.ok(e.readingKeys(choice.rememberReading).length);}}
+  }
+  const page=e.alternatives('m/4',{start:0,end:3},{layout:'qwerty'});assert.equal(page.items.find(c=>c.text==='用').rememberReading,'ㄩㄥˋ');
+  const partial=e.alternatives('u',{start:0,end:1},{layout:'qwerty'});assert.ok(partial.items.every(c=>c.rememberReading===null));
+ }finally {e.dispose()}
+});

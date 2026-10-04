@@ -154,3 +154,51 @@ The .5 threshold catches over a third of errors while marking under 3% of
 segments. Thirty-two correct segments receive a cue; 103 wrong segments do not.
 These selected development readings are visible evidence used for threshold
 selection, not held-out validation or representative accuracy.
+
+## Explicit Remember
+
+Apply a Chinese or English alternative, then reopen the locked segment's menu.
+**Remember** saves that applied choice in this browser; merely previewing,
+applying or committing never learns anything. Click Remember, or use the existing
+ArrowDown navigation to reach it after the local alternatives and press Enter.
+The action is highlighted and announced separately. All existing numbered
+conversion, arrow, Enter, Escape, Space and Tab bindings keep their meanings.
+Remember is hidden without an eligible applied choice. Japanese, raw keys,
+punctuation and unfinished Chinese choices cannot be remembered here.
+
+Chinese entries use composed readings supplied by the Rust alternatives API as
+`rememberReading`, including normalized slot replacement and tone. They use the
+existing `polytype-custom-tw-v1` reading/text array and atomic per-engine dictionary
+replacement, with the explicitly remembered entry first. The existing dictionary
+panel displays them and removes them. Nothing is added to checked-in dictionaries.
+
+English uses a separate `polytype-custom-en-v1` array of exact case-preserving
+spellings, at most 200 words, each 1–40 ASCII letters/digits/apostrophe/hyphen/
+underscore units with at least one letter. Trailing period/comma/semicolon stays
+in output and is omitted from the remembered spelling. No case folding, fuzzy
+matching, word counts, context statistics or automatic additions occur. Rust
+maps physical keys through the selected layout and prefers the existing literal
+English path for a matching whole token through the correction lattice. The
+lattice retains language boundaries, including converted first-tone Space;
+explicit composition locks win. If remembered preferences cannot produce a full
+path, the engine retries with explicit locks only. Preferences apply only when
+English is enabled. Removing the entry restores ordinary ranking for future
+compositions; existing explicit locks remain until unlocked.
+
+`Engine::set_custom_english_entries` / protocol `setCustomEnglishEntries` /
+web `setCustomEnglishEntries` atomically validate and replace the per-engine word
+list. Chinese replacement preserves English entries and vice versa. Prototype
+engines reject custom English. `dictionarySize.englishCustom` exposes the count;
+empty user data preserves ordinary candidates byte for byte. The dictionary
+panel lists removable English words and **Export dictionary (JSON)** exports
+`{version:1,chinese:[{reading,text}],english:[word]}`. Restoring exports uses the
+explicit engine setters; this prototype has no dictionary import control.
+
+Denied storage keeps entries and export available in the current session.
+Corrupt/unreadable stored lists are preserved and never overwritten by subsequent
+session edits. Clearing browser data can remove saved entries. Debug and case
+captures still omit dictionary lists; `customEntryDependent` flags nonempty user
+dictionaries and counts include English entries. English-dependent captures append
+`+remember-en-v1` to their ranking identity. Reproduction needs separately restored
+user entries. Tests, the evaluator and confidence diagnostics instantiate empty
+engines and never load browser storage. Blind capture hides menus and markers.

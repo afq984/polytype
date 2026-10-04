@@ -481,6 +481,45 @@ try {
       finally{Storage.prototype.setItem=original}
     })()`);
     assert.match(denied,/session only/);
+    // Applied correction choices never learn until Remember is explicitly used.
+    const stageMemory=raw=>evaluate(`document.getElementById('clear').click();document.getElementById('raw').value=${JSON.stringify(raw)};document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
+    await evaluate("document.getElementById('keyboard-layout').value='qwerty';document.getElementById('enable-english').checked=true;document.getElementById('enable-japanese').checked=true;document.getElementById('enable-zhuyin').checked=true;document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
+    await stageMemory('y94');
+    await evaluate("document.querySelector('#preedit button').click();[...document.querySelectorAll('#segment-choices button')].find(b=>b.dataset.text==='再').click()");
+    assert.equal(await evaluate("JSON.parse(localStorage.getItem('polytype-custom-tw-v1')).some(e=>e.text==='再')"),false);
+    await evaluate("document.querySelector('#preedit button').click();document.getElementById('segment-remember').click()");
+    assert.ok(await evaluate("JSON.parse(localStorage.getItem('polytype-custom-tw-v1')).some(e=>e.reading==='ㄗㄞˋ'&&e.text==='再')"));
+    await stageMemory('y94');assert.equal(await evaluate("document.getElementById('preedit').textContent"),'再');
+    await stageMemory('gakkou');assert.equal(await evaluate("document.getElementById('preedit').textContent"),'学校');
+    await evaluate("document.querySelector('#preedit button').click();document.querySelector('#segment-choices [data-kind=english]').click()");
+    assert.equal(await evaluate("localStorage.getItem('polytype-custom-en-v1')"),null);
+    await evaluate("document.querySelector('#preedit button').click()");
+    // Existing ArrowDown/Enter bindings reach the explicit Remember action.
+    for(let i=0;i<20;i++)await key('ArrowDown','ArrowDown',40);
+    assert.equal(await evaluate("document.getElementById('segment-remember').getAttribute('aria-pressed')"),'true');
+    await key('Enter','Enter',13);
+    assert.deepEqual(await evaluate("JSON.parse(localStorage.getItem('polytype-custom-en-v1'))"),['gakkou']);
+    await stageMemory('gakkou');assert.equal(await evaluate("document.getElementById('preedit').textContent"),'gakkou');
+    const dictionaryExport=await evaluate(`(async()=>{const create=URL.createObjectURL,click=HTMLAnchorElement.prototype.click;let blob,name;URL.createObjectURL=value=>{blob=value;return create(value)};HTMLAnchorElement.prototype.click=function(){name=this.download};try{document.getElementById('export-dictionary').click();return {name,value:JSON.parse(await blob.text())}}finally{URL.createObjectURL=create;HTMLAnchorElement.prototype.click=click}})()`);
+    assert.equal(dictionaryExport.name,'polytype-custom-dictionary.json');assert.deepEqual(dictionaryExport.value.english,['gakkou']);assert.ok(dictionaryExport.value.chinese.some(e=>e.text==='再'));
+    const memoryDebug=await evaluate("(async()=>{await document.getElementById('copy-debug').onclick();return JSON.parse(document.getElementById('debug-report').value)})()");
+    assert.equal(memoryDebug.dictionary.englishCustom,1);assert.equal(memoryDebug.customEntryDependent,true);assert.equal('englishEntries' in memoryDebug,false);
+    await reloadReady();
+    assert.ok(await evaluate("document.getElementById('custom-entries').textContent.includes('English → gakkou')"));
+    await stageMemory('gakkou');assert.equal(await evaluate("document.getElementById('preedit').textContent"),'gakkou');
+    await evaluate("document.querySelector('#custom-entries [aria-label=\"Remove English gakkou\"]').click()");
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'学校');
+    await evaluate("document.querySelector('#custom-entries [aria-label=\"移除 再\"]').click()");
+    await stageMemory('y94');assert.equal(await evaluate("document.getElementById('preedit').textContent"),'在');
+    await stageMemory('gakkou');
+    const rememberDenied=await evaluate(`(()=>{document.querySelector('#preedit button').click();document.querySelector('#segment-choices [data-kind=english]').click();document.querySelector('#preedit button').click();const set=Storage.prototype.setItem;Storage.prototype.setItem=()=>{throw new Error('denied')};try{document.getElementById('segment-remember').click();return document.getElementById('dictionary-status').textContent}finally{Storage.prototype.setItem=set}})()`);
+    assert.match(rememberDenied,/session only/);
+    await evaluate("document.querySelector('#custom-entries [aria-label=\"Remove English gakkou\"]').click();localStorage.setItem('polytype-custom-en-v1','{')");
+    await reloadReady();await stageMemory('gakkou');
+    await evaluate("document.querySelector('#preedit button').click();document.querySelector('#segment-choices [data-kind=english]').click();document.querySelector('#preedit button').click();document.getElementById('segment-remember').click()");
+    assert.equal(await evaluate("localStorage.getItem('polytype-custom-en-v1')"),'{');
+    assert.match(await evaluate("document.getElementById('dictionary-status').textContent"),/session only/);
+    await evaluate("localStorage.removeItem('polytype-custom-en-v1')");await reloadReady();
     // Invalid stored preferences are ignored, without overwriting them on load.
     const defaults={layout:'qwerty',english:true,japanese:true,zhuyin:true};
     for(const invalid of ['{','null','[]',JSON.stringify({...defaults,layout:'dvorak'}),JSON.stringify({...defaults,english:'false'}),JSON.stringify({layout:'qwerty'})]) {

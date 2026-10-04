@@ -10,3 +10,5 @@ node_modules/
 polytype-local-cases*.jsonl
 /Polytype-Demo.html
 /web/dictionary-notices.txt
+
+polytype-custom-dictionary.json

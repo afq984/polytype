@@ -509,6 +509,64 @@ pub(crate) fn decode(
     dictionary: &Dictionary,
     options: &DecodeOptions,
 ) -> Result<Vec<Candidate>, String> {
+    if dictionary.custom_english.is_empty() || !options.english {
+        if constraints.is_empty() {
+            return Ok(search::decode(input, dictionary, options));
+        }
+        let plan = Plan::prepare(input, constraints, dictionary, options)?;
+        return Ok(search::decode_constrained(
+            input, dictionary, options, &plan,
+        ));
+    }
+    // Remembered exact spellings prefer the existing literal English path. The
+    // normal lattice still enforces language boundaries; explicit locks win.
+    if constraints.is_empty() && input.encode_utf16().count() > 400 {
+        let raw: Vec<u16> = input.encode_utf16().take(400).collect();
+        return decode(
+            &String::from_utf16_lossy(&raw),
+            constraints,
+            dictionary,
+            options,
+        );
+    }
+    let raw = units(input)?;
+    let mut preferred = constraints.to_vec();
+    for start in 0..raw.len() {
+        if !boundary(&raw, start) {
+            continue;
+        }
+        for end in start + 1..=raw.len() {
+            if !boundary(&raw, end)
+                || !roman_span(&raw, start, end, options)
+                || preferred.iter().any(|c| start < c.end && end > c.start)
+            {
+                continue;
+            }
+            let token = options.roman(&String::from_utf16_lossy(&raw[start..end]), true);
+            if dictionary
+                .custom_english
+                .iter()
+                .any(|word| word == token.trim_end_matches(['.', ',', ';']))
+            {
+                let choice = Constraint {
+                    start,
+                    end,
+                    text: token,
+                    lang: "EN".into(),
+                };
+                if resolve(&raw, &choice, dictionary, options).is_ok() {
+                    preferred.push(choice);
+                }
+            }
+        }
+    }
+    if preferred.len() > constraints.len() {
+        let plan = Plan::prepare(input, &preferred, dictionary, options)?;
+        let result = search::decode_constrained(input, dictionary, options, &plan);
+        if !result.is_empty() {
+            return Ok(result);
+        }
+    }
     if constraints.is_empty() {
         return Ok(search::decode(input, dictionary, options));
     }
@@ -840,6 +898,7 @@ pub struct Alternative {
     pub parts: Vec<Part>,
     pub score: f64,
     pub constraint: Constraint,
+    pub remember_reading: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -899,6 +958,7 @@ fn alternative(path: Path, span: Span, lang: &str, kind: &str) -> Alternative {
         kind: kind.into(),
         parts: path.parts,
         score: path.score,
+        remember_reading: None,
         constraint: Constraint {
             start: span.start,
             end: span.end,
@@ -1012,6 +1072,20 @@ pub(crate) fn alternatives(
             "RAW",
             "raw",
         ));
+    }
+    if let Ok(syllables) = syllables(&raw, span.start, span.end)
+        && syllables.iter().all(|(_, s)| s.complete)
+    {
+        let reading = syllables
+            .iter()
+            .map(|(_, s)| zhuyin(&s.key))
+            .collect::<Vec<_>>()
+            .join(" ");
+        for item in &mut items {
+            if item.lang == "TW" {
+                item.remember_reading = Some(reading.clone());
+            }
+        }
     }
     items.sort_by(|a, b| b.score.total_cmp(&a.score));
     let mut seen = HashSet::new();
