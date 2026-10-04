@@ -1,5 +1,25 @@
 # Polytype handoff
 
+## Owner-confirmed ASCEND typing conventions
+
+ASCEND development readings now use the owner's confirmed 多 ㄉㄨㄛ,
+玩 ㄨㄢˊ and 亞 ㄧㄚˇ. Adjudication/import applies these after citation review,
+with reviewer `user`, date 2026-10-04 and position-level reasons. Original
+citations and word evidence are retained; whole-utterance review strata stay
+unchanged. There are 25 corrected positions in 21 selected source cases.
+GSD keeps its documented Taiwan citation ㄧㄚˋ; its TODO now distinguishes
+that citation from the owner's typed ㄧㄚˇ. Runtime dictionaries/ranking are
+unchanged. See [eval/README.md](eval/README.md) for reproduction and provenance.
+
+Paired development results against main `d166dba5` gain 80 top-one and 112
+top-five configurations, with zero losses. Each mixed group gains nine top-one
+and thirteen top-five targets; each Chinese-only group gains one of each.
+English-only candidates and all English token sequences remain unchanged.
+The audit retains 132 non-primary annotated positions: 59 contextual readings
+(including three flagged segmentation/context mismatches) and 73 typing-habit
+candidates for owner follow-up. Counts reuse development source text; these are
+annotation/input changes, not a decoder accuracy improvement.
+
 ## Reading-conditioned Chinese singles (heterophony-v1)
 
 Single-character counts now follow McBopomofo's pinned primary, secondary and

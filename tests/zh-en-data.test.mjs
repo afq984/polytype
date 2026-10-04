@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {createEngine,colemak} from '../web/engine.mjs';
 import {zhEnCorpus,englishOnlyCorpus,zhEnCases,englishOnlyCases,zhEnSkipped,generateZhEnCases} from '../eval/zh-en-cases.mjs';
 import {summarizeZhEnCases,renderZhEnSummary} from '../scripts/zh-en-summary.mjs';
-import {validateAdjudications,applyAdjudications,conventionIssues} from '../scripts/zh-en-adjudication.mjs';
+import {validateAdjudications,applyAdjudications,applyTypingConventions,conventionIssues} from '../scripts/zh-en-adjudication.mjs';
 import {parseCsv,maximalMatch,taiwanConverter,cedictDictionary,annotate,pinyinToZhuyin} from '../scripts/zh-en-annotation.mjs';
 const root=new URL('../',import.meta.url);
 
@@ -87,9 +87,9 @@ test('positional adjudications reproduce all reviewed annotations and reject sta
   let applied=0;
   for(const entry of zhEnCorpus.cases) {
     const issues=queue.filter(i=>i.id===entry.id).map(({id,adjudication,...issue})=>issue);
-    const segments=entry.segments.map(({provisionalText,provisionalReading,...s})=>({...s,
-      text:provisionalText??s.text,...(s.lang==='zh'?{reading:provisionalReading??s.reading}:{}),
-      ...(s.evidence?{evidence:s.evidence.map(({adjudicatedReading,provisionalText,...e})=>({...e,text:provisionalText??e.text}))}:{}),
+    const segments=entry.segments.map(({provisionalText,provisionalReading,citationReading,...s})=>({...s,
+      text:provisionalText??s.text,...(s.lang==='zh'?{reading:provisionalReading??citationReading??s.reading}:{}),
+      ...(s.evidence?{evidence:s.evidence.map(({adjudicatedReading,typingReading,provisionalText,...e})=>({...e,text:provisionalText??e.text}))}:{}),
     }));
     const provisional={id:entry.id,text:segments.map(s=>s.text).join(''),segments,review:issues.length?'pending':'automatic'};
     const actual=applyAdjudications(provisional,issues,data);
@@ -98,6 +98,7 @@ test('positional adjudications reproduce all reviewed annotations and reject sta
     assert.equal(actual.entry.text,entry.text,entry.id);
     assert.equal(actual.entry.review,entry.review,entry.id);
     assert.deepEqual(actual.entry.reviewedBy,entry.reviewedBy,entry.id);
+    assert.deepEqual(actual.entry.typingAdjudications,entry.typingAdjudications,entry.id);
     assert.equal(actual.issues.filter(i=>i.adjudication).length,issues.length,entry.id);
     applied+=issues.length;
     if(issues.length) {
@@ -125,6 +126,49 @@ test('positional adjudications reproduce all reviewed annotations and reject sta
   for(const entry of zhEnCorpus.cases)for(const segment of entry.segments.filter(s=>s.lang==='zh')) {
     for(const [index,character] of [...segment.text].entries())if(character==='一'||character==='不')assert.equal(segment.reading.split(' ')[index],character==='一'?'ㄧ':'ㄅㄨˋ',entry.id);
   }
+});
+
+test('owner typing conventions preserve citation evidence and record every corrected position',()=>{
+  const data=JSON.parse(readFileSync(new URL('eval/zh-en/adjudications.json',root)));
+  const conventions=data.typingConventions;
+  const entry={id:'owner',text:'多少 很多玩亞洲',review:'automatic',segments:[
+    {lang:'zh',text:'多少',reading:'ㄉㄨㄛ ㄕㄠˇ',evidence:[{text:'多少',offset:0,chosen:'duo1 shao3'}]},
+    {lang:'en',text:' '},
+    {lang:'zh',text:'很多玩亞洲',reading:'ㄏㄣˇ ㄉㄨㄛˊ ㄨㄢˋ ㄧㄚˋ ㄓㄡ',evidence:[{text:'很',offset:0},{text:'多',offset:1},{text:'玩',offset:2},{text:'亞洲',offset:3}]},
+  ]};
+  const before=structuredClone(entry),after=applyTypingConventions(entry,conventions);
+  assert.deepEqual(entry,before);
+  assert.deepEqual(after.segments[0],before.segments[0],'already-confirmed readings retain their evidence');
+  assert.equal(after.segments[2].reading,'ㄏㄣˇ ㄉㄨㄛ ㄨㄢˊ ㄧㄚˇ ㄓㄡ');
+  assert.equal(after.segments[2].citationReading,before.segments[2].reading);
+  assert.equal(after.segments[2].evidence[3].typingReading,'ㄧㄚˇ ㄓㄡ');
+  assert.equal(after.review,'automatic','a typed-reading decision does not review a whole utterance');
+  assert.deepEqual(after.typingAdjudications.map(d=>[d.segment,d.offset,d.character,d.from,d.reading,d.reviewer,d.date]),[
+    [2,1,'多','ㄉㄨㄛˊ','ㄉㄨㄛ','user','2026-10-04'],
+    [2,2,'玩','ㄨㄢˋ','ㄨㄢˊ','user','2026-10-04'],
+    [2,3,'亞','ㄧㄚˋ','ㄧㄚˇ','user','2026-10-04'],
+  ]);
+  assert.deepEqual(applyTypingConventions(after,conventions),after);
+  const counts={多:0,玩:0,亞:0};
+  for(const row of zhEnCorpus.cases)for(const decision of row.typingAdjudications??[]) {
+    const s=row.segments[decision.segment];
+    assert.equal([...s.text][decision.offset],decision.character,row.id);
+    assert.equal(s.citationReading.split(' ')[decision.offset],decision.from,row.id);
+    assert.equal(s.reading.split(' ')[decision.offset],decision.reading,row.id);
+    assert.equal(decision.reviewer,'user');assert.equal(decision.date,'2026-10-04');
+    assert.ok(decision.reason.trim());counts[decision.character]++;
+  }
+  assert.deepEqual(counts,{多:20,玩:4,亞:1});
+  for(const row of zhEnCorpus.cases)for(const s of row.segments.filter(s=>s.lang==='zh'))for(const [i,c] of [...s.text].entries()) {
+    const convention=conventions.find(convention=>convention.character===c);
+    if(convention)assert.notEqual(s.reading.split(' ')[i],convention.from,row.id);
+  }
+  for(const mutation of [c=>c.reviewer='model',c=>c.date='2026-10-00',c=>c.reason='',c=>c.reading=c.from,c=>c.extra=true]) {
+    const invalid=structuredClone(data);mutation(invalid.typingConventions[0]);
+    assert.throws(()=>validateAdjudications(invalid,new Set(zhEnCorpus.cases.map(c=>c.id))));
+  }
+  const duplicate=structuredClone(data);duplicate.typingConventions.push(duplicate.typingConventions[0]);
+  assert.throws(()=>validateAdjudications(duplicate,new Set(zhEnCorpus.cases.map(c=>c.id))),/Duplicate typing/);
 });
 
 test('review enforces conversion positions, consistent overlapping readings and full-tone compound flags',()=>{

@@ -48,8 +48,8 @@ test('quick feedback converts in both layouts while custom readings retain prece
 });
 
 // Preserve the supplied target, never accept 訝熱帶 as its replacement.
-test('GSD 04: 亞熱帶 with the supplied ㄧㄚˋ reading remains recoverable',
-  {todo:'Upstream primary 亞 ㄧㄚˇ demotes ㄧㄚˋ; known heterophony top-one/top-five regression'},()=>{
+test('GSD 04: 亞熱帶 with the Taiwan citation ㄧㄚˋ reading remains recoverable',
+  {todo:'GSD uses citation ㄧㄚˋ; the owner types ㄧㄚˇ, matching upstream primary. Citation target remains a known top-one/top-five limitation.'},()=>{
     const row=realCases.find(row=>row.id==='gsd-04'),engine=createEngine();
     try {
       const found=['qwerty','colemak'].map(layout=>engine.decode(row.raw,{layout}).some(c=>engine.commitCandidate(c)===row.text));

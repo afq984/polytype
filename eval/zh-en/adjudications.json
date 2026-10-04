@@ -7,6 +7,32 @@
     "neutralTone": "Taiwan particles and conventional suffixes; full-tone 起來 時候 學生 還是 東西 不是 個",
     "thirdTone": "citation-no-sandhi"
   },
+  "typingConventions": [
+    {
+      "character": "多",
+      "from": "ㄉㄨㄛˊ",
+      "reading": "ㄉㄨㄛ",
+      "reviewer": "user",
+      "date": "2026-10-04",
+      "reason": "Owner types 多 as ㄉㄨㄛ, including 多少 and 很多; use this typing convention instead of the sourced duo2 citation."
+    },
+    {
+      "character": "玩",
+      "from": "ㄨㄢˋ",
+      "reading": "ㄨㄢˊ",
+      "reviewer": "user",
+      "date": "2026-10-04",
+      "reason": "Owner types 玩 as ㄨㄢˊ; use the confirmed typing convention instead of sourced wan4."
+    },
+    {
+      "character": "亞",
+      "from": "ㄧㄚˋ",
+      "reading": "ㄧㄚˇ",
+      "reviewer": "user",
+      "date": "2026-10-04",
+      "reason": "Owner types 亞 as ㄧㄚˇ in 亞洲 and 亞熱帶; apply to ASCEND typing annotations while preserving the separate GSD citation set."
+    }
+  ],
   "cases": {
     "ascend-test-0001": [
       {

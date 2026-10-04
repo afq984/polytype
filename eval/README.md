@@ -359,6 +359,19 @@ and 60 remain automatic. This does not constitute an exhaustive review of every
 unflagged syllable or conversion. User spot-checks of uncertain discourse fillers
 and disfluent fragments remain useful.
 
+The owner confirmed typing 多 as ㄉㄨㄛ (including 多少 and 很多), 玩 as
+ㄨㄢˊ and 亞 as ㄧㄚˇ (亞洲 and 亞熱帶) on 2026-10-04. ASCEND applies the
+explicit `typingConventions` in adjudications.json after the citation decisions,
+only when the recorded source reading matches. Every corrected position retains
+its character, segment/offset, previous reading, new reading, reviewer `user`,
+date and reason in `typingAdjudications`. Changed segments retain `citationReading`;
+word evidence retains its original source/model readings plus `typingReading`.
+These limited owner confirmations do not change whole-utterance review strata.
+Other readings and all source text stay unchanged. The separate GSD corpus keeps
+its documented Taiwan citation ㄧㄚˋ, so its 亞熱帶 target remains a visible
+limitation for the reading-conditioned dictionary. Import and verification
+reproduce both the citation evidence and these typed-reading decisions.
+
 
 ASCEND English is mostly lowercase, with capitalized names, `I`, acronyms and
 spelled-out letters (e.g. `G P A`); 44 selected mixed utterances contain capitals.
