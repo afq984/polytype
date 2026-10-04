@@ -1,4 +1,5 @@
 // The browser only adapts events and renders results; all decoding runs in Rust.
+export const rankingId='scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1+zh-punct-v1';
 import init, { Polytype } from './pkg/polytype.js';
 export { physicalKey } from './keyboard.mjs';
 

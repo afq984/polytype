@@ -66,6 +66,7 @@ struct Policy {
     identifiers: bool,
     first_tone: bool,
     legacy_romaji: bool,
+    chinese_punctuation: bool,
 }
 
 impl Default for Policy {
@@ -77,6 +78,7 @@ impl Default for Policy {
             identifiers: false,
             first_tone: false,
             legacy_romaji: false,
+            chinese_punctuation: true,
         }
     }
 }
@@ -164,6 +166,7 @@ struct Lattice {
     families: Option<HashMap<FamilyKey, usize>>,
     floor: u8,
     commit_identity: bool,
+    mapped_punctuation: bool,
 }
 
 // A soft family cap: keep spare script variants when capacity permits, but
@@ -256,6 +259,83 @@ fn punctuation(unit: u16, expanded: bool) -> bool {
         .is_some_and(|c| "?!？！。，；：".contains(c) || (expanded && "():".contains(c)))
 }
 
+// McBopomofo BPMFPunctuations.txt at the revision in chinese-source.json.
+// Standard overrides win over generic entries: apostrophe is 、, quote is ；.
+// See docs/PUNCTUATION.md for source lines and the deliberately limited subset.
+fn chinese_punctuation(unit: u16) -> Option<&'static str> {
+    match char::from_u32(unit as u32)? {
+        '<' => Some("，"),
+        '>' => Some("。"),
+        '?' => Some("？"),
+        '!' => Some("！"),
+        ':' => Some("："),
+        '\'' => Some("、"),
+        '"' => Some("；"),
+        '[' => Some("「"),
+        ']' => Some("」"),
+        '{' => Some("『"),
+        '}' => Some("』"),
+        _ => None,
+    }
+}
+
+// Tone completion alone is not a Chinese word. In particular, an unsupported
+// reading of an English token must not gain a new punctuation/language boundary.
+// Phrase parts have dictionary evidence; single parts retain slots even when
+// they fall back to raw Zhuyin, so check their exact normalized dictionary key.
+fn converted_chinese(part: &Part, dictionary: &Dictionary) -> bool {
+    if part.lang != "TW" || part.complete != Some(true) {
+        return false;
+    }
+    if part.slots.is_none() {
+        return true;
+    }
+    let raw: Vec<u16> = part.raw.encode_utf16().collect();
+    read_units(&raw, 0).is_some_and(|syllable| {
+        dictionary
+            .singles
+            .get(&syllable.key)
+            .is_some_and(|values| values.contains(&part.text))
+    })
+}
+
+// Roman tokens keep their existing segmentation and exact ASCII scores. A
+// trailing mapped key also has a weaker Chinese-punctuation interpretation.
+// Checking rendered text avoids turning romaji n' or a possessive into a mark.
+fn push_roman(
+    beams: &mut Lattice,
+    at: usize,
+    state: &BeamEntry,
+    part: Part,
+    score: f64,
+    lang: &str,
+) {
+    let alternative = if beams.mapped_punctuation {
+        part.raw.chars().last().and_then(|key| {
+            let full = chinese_punctuation(u16::try_from(key as u32).ok()?)?;
+            part.text.strip_suffix(key)?;
+            let mut alternative = part.clone();
+            alternative.text = format!("{}{full}", part.text.strip_suffix(key)?);
+            if let Some(commit) = &part.commit_text {
+                alternative.commit_text = Some(format!("{}{full}", commit.strip_suffix(key)?));
+            }
+            if let Some(reading) = &part.reading {
+                alternative.reading = Some(format!("{}{full}", reading.strip_suffix(key)?));
+            }
+            alternative
+                .note
+                .push_str(" · Chinese punctuation alternative");
+            Some(alternative)
+        })
+    } else {
+        None
+    };
+    push(beams, at, state, part, score, Some(lang));
+    if let Some(part) = alternative {
+        push(beams, at, state, part, score - 0.25, Some(lang));
+    }
+}
+
 fn segment(raw: &[u16], start: usize, end: usize) -> String {
     String::from_utf16_lossy(&raw[start..end])
 }
@@ -321,6 +401,7 @@ pub(crate) fn diagnose(
         diversity,
         floor: diversity,
         legacy_romaji: !diversity,
+        chinese_punctuation: diversity,
         ..Policy::default()
     };
     let candidates = decode_configured(input, dictionary, options, width, 5, policy);
@@ -349,12 +430,16 @@ pub(crate) fn experiment(
         floor: false,
         // These named ablations reproduce the frozen family-v1 experiment.
         legacy_romaji: true,
+        chinese_punctuation: false,
         ..Policy::default()
     };
     for flag in name.split('+') {
         match flag {
             "baseline" => {}
             "floor" => policy.floor = true,
+            "punctuation" => policy.chinese_punctuation = true,
+            "current" => policy = Policy::default(),
+            "no-punctuation" => policy.chinese_punctuation = false,
             "discards" => policy.discards = true,
             "identifiers" => policy.identifiers = true,
             "first-tone" => policy.first_tone = true,
@@ -389,10 +474,12 @@ fn decode_lattice(
     }
     let raw: Vec<u16> = input.encode_utf16().take(400).collect();
     let modern_romaji = dictionary.expanded && !policy.legacy_romaji;
+    let mapped_punctuation = dictionary.expanded && policy.chinese_punctuation;
     let mut beams = Lattice {
         states: vec![Vec::new(); raw.len() + 1],
         width,
         commit_identity: modern_romaji,
+        mapped_punctuation,
         families: (policy.diversity && dictionary.expanded && options.japanese).then(HashMap::new),
         floor: if policy.floor && dictionary.expanded {
             u8::from(options.english)
@@ -417,22 +504,56 @@ fn decode_lattice(
             {
                 state.candidate.lang = None;
             }
-            if punctuation(raw[i], dictionary.expanded) {
+            let full = mapped_punctuation
+                .then(|| chinese_punctuation(raw[i]))
+                .flatten();
+            let chinese_context = full.is_some()
+                && state
+                    .parts
+                    .iter()
+                    .rev()
+                    .find(|p| p.lang != "space" && p.lang != "punct")
+                    .is_some_and(|p| converted_chinese(p, dictionary));
+            // Preserve the existing attached-English-possessive interpretation.
+            let possessive = raw[i] == b'\'' as u16
+                && raw
+                    .get(i + 1)
+                    .is_some_and(|&c| options.roman(&segment(&[c], 0, 1)) == "s")
+                && (i + 2 == raw.len()
+                    || raw[i + 2] == b' ' as u16
+                    || punctuation(raw[i + 2], dictionary.expanded));
+            if punctuation(raw[i], dictionary.expanded)
+                || (mapped_punctuation
+                    && "、「」『』".contains(char::from_u32(raw[i] as u32).unwrap_or_default()))
+                || (chinese_context && full.is_some() && !possessive)
+            {
                 let text = segment(&raw, i, i + 1);
-                push(
-                    &mut beams,
-                    i + 1,
-                    &state,
-                    Part {
-                        raw: text.clone(),
-                        text,
-                        lang: "punct".into(),
-                        note: "Literal punctuation".into(),
-                        ..Part::default()
-                    },
-                    0.0,
-                    None,
-                );
+                for (text, score, note) in
+                    std::iter::once((text.clone(), 0.0, "Literal punctuation")).chain(full.map(
+                        |full| {
+                            (
+                                full.into(),
+                                if chinese_context { 0.25 } else { -0.25 },
+                                "Chinese punctuation",
+                            )
+                        },
+                    ))
+                {
+                    push(
+                        &mut beams,
+                        i + 1,
+                        &state,
+                        Part {
+                            raw: segment(&raw, i, i + 1),
+                            text,
+                            lang: "punct".into(),
+                            note: note.into(),
+                            ..Part::default()
+                        },
+                        score,
+                        None,
+                    );
+                }
                 continue;
             }
             if raw[i] == b' ' as u16 {
@@ -689,7 +810,7 @@ fn decode_lattice(
                         1.45
                     };
                     for (n, text) in texts.iter().take(width).enumerate() {
-                        push(
+                        push_roman(
                             &mut beams,
                             end,
                             &state,
@@ -707,7 +828,7 @@ fn decode_lattice(
                             },
                             spelling_len * rate - n as f64 * 0.7 + transition("JP")
                                 - if has_case { 2.0 } else { 0.0 },
-                            Some("JP"),
+                            "JP",
                         );
                     }
                 }
@@ -742,7 +863,7 @@ fn decode_lattice(
                         } else {
                             format!(" · waiting for {}…", composition.pending)
                         };
-                        push(
+                        push_roman(
                             &mut beams,
                             end,
                             &state,
@@ -763,7 +884,7 @@ fn decode_lattice(
                                 } else {
                                     0.0
                                 },
-                            Some("JP"),
+                            "JP",
                         );
                     }
                 }
@@ -780,7 +901,7 @@ fn decode_lattice(
                 let number_in_roman_context = !spelling.is_empty()
                     && spelling.chars().all(|c| c.is_ascii_digit())
                     && matches!(previous_language, Some("EN" | "JP"));
-                push(
+                push_roman(
                     &mut beams,
                     end,
                     &state,
@@ -844,7 +965,7 @@ fn decode_lattice(
                     } else {
                         token_len * 0.1 - 2.0
                     },
-                    Some("EN"),
+                    "EN",
                 );
             }
         }

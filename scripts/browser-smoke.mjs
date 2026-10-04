@@ -7,6 +7,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {feedbackCases,mixedCases} from '../eval/cases.mjs';
 import {captureA,captureB} from '../eval/island-cases.mjs';
+import {rankingId} from '../web/engine.mjs';
 
 const profile = await mkdtemp(join(tmpdir(), 'polytype-browser-'));
 const chrome = spawn(process.env.CHROME_BIN || 'google-chrome', [
@@ -136,6 +137,12 @@ try {
     assert.equal(await evaluate("document.getElementById('preedit').textContent"), '資料庫 hello');
     assert.ok(await evaluate("document.getElementById('dictionary-count').textContent.includes('28184')"));
     assert.ok(await evaluate("document.getElementById('dictionary-count').textContent.includes('69097')"));
+    // Shift+Comma follows a converted Chinese segment; ASCII stays selectable.
+    await evaluate("document.getElementById('raw').value='us3lc3'; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true})); document.getElementById('raw').focus(); document.getElementById('raw').setSelectionRange(6,6)");
+    await key('<','Comma',undefined,8);
+    assert.equal(await evaluate("document.getElementById('raw').value"),'us3lc3<');
+    assert.equal(await evaluate("document.getElementById('preedit').textContent"),'你好，');
+    assert.ok(await evaluate("[...document.querySelectorAll('#candidates button')].some(b=>b.textContent.slice(1)==='你好<')"));
     // Browser storage remains outside the core; rehydrate it into a fresh WASM instance.
     await evaluate("document.getElementById('entry-reading').value='ㄎㄜ ㄐㄧˋ'; document.getElementById('entry-text').value='科技'; document.getElementById('dictionary-form').requestSubmit()");
     await evaluate("document.getElementById('raw').value='kd ur4'; document.getElementById('raw').dispatchEvent(new Event('input', {bubbles:true}))");
@@ -249,7 +256,7 @@ try {
     await evaluate(`document.getElementById('raw').value=${JSON.stringify(captureB.replace('ep cuaigk','ep  cuaigk'))}; document.getElementById('raw').dispatchEvent(new Event('input',{bubbles:true}))`);
     assert.ok((await evaluate("document.getElementById('preedit').textContent")).includes('跟 claude 討論'));
     const islandReport=await evaluate("(async()=>{await document.getElementById('copy-debug').onclick();return JSON.parse(document.getElementById('debug-report').value)})()");
-    assert.equal(islandReport.ranking,'scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1');
+    assert.equal(islandReport.ranking,rankingId);
     // Reading-based conversion and identical-preedit commit recovery.
     await evaluate("document.getElementById('keyboard-layout').value='qwerty'; document.getElementById('keyboard-layout').dispatchEvent(new Event('change',{bubbles:true}))");
     for(const [raw,target] of [['toukyou','東京'],['nihonngo','日本語']]){

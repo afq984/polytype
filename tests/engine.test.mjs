@@ -7,7 +7,8 @@ test('original sentence preserves exactly two literal spaces',()=>{
  for(let i=0;i<=sample.length;i++)assert.ok(decode(sample.slice(0,i)).length,`prefix ${i}`);
 });
 test('user vocabulary request including first-tone spaces and punctuation',()=>{
- assert.equal(best('aj4fu06m/4fu3x96c961j6hji4 dk3u3y/ ru8 h6dj4a87?'),'目前用起來還不錯 可以增加詞庫嗎?');
+ // Expanded Chinese punctuation migration; the frozen prototype fixture keeps ASCII.
+ assert.equal(best('aj4fu06m/4fu3x96c961j6hji4 dk3u3y/ ru8 h6dj4a87?'),'目前用起來還不錯 可以增加詞庫嗎？');
  assert.equal(best('m/4'),'用');
 });
 test('all six initial/medial/final input orders',()=>{

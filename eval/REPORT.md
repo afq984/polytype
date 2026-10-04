@@ -74,7 +74,7 @@ Top-5 regressions: none (reading level: none).
 - acceptance-10: しんよう → 信用 (target rank: 3; reading-level rank: 1; dictionary reachable: not measured)
 - acceptance-11: しにょう → し尿 (target rank: 2; reading-level rank: 1; dictionary reachable: not measured)
 - acceptance-12: こーひー → コーヒー (target rank: 3; reading-level rank: 1; dictionary reachable: not measured)
-- acceptance-13: かん  hello! → 感  hello! (target rank: 3; reading-level rank: 1; dictionary reachable: not measured)
+- acceptance-13: かん  hello! → 感  hello! (target rank: 4; reading-level rank: 1; dictionary reachable: not measured)
 - synthetic-6: さくら hello → 桜 hello (target rank: 2; reading-level rank: 1; dictionary reachable: not measured)
 - synthetic-7: がっこう small → 学校 small (target rank: 2; reading-level rank: 1; dictionary reachable: not measured)
 - trilingual: がっこう 你好 hello → 学校 你好 hello (target rank: 2; reading-level rank: 1; dictionary reachable: not measured)

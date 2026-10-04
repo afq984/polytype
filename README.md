@@ -101,6 +101,9 @@ deploy only when the deploy checkbox is checked on `main`.
 - **Kana + Chinese + English** demonstrates 学校 你好 hello.
 - QWERTY-encoded `us3lc3` → 你好; `/j5 ` (with trailing Space) → 中.
 
+After completed Chinese, punctuation prefers the standard Chinese forms with
+ASCII alternatives still selectable; see [the key map and numeric limitations](docs/PUNCTUATION.md).
+
 Literal spaces permit language changes. A Zhuyin first-tone space completes a
 syllable instead of inserting a separator. Candidate selection and commit operate
 on the whole composition. Other unfinished consonants can still commit literally.

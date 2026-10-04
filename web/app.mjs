@@ -1,4 +1,4 @@
-import{decode,commitCandidate,examplesForLayout,physicalKey,setCustomEntries,dictionarySize}from'./engine.mjs';
+import{rankingId,decode,commitCandidate,examplesForLayout,physicalKey,setCustomEntries,dictionarySize}from'./engine.mjs';
 const $=id=>document.getElementById(id);let candidates=[],selected=0,committed='',timer=null;
 const blind=()=>$('blind-capture').checked;
 const options=()=>({layout:$('keyboard-layout').value,english:$('enable-english').checked,japanese:$('enable-japanese').checked,zhuyin:$('enable-zhuyin').checked});
@@ -58,7 +58,7 @@ $('copy-debug').onclick=async()=>{
  const visibleCandidates=$('raw').value?candidates:[];
  const report={
   format:'polytype-debug-v1',capturedAt:new Date().toISOString(),
-  engine:'Rust/WASM',profile:'expanded',ranking:'scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1',
+  engine:'Rust/WASM',profile:'expanded',ranking:rankingId,
   options:options(),
   browser:navigator.userAgent,mode:location.protocol==='file:'?'standalone':'web',
   raw:$('raw').value,rawEncoding:'QWERTY physical positions; roman interpretation uses options.layout',
@@ -94,7 +94,7 @@ $('blind-capture').onchange=()=>{
 };
 $('capture-case').onclick=()=>{
  stop();if(!$('raw').value)return;
- caseSnapshot={...(blind()?{blind:true}:{}),raw:$('raw').value,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),ranking:'scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1'};
+ caseSnapshot={...(blind()?{blind:true}:{}),raw:$('raw').value,options:options(),selectedRank:candidates.length?selected+1:null,dictionary:dictionarySize(),ranking:rankingId};
  $('case-expected-label').textContent=blind()?'Intended text · type with your OS IME':'Expected output · edit if the selected candidate is wrong';
  $('case-raw').value=caseSnapshot.raw;$('case-expected').value=!blind()&&candidates[selected]?commitCandidate(candidates[selected]):'';
  $('case-editor').hidden=false;$('case-editor').open=true;$('case-expected').focus();

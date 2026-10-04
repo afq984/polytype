@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {createEngine, readingKeys} from '../web/engine.mjs';
 import {distance, caseMetrics, summarizeMilestone} from './evaluation-metrics.mjs';
 import {loadEvaluationCases} from './evaluation-cases.mjs';
-import {cases as bundled, corpus, mixedCorpus, japaneseCorpus, readingSequence, kanaLevel} from '../eval/cases.mjs';
+import {cases as bundled, corpus, mixedCorpus, japaneseCorpus, readingSequence, kanaLevel, expandedTarget} from '../eval/cases.mjs';
 
 const {cases, external, timing, extraModules} = await loadEvaluationCases(process.argv.slice(2), bundled);
 const lexicon = JSON.parse(await readFile(new URL('../data/lexicon.json',import.meta.url),'utf8'));
@@ -39,7 +39,8 @@ for(const profile of ['prototype','expanded']) {
   const oracle=dictionaryOracle(profile==='expanded');
   const rows=[],prefixTimes=[];
   try {
-    for(const entry of cases) {
+    for(const original of cases) {
+      const entry={...original,text:profile==='expanded'&&!external&&bundled.some(row=>row.id===original.id&&row.raw===original.raw)?expandedTarget(original):original.text};
       const candidates=engine.decode(entry.raw,entry.options);
       const outputs=candidates.map(candidate=>engine.commitCandidate(candidate));
       const rank=outputs.indexOf(entry.text)+1;

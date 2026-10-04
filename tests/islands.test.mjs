@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {createEngine} from '../web/engine.mjs';
 import {captureA,captureB,islandCases} from '../eval/island-cases.mjs';
-import {kanaLevel} from '../eval/cases.mjs';
+import {kanaLevel,expandedTarget} from '../eval/cases.mjs';
 const baseline=JSON.parse(readFileSync(new URL('../eval/island-baseline.json',import.meta.url)));
 const normalize=v=>JSON.parse(JSON.stringify(v,(k,x)=>k==='score'?Math.round(x*1e9)/1e9:x));
 
@@ -25,7 +25,7 @@ test('English islands survive with unchanged scores and tone boundaries',()=>{
       const candidates=e.decode(row.raw,row.options),texts=candidates.map(c=>e.commitCandidate(c)),readings=candidates.map(kanaLevel);
       // Kana-annotated targets accept an imported conversion of the same reading.
       const accepted=[row.text,...(row.alternatives??[])];
-      if(row.text&&row.candidates[0]?.text===row.text)assert.ok(texts[0]===row.text||readings[0]===row.text,`${row.id}: ${texts[0]}`);
+      if(row.text&&row.candidates[0]?.text===row.text)assert.ok(texts[0]===expandedTarget(row)||readings[0]===expandedTarget(row),`${row.id}: ${texts[0]}`);
       // Explicit migration: the imported dictionary now converts lowercase tanaka to 田中,
       // displacing the provisional Latin alternative; tracked as a TODO in diversity.test.mjs.
       if(row.text&&row.candidates.some(c=>accepted.includes(c.text))&&!row.id.startsWith('mixed-06-'))assert.ok(texts.some((t,i)=>accepted.includes(t)||accepted.includes(readings[i])),row.id);

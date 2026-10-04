@@ -14,6 +14,10 @@ export const realCases = corpus.cases.map(entry=>{
   return {...entry,group:'real-text',raw:keys.join('')};
 });
 const acceptance=JSON.parse(readFileSync(new URL('../tests/fixtures/acceptance.json',import.meta.url)));
+// Keep the frozen prototype fixture; expanded Chinese punctuation has one
+// explicit target migration, with the original ASCII form still selectable.
+export const expandedTarget = row => row.raw===acceptance[1].raw
+  ? '目前用起來還不錯 可以增加詞庫嗎？' : row.text;
 export const guardCases = [
   ...acceptance.map((entry,i)=>({id:`acceptance-${i+1}`,group:'guards',text:entry.text,raw:entry.raw??encode(entry.roman)})),
   ...['hello world','good morning','this is a test','please open the browser','the keyboard is working','sakura hello','gakkou small'].map((roman,i)=>({

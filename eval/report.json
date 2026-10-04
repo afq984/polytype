@@ -9363,8 +9363,8 @@
           "id": "acceptance-2",
           "group": "guards",
           "raw": "aj4fu06m/4fu3x96c961j6hji4 dk3u3y/ ru8 h6dj4a87?",
-          "expected": "目前用起來還不錯 可以增加詞庫嗎?",
-          "actual": "目前用起來還不錯 可以增加詞庫嗎?",
+          "expected": "目前用起來還不錯 可以增加詞庫嗎？",
+          "actual": "目前用起來還不錯 可以增加詞庫嗎？",
           "rank": 1,
           "readingRank": 1,
           "spaceNormalizedRank": 1,
@@ -9378,10 +9378,10 @@
           "characters": 17,
           "reachable": null,
           "candidates": [
+            "目前用起來還不錯 可以增加詞庫嗎？",
             "目前用起來還不錯 可以增加詞庫嗎?",
+            "目前用起來還不錯 可以增加詞庫嘛？",
             "目前用起來還不錯 可以增加詞庫嘛?",
-            "目前用起來還不錯 可以增加詞庫蟆?",
-            "目前佣起來還不錯 可以增加詞庫嗎?",
             "an4tl06m/4tl3x96c961n6hnu4 se3l3j/ pl8 h6sn4a87?"
           ]
         },
@@ -9649,9 +9649,9 @@
           "raw": "naj  hkuu;!",
           "expected": "かん  hello!",
           "actual": "感  hello!",
-          "rank": 3,
+          "rank": 4,
           "readingRank": 1,
-          "spaceNormalizedRank": 3,
+          "spaceNormalizedRank": 4,
           "englishMatches": 1,
           "englishTokens": 1,
           "hanEdits": 1,
@@ -9663,10 +9663,10 @@
           "reachable": null,
           "candidates": [
             "感  hello!",
+            "感  hello！",
             "間  hello!",
             "かん  hello!",
-            "kan  hello!",
-            "館  hello!"
+            "kan  hello!"
           ]
         },
         {
@@ -9921,7 +9921,8 @@
           "characters": 29,
           "reachable": null,
           "candidates": [
-            "for (int i = 0; i < 100; i++)"
+            "for (int i = 0; i < 100; i++)",
+            "for (int i = 0; 凹， 100; i++)"
           ]
         },
         {
@@ -10179,9 +10180,9 @@
           "reachable": null,
           "candidates": [
             "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10：00 から Zoom で, agenda は きょうゆうずみです.",
             "あしたの standup は 10:00 カラ Zoom で, agenda は きょうゆうずみです.",
-            "あしたの standup ha 10:00 から Zoom で, agenda は きょうゆうずみです.",
-            "あしたの standup は 10:00 殻 Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10：00 カラ Zoom で, agenda は きょうゆうずみです.",
             "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu."
           ]
         },
@@ -10211,9 +10212,9 @@
           "reachable": null,
           "candidates": [
             "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10：00 から Zoom で, agenda は きょうゆうずみです.",
             "あしたの standup は 10:00 カラ Zoom で, agenda は きょうゆうずみです.",
-            "あしたの standup ha 10:00 から Zoom で, agenda は きょうゆうずみです.",
-            "あしたの standup は 10:00 殻 Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10：00 カラ Zoom で, agenda は きょうゆうずみです.",
             "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu."
           ]
         },
@@ -10243,9 +10244,9 @@
           "reachable": null,
           "candidates": [
             "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10：00 から Zoom で, agenda は きょうゆうずみです.",
             "あしたの standup は 10:00 カラ Zoom で, agenda は きょうゆうずみです.",
-            "あしたの standup ha 10:00 から Zoom で, agenda は きょうゆうずみです.",
-            "あしたの standup は 10:00 殻 Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10：00 カラ Zoom で, agenda は きょうゆうずみです.",
             "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu."
           ]
         },
@@ -10275,9 +10276,9 @@
           "reachable": null,
           "candidates": [
             "あしたの standup は 10:00 から Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10：00 から Zoom で, agenda は きょうゆうずみです.",
             "あしたの standup は 10:00 カラ Zoom で, agenda は きょうゆうずみです.",
-            "あしたの standup ha 10:00 から Zoom で, agenda は きょうゆうずみです.",
-            "あしたの standup は 10:00 殻 Zoom で, agenda は きょうゆうずみです.",
+            "あしたの standup は 10：00 カラ Zoom で, agenda は きょうゆうずみです.",
             "ashitano standup ha 10:00 kara Zoom de, agenda ha kyouyuuzumidesu."
           ]
         },

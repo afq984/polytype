@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {createEngine} from '../web/engine.mjs';
-import {mixedCases,kanaLevel} from '../eval/cases.mjs';
+import {mixedCases,kanaLevel,expandedTarget} from '../eval/cases.mjs';
 import {diversityCases} from '../eval/diversity-cases.mjs';
 
 const baseline=JSON.parse(readFileSync(new URL('../eval/diversity-baseline.json',import.meta.url)));
@@ -17,8 +17,9 @@ test('frozen controls and existing correct candidates survive family retention',
     for(const row of baseline.rows.filter(row=>row.group!=='diversity-ambiguous')){
       const before=row.runs[0],after=engine.decode(row.raw,row.options),texts=after.map(c=>engine.commitCandidate(c)),readings=after.map(kanaLevel);
       // Kana-annotated targets accept an imported conversion of the same reading.
+      const expected=expandedTarget({...row,text:row.expected});
       const accepted=[row.expected,...row.alternatives];
-      if(before.exactRank===1)assert.ok(texts[0]===row.expected||readings[0]===row.expected,`${row.id}: ${texts[0]}`);
+      if(before.exactRank===1)assert.ok(texts[0]===expected||readings[0]===expected,`${row.id}: ${texts[0]}`);
       if(before.rank)assert.ok(texts.some((t,i)=>accepted.includes(t)||accepted.includes(readings[i])),row.id);
       for(const old of before.candidates){
         const same=after.find(c=>engine.commitCandidate(c)===old.text);

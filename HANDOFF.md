@@ -1,5 +1,28 @@
 # Polytype handoff
 
+## Contextual Chinese punctuation (zh-punct-v1)
+
+Expanded search now prefers McBopomofo standard-layout punctuation after a
+dictionary-converted Chinese part, while retaining ASCII candidates. The supported map,
+pinned source lines/hash, policy ablation and numeric limitations are in
+[docs/PUNCTUATION.md](docs/PUNCTUATION.md). Existing physical normalization,
+exact spaces, tone completion, attached possessives and prototype parity remain.
+Ranking: scowl-context-v4+family-v1+island-v1+mozc-v1+jpdict-v1+zh-punct-v1.
+
+The vocabulary request now ends in 嗎？; the original 嗎? remains selectable.
+Chinese 20-excerpt metrics remain 12/20 top one and 17/20 top five in both
+layouts; existing guard/feedback and Japanese/mixed metrics remain unchanged
+with that explicit punctuation migration. Five alternating WASM rounds against
+main 831d8235 over 6,321 prefixes measured a median p95 ratio of 1.0069.
+All six Bazel test targets pass (72 Node passes, three existing TODOs).
+The optional browser check could not run here: google-chrome is missing.
+Existing Mozc Japanese bracket preferences are preserved. Numeric probes are
+recorded; no digit/tone rule change ships. Quoted-English regressions caused by
+raw Zhuyin fallback gaining a quote boundary are fixed; all 3,200 sourced zh/en
+configuration aggregates match the data-stream baseline. The demo and browser
+smoke share the ranking ID; smoke includes Shift+Comma after Chinese. This work
+is local.
+
 ## External benchmark preparation
 
 The next typing benchmark has a collection protocol in eval/COLLECTION.md and a
@@ -400,7 +423,7 @@ Preserve exact spaces:
 | QWERTY raw input | Top candidate |
 | --- | --- |
 | flldal 2k7u/ jp6g4 dmauu | 小さい 的英文是 small |
-| aj4fu06m/4fu3x96c961j6hji4 dk3u3y/ ru8 h6dj4a87? | 目前用起來還不錯 可以增加詞庫嗎? |
+| aj4fu06m/4fu3x96c961j6hji4 dk3u3y/ ru8 h6dj4a87? | 目前用起來還不錯 可以增加詞庫嗎？ |
 | us3lc3 | 你好 |
 | /j5 followed by Space | 中 |
 | sujo/5 followed by Space | 中 |
