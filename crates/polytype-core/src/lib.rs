@@ -1,9 +1,11 @@
 //! Shared, local-only Polytype decoder. No browser or OS dependencies.
+mod correction;
 mod dictionary;
 mod japanese;
 mod phonetic;
 mod search;
 
+pub use correction::Constraint;
 pub use dictionary::Entry;
 use dictionary::{
     Dictionary, LEXICON, english_size, expanded_size, japanese_size, validate_entries,
@@ -77,6 +79,15 @@ impl Engine {
 
     pub fn decode_with_options(&self, raw: &str, options: &DecodeOptions) -> Vec<Candidate> {
         search::decode(raw, &self.dictionary, options)
+    }
+
+    pub fn decode_constrained(
+        &self,
+        raw: &str,
+        options: &DecodeOptions,
+        constraints: &[Constraint],
+    ) -> Result<Vec<Candidate>, String> {
+        correction::decode(raw, constraints, &self.dictionary, options)
     }
 
     /// Bounded native-only search experiment; not part of the browser protocol.

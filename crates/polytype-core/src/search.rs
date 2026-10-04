@@ -1,5 +1,6 @@
 use crate::{
     DecodeOptions, Layout,
+    correction::{Plan, Resolved},
     dictionary::{ChineseWord, Dictionary, LEXICON, english_tier},
     japanese::{compose_with_convention, to_katakana},
     phonetic::{read_units, utf16_len, zhuyin},
@@ -111,7 +112,7 @@ fn protect_continuations(beam: &mut [BeamEntry], enabled: u8) {
     }
 }
 
-fn discard_cost(count: usize, stronger: bool) -> f64 {
+pub(crate) fn discard_cost(count: usize, stronger: bool) -> f64 {
     (count * 2
         + if stronger {
             count.saturating_sub(3) * 4
@@ -140,6 +141,96 @@ fn chinese_frequency(word: &ChineseWord, syllables: usize, rank: usize) -> f64 {
     // edge before accumulation so equal reordered Chinese paths keep the same
     // stable tie order on both targets. This retains nine decimal score places.
     (score * 1e9).round() / 1e9
+}
+
+// Ordinary edges and local correction choices use the same evidence. Context
+// bonuses remain with their lattice caller; no scoring constants live in menus.
+pub(crate) fn chinese_single_score(
+    syllable: &crate::phonetic::Syllable,
+    word: &ChineseWord,
+    rank: usize,
+    converted: bool,
+    frequency: bool,
+) -> f64 {
+    if converted {
+        syllable.key.len() as f64 * 2.0
+            + if frequency {
+                chinese_frequency(word, 1, rank)
+            } else {
+                -(rank as f64) * 0.8
+            }
+    } else {
+        syllable.slots.iter().filter(|s| !s.is_empty()).count() as f64 * 0.3
+    }
+}
+
+pub(crate) fn chinese_phrase_score(
+    length: usize,
+    syllables: usize,
+    word: &ChineseWord,
+    rank: usize,
+    frequency: bool,
+) -> f64 {
+    (length * 2) as f64
+        + if frequency {
+            chinese_frequency(word, syllables, rank)
+        } else {
+            syllables as f64 - rank as f64 * 0.8
+        }
+}
+
+pub(crate) fn japanese_dictionary_score(
+    spelling_len: f64,
+    rank: usize,
+    has_case: bool,
+    modern_romaji: bool,
+    transition: f64,
+) -> f64 {
+    let rate = if !modern_romaji {
+        2.2
+    } else if has_case {
+        1.2
+    } else {
+        1.45
+    };
+    spelling_len * rate - rank as f64 * 0.7 + transition - if has_case { 2.0 } else { 0.0 }
+}
+
+pub(crate) fn japanese_rule_score(
+    spelling_len: f64,
+    composition: &crate::japanese::Composition,
+    expanded: bool,
+) -> f64 {
+    let pending_len = utf16_len(&composition.pending) as f64;
+    (spelling_len - pending_len) * 1.2
+        + pending_len
+            * if expanded {
+                if composition.pending == "n" {
+                    0.4
+                } else {
+                    -1.0
+                }
+            } else {
+                0.2
+            }
+}
+
+pub(crate) fn japanese_script_score(
+    score: f64,
+    script: &str,
+    transition: f64,
+    particle_bonus: f64,
+    has_case: bool,
+    small_kana: usize,
+    expanded: bool,
+) -> f64 {
+    score - if script == "Katakana" { 0.2 } else { 0.0 } + transition + particle_bonus
+        - if has_case { 2.0 } else { 0.0 }
+        - if expanded {
+            small_kana as f64 * 1.5
+        } else {
+            0.0
+        }
 }
 
 #[cfg(feature = "diagnostics")]
@@ -198,7 +289,7 @@ fn family_part(parent: usize, part: &Part) -> FamilyKey {
     }
 }
 
-struct Lattice {
+struct Lattice<'a> {
     states: Vec<Vec<BeamEntry>>,
     width: usize,
     families: Option<HashMap<FamilyKey, usize>>,
@@ -206,6 +297,7 @@ struct Lattice {
     commit_identity: bool,
     mapped_punctuation: bool,
     chinese_parentheses: bool,
+    plan: Option<&'a Plan>,
 }
 
 // A soft family cap: keep spare script variants when capacity permits, but
@@ -237,6 +329,24 @@ fn push(
     score: f64,
     lang: Option<&str>,
 ) {
+    push_edge(beams, at, state, part, score, lang, false);
+}
+
+fn push_edge(
+    beams: &mut Lattice,
+    at: usize,
+    state: &BeamEntry,
+    part: Part,
+    score: f64,
+    lang: Option<&str>,
+    locked: bool,
+) {
+    if !locked
+        && let Some(plan) = beams.plan
+        && !plan.allows(at - utf16_len(&part.raw), at)
+    {
+        return;
+    }
     let family = if let Some(families) = &mut beams.families {
         // Only rule-generated kana variants are equivalent. Dictionary words,
         // raw segmentation, language history, pending state and commit behavior
@@ -293,6 +403,150 @@ fn push(
     }
 }
 
+// Only a converted first-tone boundary supplies this numeric evidence.
+// Ordinary and locked Roman edges share both the gate and the score.
+fn english_boundary_number_score(spelling: &str, tone_switch: bool) -> Option<f64> {
+    (tone_switch
+        && spelling.chars().any(|c| c.is_ascii_digit())
+        && spelling
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || "_./-".contains(c)))
+    .then(|| {
+        utf16_len(spelling) as f64
+            * if spelling.chars().any(|c| c.is_ascii_alphabetic()) {
+                1.8
+            } else {
+                2.5
+            }
+    })
+}
+
+fn push_lock(
+    beams: &mut Lattice,
+    state: &BeamEntry,
+    lock: &Resolved,
+    dictionary: &Dictionary,
+    options: &DecodeOptions,
+    tone_boundary: (bool, f64),
+) {
+    let first = lock.parts.first().unwrap();
+    let raw = lock.constraint.lang == "RAW";
+    let mut score = lock.score;
+    if tone_boundary.0 && matches!(first.lang.as_str(), "EN" | "JP") {
+        if first.lang == "EN" && lock.parts.len() == 1 {
+            let roman = options
+                .roman(&first.raw, dictionary.expanded)
+                .to_lowercase();
+            let spelling = roman.trim_end_matches(['.', ',', ';']);
+            if !LEXICON.english.contains(spelling) && english_tier(spelling).is_none() {
+                score = english_boundary_number_score(spelling, true).unwrap_or(score);
+            }
+        }
+        score -= tone_boundary.1;
+    }
+    if first.lang == "punct" {
+        let unit = first.raw.encode_utf16().next().unwrap();
+        let (ascii, full) = punctuation_pair(unit, options.layout).unwrap();
+        let chinese_context = state
+            .parts
+            .iter()
+            .rev()
+            .find(|part| part.lang != "space" && part.lang != "punct")
+            .is_some_and(|part| converted_chinese(part, dictionary));
+        let pasted_full = first.raw == full;
+        if !roman_punctuation(unit, true, true, options.layout)
+            && !pasted_full
+            && !chinese_context
+            && state.lang.is_some()
+        {
+            return;
+        }
+        debug_assert!(first.text == ascii || first.text == full);
+        score = punctuation_score(first.text == full, chinese_context);
+    }
+    let possessive = first.lang == "EN"
+        && matches!(first.text.as_str(), "'" | "’" | "'s" | "’s")
+        && matches!(state.lang.as_deref(), Some("TW" | "JP"))
+        && state
+            .parts
+            .last()
+            .is_some_and(|p| p.complete != Some(false));
+    if !raw
+        && first.lang != "space"
+        && first.lang != "punct"
+        && state.lang.is_some()
+        && state.lang.as_deref() != Some(first.lang.as_str())
+        && !possessive
+    {
+        return;
+    }
+    // Append a multi-part choice atomically: its internal offsets are never
+    // exposed to ordinary edges or beam pruning.
+    let mut prefix = state.clone();
+    for part in &lock.parts[..lock.parts.len() - 1] {
+        if let Some(families) = &mut beams.families {
+            let key = family_part(prefix.family, part);
+            let next = families.len() + 1;
+            prefix.family = *families.entry(key).or_insert(next);
+        }
+        prefix.candidate.text.push_str(&part.text);
+        prefix.candidate.parts.push(part.clone());
+    }
+    let last = lock.parts.last().unwrap();
+    let lang = if raw {
+        state.lang.as_deref()
+    } else if matches!(last.lang.as_str(), "space" | "punct") {
+        None
+    } else {
+        Some(last.lang.as_str())
+    };
+    push_edge(
+        beams,
+        lock.constraint.end,
+        &prefix,
+        last.clone(),
+        score,
+        lang,
+        true,
+    );
+}
+
+pub(crate) fn roman_punctuation(
+    unit: u16,
+    expanded: bool,
+    physical_keys: bool,
+    layout: Layout,
+) -> bool {
+    if physical_keys && matches!(layout, Layout::Colemak) {
+        if unit == b':' as u16 {
+            return false;
+        }
+        if unit == b'P' as u16 {
+            return true;
+        }
+    }
+    punctuation(unit, expanded)
+}
+
+pub(crate) fn chinese_fallback_text(
+    syllable: &crate::phonetic::Syllable,
+    bare_zhuyin: bool,
+) -> (String, bool) {
+    let bare_initial = bare_zhuyin
+        && syllable.key.ends_with(' ')
+        && !syllable.slots[0].is_empty()
+        && syllable.slots[1].is_empty()
+        && syllable.slots[2].is_empty();
+    (
+        zhuyin(if bare_initial {
+            &syllable.slots[0]
+        } else {
+            &syllable.key
+        }),
+        bare_initial,
+    )
+}
+
 fn punctuation(unit: u16, expanded: bool) -> bool {
     char::from_u32(unit as u32)
         .is_some_and(|c| "?!？！。，；：".contains(c) || (expanded && "():".contains(c)))
@@ -301,22 +555,47 @@ fn punctuation(unit: u16, expanded: bool) -> bool {
 // McBopomofo BPMFPunctuations.txt at the revision in chinese-source.json.
 // Standard overrides win over generic entries: apostrophe is 、, quote is ；.
 // See docs/PUNCTUATION.md for source lines and the deliberately limited subset.
+const PUNCTUATION_PAIRS: [(&str, &str); 13] = [
+    ("<", "，"),
+    (">", "。"),
+    ("?", "？"),
+    ("!", "！"),
+    (":", "："),
+    ("'", "、"),
+    ("\"", "；"),
+    ("[", "「"),
+    ("]", "」"),
+    ("{", "『"),
+    ("}", "』"),
+    ("(", "（"),
+    (")", "）"),
+];
+
 fn chinese_punctuation(unit: u16, parentheses: bool) -> Option<&'static str> {
-    match char::from_u32(unit as u32)? {
-        '<' => Some("，"),
-        '>' => Some("。"),
-        '?' => Some("？"),
-        '!' => Some("！"),
-        ':' => Some("："),
-        '\'' => Some("、"),
-        '"' => Some("；"),
-        '[' => Some("「"),
-        ']' => Some("」"),
-        '{' => Some("『"),
-        '}' => Some("』"),
-        '(' if parentheses => Some("（"),
-        ')' if parentheses => Some("）"),
-        _ => None,
+    PUNCTUATION_PAIRS.iter().find_map(|&(ascii, full)| {
+        (ascii.encode_utf16().next() == Some(unit) && (parentheses || !matches!(ascii, "(" | ")")))
+            .then_some(full)
+    })
+}
+
+pub(crate) fn punctuation_pair(unit: u16, layout: Layout) -> Option<(&'static str, &'static str)> {
+    let unit = if matches!(layout, Layout::Colemak) && unit == b'P' as u16 {
+        b':' as u16
+    } else {
+        unit
+    };
+    PUNCTUATION_PAIRS.iter().copied().find(|&(ascii, full)| {
+        ascii.encode_utf16().next() == Some(unit) || full.encode_utf16().next() == Some(unit)
+    })
+}
+
+pub(crate) fn punctuation_score(full: bool, chinese_context: bool) -> f64 {
+    if !full {
+        0.0
+    } else if chinese_context {
+        0.25
+    } else {
+        -0.25
     }
 }
 
@@ -324,7 +603,7 @@ fn chinese_punctuation(unit: u16, parentheses: bool) -> Option<&'static str> {
 // reading of an English token must not gain a new punctuation/language boundary.
 // Phrase parts have dictionary evidence; single parts retain slots even when
 // they fall back to raw Zhuyin, so check their exact normalized dictionary key.
-fn converted_chinese(part: &Part, dictionary: &Dictionary) -> bool {
+pub(crate) fn converted_chinese(part: &Part, dictionary: &Dictionary) -> bool {
     if part.lang != "TW" || part.complete != Some(true) {
         return false;
     }
@@ -405,7 +684,36 @@ fn decode_configured(
     limit: usize,
     policy: Policy,
 ) -> Vec<Candidate> {
-    let mut result = decode_lattice(input, dictionary, options, width, limit, policy);
+    decode_planned(input, dictionary, options, width, limit, policy, None)
+}
+
+pub(crate) fn decode_constrained(
+    input: &str,
+    dictionary: &Dictionary,
+    options: &DecodeOptions,
+    plan: &Plan,
+) -> Vec<Candidate> {
+    decode_planned(
+        input,
+        dictionary,
+        options,
+        12,
+        5,
+        Policy::default(),
+        Some(plan),
+    )
+}
+
+fn decode_planned(
+    input: &str,
+    dictionary: &Dictionary,
+    options: &DecodeOptions,
+    width: usize,
+    limit: usize,
+    policy: Policy,
+    plan: Option<&Plan>,
+) -> Vec<Candidate> {
+    let mut result = decode_lattice_planned(input, dictionary, options, width, limit, policy, plan);
     // A bounded mixed-language beam can discard every English path before a
     // later operator arrives. Reserve a slot for an independently decoded
     // literal-English path, even when phonetic scores crowd it out.
@@ -415,10 +723,17 @@ fn decode_configured(
             zhuyin: false,
             ..options.clone()
         };
-        if let Some(literal) =
-            decode_lattice(input, dictionary, &literal_options, width, limit, policy)
-                .into_iter()
-                .next()
+        if let Some(literal) = decode_lattice_planned(
+            input,
+            dictionary,
+            &literal_options,
+            width,
+            limit,
+            policy,
+            plan,
+        )
+        .into_iter()
+        .next()
             && !result
                 .iter()
                 .any(|candidate| candidate.text == literal.text)
@@ -549,6 +864,7 @@ fn diagnostic_family(candidate: &Candidate) -> String {
     .unwrap()
 }
 
+#[cfg(feature = "diagnostics")]
 fn decode_lattice(
     input: &str,
     dictionary: &Dictionary,
@@ -556,6 +872,18 @@ fn decode_lattice(
     width: usize,
     limit: usize,
     policy: Policy,
+) -> Vec<Candidate> {
+    decode_lattice_planned(input, dictionary, options, width, limit, policy, None)
+}
+
+fn decode_lattice_planned(
+    input: &str,
+    dictionary: &Dictionary,
+    options: &DecodeOptions,
+    width: usize,
+    limit: usize,
+    policy: Policy,
+    plan: Option<&Plan>,
 ) -> Vec<Candidate> {
     if !options.english && !options.japanese && !options.zhuyin {
         return Vec::new();
@@ -566,18 +894,12 @@ fn decode_lattice(
     let physical_keys = dictionary.expanded && policy.physical_keys;
     let roman = |value: &str| options.roman(value, physical_keys);
     let roman_colon = physical_keys && matches!(options.layout, Layout::Colemak);
-    let is_punctuation = |unit| {
-        if roman_colon && unit == b':' as u16 {
-            false
-        } else if roman_colon && unit == b'P' as u16 {
-            true
-        } else {
-            punctuation(unit, dictionary.expanded)
-        }
-    };
+    let is_punctuation =
+        |unit| roman_punctuation(unit, dictionary.expanded, physical_keys, options.layout);
     let mut beams = Lattice {
         states: vec![Vec::new(); raw.len() + 1],
         width,
+        plan,
         commit_identity: modern_romaji,
         mapped_punctuation,
         chinese_parentheses: policy.chinese_parentheses,
@@ -645,6 +967,18 @@ fn decode_lattice(
             } else {
                 0.0
             };
+            if let Some(lock) = plan.and_then(|p| p.at(i)) {
+                push_lock(
+                    &mut beams,
+                    &state,
+                    lock,
+                    dictionary,
+                    options,
+                    (tone_switch, switch_cost),
+                );
+                continue;
+            }
+
             let full = mapped_punctuation
                 .then(|| {
                     chinese_punctuation(
@@ -703,7 +1037,7 @@ fn decode_lattice(
                         |full| {
                             (
                                 full.into(),
-                                if chinese_context { 0.25 } else { -0.25 },
+                                punctuation_score(true, chinese_context),
                                 "Chinese punctuation",
                             )
                         },
@@ -806,17 +1140,17 @@ fn decode_lattice(
                                 complete: Some(true),
                                 ..Part::default()
                             },
-                            (length * 2) as f64
-                                + if dictionary.expanded && policy.frequency {
-                                    chinese_frequency(word, syllables, n)
-                                } else {
-                                    syllables as f64 - n as f64 * 0.8
-                                }
-                                - if dictionary.expanded {
-                                    discard_penalty
-                                } else {
-                                    0.0
-                                },
+                            chinese_phrase_score(
+                                length,
+                                syllables,
+                                word,
+                                n,
+                                dictionary.expanded && policy.frequency,
+                            ) - if dictionary.expanded {
+                                discard_penalty
+                            } else {
+                                0.0
+                            },
                             Some("TW"),
                         );
                     }
@@ -841,34 +1175,25 @@ fn decode_lattice(
                     // Space finalizes an unsupported bare initial as chat text.
                     // Keep slot replacement, completion and the existing weak
                     // fallback score; dictionary readings always take precedence.
-                    let bare_initial = dictionary.expanded
-                        && policy.bare_zhuyin
-                        && values.is_none()
-                        && syllable.key.ends_with(' ')
-                        && !syllable.slots[0].is_empty()
-                        && syllable.slots[1].is_empty()
-                        && syllable.slots[2].is_empty();
-                    let fallback_text = if bare_initial {
+                    let (fallback_text, bare_initial) = chinese_fallback_text(
+                        &syllable,
+                        dictionary.expanded && policy.bare_zhuyin && values.is_none(),
+                    );
+                    if bare_initial {
                         note.push_str(" · bare Zhuyin chat initial");
-                        zhuyin(&syllable.slots[0])
-                    } else {
-                        zhuyin(&syllable.key)
-                    };
+                    }
                     let fallback = vec![ChineseWord {
                         text: fallback_text,
                         log_frequency: Some(0.0),
                     }];
                     for (n, word) in values.unwrap_or(&fallback).iter().take(width).enumerate() {
-                        let score = if values.is_some() {
-                            syllable.key.len() as f64 * 2.0
-                                + if dictionary.expanded && policy.frequency {
-                                    chinese_frequency(word, 1, n)
-                                } else {
-                                    -(n as f64) * 0.8
-                                }
-                        } else {
-                            syllable.slots.iter().filter(|s| !s.is_empty()).count() as f64 * 0.3
-                        };
+                        let score = chinese_single_score(
+                            &syllable,
+                            word,
+                            n,
+                            values.is_some(),
+                            dictionary.expanded && policy.frequency,
+                        );
                         push(
                             &mut beams,
                             syllable.end,
@@ -1022,13 +1347,6 @@ fn decode_lattice(
                     // token keeps only the rule-kana rate on top of the
                     // existing case penalty, so names such as Tanaka stay
                     // Latin. The frozen prototype keeps its demo-word rate.
-                    let rate = if !modern_romaji {
-                        2.2
-                    } else if has_case {
-                        1.2
-                    } else {
-                        1.45
-                    };
                     for (n, text) in texts.iter().take(width).enumerate() {
                         push_roman(
                             &mut beams,
@@ -1046,9 +1364,13 @@ fn decode_lattice(
                                 reading: modern_romaji.then(|| format!("{kana}{suffix}")),
                                 ..Part::default()
                             },
-                            spelling_len * rate - n as f64 * 0.7 + transition("JP")
-                                - if has_case { 2.0 } else { 0.0 }
-                                - switch_cost,
+                            japanese_dictionary_score(
+                                spelling_len,
+                                n,
+                                has_case,
+                                modern_romaji,
+                                transition("JP"),
+                            ) - switch_cost,
                             "JP",
                         );
                     }
@@ -1059,19 +1381,9 @@ fn decode_lattice(
                     } else {
                         composition.text.clone()
                     };
-                    let pending_len = utf16_len(&composition.pending) as f64;
-                    let score = (spelling_len - pending_len) * 1.2
-                        + pending_len
-                            * if dictionary.expanded {
-                                if composition.pending == "n" {
-                                    0.4
-                                } else {
-                                    -1.0
-                                }
-                            } else {
-                                0.2
-                            };
-                    for (script, penalty) in [("Hiragana", 0.0), ("Katakana", 0.2)] {
+                    let score =
+                        japanese_rule_score(spelling_len, &composition, dictionary.expanded);
+                    for script in ["Hiragana", "Katakana"] {
                         let convert = |text: &str| {
                             if script == "Katakana" {
                                 to_katakana(text)
@@ -1098,14 +1410,15 @@ fn decode_lattice(
                                 note: format!("{roman} → {script}{wait}"),
                                 ..Part::default()
                             },
-                            score - penalty + transition("JP") + particle_bonus
-                                - if has_case { 2.0 } else { 0.0 }
-                                - if dictionary.expanded {
-                                    composition.explicit_small_kana as f64 * 1.5
-                                } else {
-                                    0.0
-                                }
-                                - switch_cost,
+                            japanese_script_score(
+                                score,
+                                script,
+                                transition("JP"),
+                                particle_bonus,
+                                has_case,
+                                composition.explicit_small_kana,
+                                dictionary.expanded,
+                            ) - switch_cost,
                             "JP",
                         );
                     }
@@ -1166,20 +1479,9 @@ fn decode_lattice(
                         // Standalone and Chinese-context tone keys keep their
                         // normal competition.
                         spelling_len * 2.5
-                    } else if tone_switch
-                        && spelling.chars().any(|c| c.is_ascii_digit())
-                        && spelling
-                            .chars()
-                            .all(|c| c.is_ascii_alphanumeric() || "_./-".contains(c))
+                    } else if let Some(score) = english_boundary_number_score(spelling, tone_switch)
                     {
-                        // At the newly opened Roman boundary, numbers and code
-                        // identifiers are evidence too; retain the spelling.
-                        spelling_len
-                            * if spelling.chars().any(|c| c.is_ascii_alphabetic()) {
-                                1.8
-                            } else {
-                                2.5
-                            }
+                        score
                     } else if policy.identifiers
                         && dictionary.expanded
                         && spelling.chars().any(|c| c.is_ascii_alphabetic())
